@@ -42,10 +42,11 @@ const demoStandings = [
       {
         corps.map((c) => (
           <Card
-            category="Corps"
+            category={c.data.abbreviation}
             title={c.data.name}
             meta={c.data.summary}
             href={`/corps/${c.id}`}
+            image={c.data.crest}
           />
         ))
       }

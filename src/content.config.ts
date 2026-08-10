@@ -21,6 +21,7 @@ const corps = defineCollection({
     crest: z.string().optional(),
     summary: z.string().optional(),
     website: z.string().url().optional(),
+    twitch: z.string().url().optional(),
     active: z.boolean().default(true),
   }),
 });
@@ -58,14 +59,15 @@ const locations = defineCollection({
   schema: z.object({
     name: z.string(),
     type: z.enum(['training-facility', 'dedicated-arena', 'garrison-gaming-room']),
-    corps: reference('corps').optional(),
+    corps: z.array(reference('corps')).optional(),
     address: z.string(),
     location: z.object({
       lat: z.number(),
       long: z.number(),
     }),
     equipment: z.array(z.string()).optional(),
-    bookingContact: z.string().optional(),
+    pocName: z.string().optional(),
+    pocRole: z.string().optional(),
     photos: z.array(z.string()).optional(),
     active: z.boolean().default(true),
   }),

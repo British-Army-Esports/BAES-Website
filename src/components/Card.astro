@@ -5,14 +5,16 @@ export interface Props {
   meta?: string;
   href: string;
   clip?: 'tl' | 'br';
+  image?: string;
 }
 
-const { category, title, meta, href, clip = 'br' } = Astro.props;
+const { category, title, meta, href, clip = 'br', image } = Astro.props;
 ---
 
 <a href={href} class:list={['card', clip === 'tl' ? 'clip-tl' : 'clip-br']}>
   <span class="card__flag" aria-hidden="true"></span>
   <div class="card__body">
+    {image && <img class="card__image" src={image} alt="" loading="lazy" />}
     {category && <span class="card__category label">{category}</span>}
     <h3 class="card__title">{title}</h3>
     {meta && <p class="card__meta">{meta}</p>}
@@ -53,6 +55,14 @@ const { category, title, meta, href, clip = 'br' } = Astro.props;
     display: flex;
     flex-direction: column;
     gap: 0.6rem;
+  }
+
+  .card__image {
+    height: 56px;
+    width: auto;
+    object-fit: contain;
+    align-self: flex-start;
+    margin-bottom: 0.25rem;
   }
 
   .card__category {
