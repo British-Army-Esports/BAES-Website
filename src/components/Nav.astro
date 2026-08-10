@@ -18,24 +18,7 @@ const links = [
 <header class="nav">
   <div class="nav__inner container">
     <a class="nav__brand" href="/">
-      <svg class="nav__jack" viewBox="0 0 60 30" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <rect width="60" height="30" fill="#00247d"></rect>
-        <g stroke="#fff" stroke-width="6">
-          <path d="M0,0 L60,30"></path>
-          <path d="M60,0 L0,30"></path>
-        </g>
-        <clipPath id="jack-counterchange">
-          <polygon points="0,0 30,15 60,0 60,3 33,15 60,27 60,30 57,30 30,18 3,30 0,30 0,27 27,15 0,3"></polygon>
-        </clipPath>
-        <g stroke="#cf142b" stroke-width="4" clip-path="url(#jack-counterchange)">
-          <path d="M0,0 L60,30"></path>
-          <path d="M60,0 L0,30"></path>
-        </g>
-        <rect x="24" width="12" height="30" fill="#fff"></rect>
-        <rect y="12" width="60" height="6" fill="#fff"></rect>
-        <rect x="26" width="8" height="30" fill="#cf142b"></rect>
-        <rect y="13" width="60" height="4" fill="#cf142b"></rect>
-      </svg>
+      <img class="nav__crest" src="/logos/brand/baes-crest.png" alt="" width="1164" height="1460" />
       <span class="nav__wordmark">
         <span class="nav__wordmark-line">
           <span class="nav__wordmark-white">BRITISH ARMY</span>
@@ -90,10 +73,9 @@ const links = [
     flex-shrink: 0;
   }
 
-  .nav__jack {
-    width: 28px;
-    height: 14px;
-    border: 1px solid var(--border);
+  .nav__crest {
+    height: 46px;
+    width: auto;
   }
 
   .nav__wordmark {
