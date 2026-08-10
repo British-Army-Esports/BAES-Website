@@ -1,0 +1,83 @@
+---
+import { getCollection } from 'astro:content';
+
+const now = new Date();
+const events = await getCollection('events');
+
+const liveEvent = events.find((event) => {
+  if (event.data.presenceType === 'community-outreach') return false;
+  const start = event.data.date;
+  const end = event.data.endDate ?? new Date(start.getTime() + 24 * 60 * 60 * 1000);
+  return now >= start && now <= end;
+});
+---
+
+{
+  liveEvent && (
+    <div class="ticker">
+      <div class="ticker__inner container">
+        <span class="ticker__pill">
+          <span class="pulse-dot" />
+          Live Now
+        </span>
+        <span class="ticker__info">
+          {liveEvent.data.title} — {liveEvent.data.location.name}
+        </span>
+        <a href={liveEvent.data.externalLink ?? '#'} class="ticker__watch">
+          Watch Live →
+        </a>
+      </div>
+    </div>
+  )
+}
+
+<style>
+  .ticker {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .ticker__inner {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    height: 38px;
+    font-family: var(--font-body);
+  }
+
+  .ticker__pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--crimson);
+    color: #fff;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.7rem;
+    padding: 0.3rem 0.7rem;
+    flex-shrink: 0;
+  }
+
+  .ticker__info {
+    color: var(--text-secondary-alt);
+    font-size: 0.8rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .ticker__watch {
+    margin-left: auto;
+    flex-shrink: 0;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.7rem;
+    color: var(--crimson-bright);
+  }
+
+  .ticker__watch:hover {
+    text-decoration: underline;
+  }
+</style>

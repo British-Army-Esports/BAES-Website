@@ -1,0 +1,97 @@
+---
+export interface Props {
+  category?: string;
+  title: string;
+  meta?: string;
+  href: string;
+  clip?: 'tl' | 'br';
+}
+
+const { category, title, meta, href, clip = 'br' } = Astro.props;
+---
+
+<a href={href} class:list={['card', clip === 'tl' ? 'clip-tl' : 'clip-br']}>
+  <span class="card__flag" aria-hidden="true"></span>
+  <div class="card__body">
+    {category && <span class="card__category label">{category}</span>}
+    <h3 class="card__title">{title}</h3>
+    {meta && <p class="card__meta">{meta}</p>}
+    <span class="card__link">
+      View details
+      <span class="card__arrow">→</span>
+    </span>
+  </div>
+</a>
+
+<style>
+  .card {
+    position: relative;
+    display: block;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+    transition: transform 0.2s var(--ease-out), border-color 0.2s var(--ease-out),
+      box-shadow 0.2s var(--ease-out);
+  }
+
+  .card:hover {
+    transform: translateY(-3px);
+    border-color: #3a3a3a;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+  }
+
+  .card__flag {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 28px;
+    background: var(--crimson);
+  }
+
+  .card__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .card__category {
+    color: var(--crimson-bright);
+  }
+
+  .card__title {
+    font-size: 1.3rem;
+    line-height: 1.15;
+  }
+
+  .card__meta {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+  }
+
+  .card__link {
+    margin-top: 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.7rem;
+    color: var(--text-secondary-alt);
+    transition: color 0.2s var(--ease-out);
+  }
+
+  .card__arrow {
+    transition: transform 0.2s var(--ease-out);
+  }
+
+  .card:hover .card__link {
+    color: var(--crimson-bright);
+  }
+
+  .card:hover .card__arrow {
+    transform: translateX(3px);
+  }
+</style>

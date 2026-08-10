@@ -1,0 +1,125 @@
+---
+export interface StandingsRow {
+  name: string;
+  played: number;
+  won: number;
+  lost: number;
+  gd: number;
+  pts: number;
+}
+
+export interface Props {
+  caption?: string;
+  rows: StandingsRow[];
+}
+
+const { caption, rows } = Astro.props;
+---
+
+<div class="standings">
+  {caption && <p class="standings__caption label">{caption}</p>}
+  <table class="standings__table">
+    <thead>
+      <tr>
+        <th class="standings__team-col">Team</th>
+        <th>P</th>
+        <th>W</th>
+        <th>L</th>
+        <th>GD</th>
+        <th>PTS</th>
+      </tr>
+    </thead>
+    <tbody>
+      {rows.map((row, i) => (
+        <tr class:list={{ 'standings__row--leader': i === 0 }}>
+          <td class="standings__team-col">
+            <span class="standings__rank">{i + 1}</span>
+            {row.name}
+          </td>
+          <td>{row.played}</td>
+          <td>{row.won}</td>
+          <td>{row.lost}</td>
+          <td>{row.gd > 0 ? `+${row.gd}` : row.gd}</td>
+          <td class="standings__pts">{row.pts}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
+<style>
+  .standings {
+    background: var(--surface);
+    border: 1px solid var(--border);
+  }
+
+  .standings__caption {
+    padding: 1rem 1.25rem 0;
+  }
+
+  .standings__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--font-body);
+  }
+
+  thead th {
+    text-align: right;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    padding: 1rem 1rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  thead th.standings__team-col {
+    text-align: left;
+  }
+
+  tbody td {
+    text-align: right;
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.9rem;
+    color: var(--text-primary-dim);
+  }
+
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  td.standings__team-col {
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 600;
+  }
+
+  .standings__rank {
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+    width: 1.2em;
+  }
+
+  .standings__pts {
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  .standings__row--leader td {
+    background: var(--crimson);
+    color: #fff;
+    border-bottom-color: var(--crimson);
+  }
+
+  .standings__row--leader .standings__rank {
+    color: rgba(255, 255, 255, 0.75);
+  }
+
+  .standings__row--leader .standings__pts {
+    color: #fff;
+  }
+</style>

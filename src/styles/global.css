@@ -1,0 +1,152 @@
+@import '@fontsource/rajdhani/500.css';
+@import '@fontsource/rajdhani/600.css';
+@import '@fontsource/rajdhani/700.css';
+@import '@fontsource/inter/400.css';
+@import '@fontsource/inter/500.css';
+@import '@fontsource/inter/600.css';
+
+:root {
+  /* Colour */
+  --bg-base: #0a0a0a;
+  --bg-base-alt: #0d0d0d;
+  --surface: #141414;
+  --surface-alt: #1a1a1a;
+  --crimson: #c8102e;
+  --crimson-bright: #dc1430;
+  --text-primary: #ffffff;
+  --text-primary-dim: #f2f2f2;
+  --text-secondary: #8a8a8a;
+  --text-secondary-alt: #9e9e9e;
+  --border: #262626;
+
+  /* Type */
+  --font-display: 'Rajdhani', sans-serif;
+  --font-body: 'Inter', sans-serif;
+
+  /* Shape */
+  --clip-corner: 14px;
+  --clip-corner-sm: 8px;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  background: var(--bg-base);
+  color: var(--text-primary-dim);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin: 0;
+  color: var(--text-primary);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+/* Small uppercase label styling: nav items, stat labels, table headers, filters */
+.label {
+  font-family: var(--font-body);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+/* Angular clipped-corner utility — one corner cut at 45deg, never fully rounded */
+.clip-tl {
+  clip-path: polygon(
+    var(--clip-corner) 0,
+    100% 0,
+    100% 100%,
+    0 100%,
+    0 var(--clip-corner)
+  );
+}
+
+.clip-br {
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - var(--clip-corner)),
+    calc(100% - var(--clip-corner)) 100%,
+    0 100%
+  );
+}
+
+.clip-tl-sm {
+  clip-path: polygon(
+    var(--clip-corner-sm) 0,
+    100% 0,
+    100% 100%,
+    0 100%,
+    0 var(--clip-corner-sm)
+  );
+}
+
+.pulse-dot {
+  position: relative;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--crimson-bright);
+  flex-shrink: 0;
+}
+
+.pulse-dot::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--crimson-bright);
+  animation: pulse-ring 1.6s var(--ease-out) infinite;
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(2.8);
+    opacity: 0;
+  }
+}
+
+.container {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 clamp(1rem, 3vw, 2.5rem);
+}

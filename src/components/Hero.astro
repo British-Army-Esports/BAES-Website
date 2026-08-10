@@ -1,0 +1,124 @@
+---
+export interface Props {
+  kicker?: string;
+  headlineLines?: string[];
+  crimsonWord?: string;
+  ctaText?: string;
+  ctaHref?: string;
+}
+
+const {
+  kicker = 'Excellence. Adaptability. Together.',
+  headlineLines = ['Compete.', 'Represent.'],
+  crimsonWord = 'Victory.',
+  ctaText = 'Explore Disciplines',
+  ctaHref = '/disciplines',
+} = Astro.props;
+---
+
+<section class="hero">
+  <div class="hero__field" aria-hidden="true">
+    <svg class="hero__grid" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+      <defs>
+        <pattern id="hero-grid" width="42" height="42" patternUnits="userSpaceOnUse">
+          <path d="M42 0 L0 0 0 42" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"></path>
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#hero-grid)"></rect>
+    </svg>
+  </div>
+
+  <div class="hero__inner container">
+    <p class="hero__kicker label">{kicker}</p>
+    <h1 class="hero__headline">
+      {headlineLines.map((line) => <span class="hero__line">{line}</span>)}
+      <span class="hero__line hero__line--crimson">{crimsonWord}</span>
+    </h1>
+    <div class="hero__cta-row">
+      <a href={ctaHref} class="hero__cta clip-tl">
+        {ctaText}
+        <span class="hero__cta-arrow">→</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    overflow: hidden;
+    min-height: 78vh;
+    display: flex;
+    align-items: flex-end;
+    background:
+      radial-gradient(ellipse 60% 55% at 82% 8%, rgba(200, 16, 46, 0.22), transparent 60%),
+      radial-gradient(ellipse 70% 60% at 10% 100%, rgba(200, 16, 46, 0.14), transparent 65%),
+      linear-gradient(180deg, #0d0d0d 0%, #0a0a0a 55%, #050505 100%);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .hero__field {
+    position: absolute;
+    inset: 0;
+    mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.9), transparent 85%);
+  }
+
+  .hero__grid {
+    width: 100%;
+    height: 100%;
+  }
+
+  .hero__inner {
+    position: relative;
+    padding-top: clamp(3rem, 10vw, 6rem);
+    padding-bottom: clamp(3rem, 8vw, 5rem);
+  }
+
+  .hero__kicker {
+    margin-bottom: 1.25rem;
+  }
+
+  .hero__headline {
+    display: flex;
+    flex-direction: column;
+    font-size: clamp(3rem, 9vw, 6.5rem);
+    line-height: 0.95;
+    gap: 0.05em;
+  }
+
+  .hero__line--crimson {
+    color: var(--crimson-bright);
+  }
+
+  .hero__cta-row {
+    margin-top: clamp(2rem, 5vw, 3rem);
+  }
+
+  .hero__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: var(--crimson);
+    color: #fff;
+    font-family: var(--font-body);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.85rem;
+    padding: 1rem 1.75rem;
+    transition: background 0.2s var(--ease-out), transform 0.2s var(--ease-out);
+  }
+
+  .hero__cta:hover {
+    background: var(--crimson-bright);
+    transform: translateX(2px);
+  }
+
+  .hero__cta-arrow {
+    transition: transform 0.2s var(--ease-out);
+  }
+
+  .hero__cta:hover .hero__cta-arrow {
+    transform: translateX(3px);
+  }
+</style>

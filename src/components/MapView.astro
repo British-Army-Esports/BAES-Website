@@ -1,0 +1,318 @@
+---
+import 'leaflet/dist/leaflet.css';
+import { getCollection } from 'astro:content';
+
+const allLocations = await getCollection('locations', ({ data }) => data.active);
+const allEvents = await getCollection('events');
+
+const locationPoints = allLocations.map((loc) => ({
+  id: loc.id,
+  name: loc.data.name,
+  type: loc.data.type,
+  address: loc.data.address,
+  lat: loc.data.location.lat,
+  long: loc.data.location.long,
+}));
+
+const now = Date.now();
+const eventPoints = allEvents.map((event) => ({
+  id: event.id,
+  name: event.data.title,
+  scale: event.data.scale,
+  presenceType: event.data.presenceType,
+  date: event.data.date.toISOString(),
+  locationName: event.data.location.name,
+  lat: event.data.location.lat,
+  long: event.data.location.long,
+  upcoming: new Date(event.data.date).getTime() >= now,
+}));
+
+const typeLabels: Record<string, string> = {
+  'training-facility': 'Training Facility',
+  'dedicated-arena': 'Dedicated Arena',
+  'garrison-gaming-room': 'Garrison Gaming Room',
+};
+---
+
+<section class="mapview">
+  <div class="mapview__controls">
+    <div class="mapview__group" role="group" aria-label="Map layers">
+      <button type="button" class="mapview__pill is-active" data-layer="locations">
+        Our Locations
+      </button>
+      <button type="button" class="mapview__pill is-active" data-layer="events">Events</button>
+    </div>
+    <div class="mapview__group" role="group" aria-label="View mode">
+      <button type="button" class="mapview__pill is-active" data-view="map">View as Map</button>
+      <button type="button" class="mapview__pill" data-view="list">View as List</button>
+    </div>
+  </div>
+
+  <div id="baes-map" class="mapview__map"></div>
+
+  <ul class="mapview__list" hidden>
+    {
+      locationPoints.map((loc) => (
+        <li class="mapview__list-item">
+          <span class="mapview__list-tag label">{typeLabels[loc.type] ?? loc.type}</span>
+          <span class="mapview__list-name">{loc.name}</span>
+          <span class="mapview__list-meta">{loc.address}</span>
+        </li>
+      ))
+    }
+    {
+      eventPoints.map((event) => (
+        <li class="mapview__list-item">
+          <span class="mapview__list-tag label mapview__list-tag--event">
+            {event.scale.replace(/-/g, ' ')}
+          </span>
+          <span class="mapview__list-name">{event.name}</span>
+          <span class="mapview__list-meta">
+            {event.locationName} · {new Date(event.date).toLocaleDateString('en-GB')}
+          </span>
+        </li>
+      ))
+    }
+    {
+      locationPoints.length === 0 && eventPoints.length === 0 && (
+        <li class="mapview__list-empty">No locations or events published yet.</li>
+      )
+    }
+  </ul>
+</section>
+
+<script type="application/json" id="baes-map-data" set:html={JSON.stringify({ locationPoints, eventPoints, typeLabels })}></script>
+
+<script>
+  import L from 'leaflet';
+
+  const dataEl = document.getElementById('baes-map-data');
+  const { locationPoints, eventPoints, typeLabels } = JSON.parse(dataEl.textContent);
+
+  {
+    const map = L.map('baes-map', {
+      zoomControl: true,
+      attributionControl: true,
+      minZoom: 4,
+    });
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_matter/{z}/{x}/{y}{r}.png', {
+      attribution:
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+      subdomains: 'abcd',
+      maxZoom: 19,
+    }).addTo(map);
+
+    const makeIcon = (pulsing) =>
+      L.divIcon({
+        className: '',
+        html: `<span class="map-pin${pulsing ? ' map-pin--pulse' : ''}"></span>`,
+        iconSize: [16, 16],
+        iconAnchor: [8, 8],
+      });
+
+    const locationsLayer = L.layerGroup(
+      locationPoints.map((loc) =>
+        L.marker([loc.lat, loc.long], { icon: makeIcon(false) }).bindPopup(
+          `<strong>${loc.name}</strong><br>${typeLabels[loc.type] ?? loc.type}<br>${loc.address}`,
+        ),
+      ),
+    );
+
+    const eventsLayer = L.layerGroup(
+      eventPoints.map((event) =>
+        L.marker([event.lat, event.long], { icon: makeIcon(event.upcoming) }).bindPopup(
+          `<strong>${event.name}</strong><br>${event.locationName}<br>${new Date(
+            event.date,
+          ).toLocaleDateString('en-GB')}`,
+        ),
+      ),
+    );
+
+    locationsLayer.addTo(map);
+    eventsLayer.addTo(map);
+
+    const allPoints = [...locationPoints, ...eventPoints];
+    if (allPoints.length > 0) {
+      map.fitBounds(
+        allPoints.map((p) => [p.lat, p.long]),
+        { padding: [40, 40], maxZoom: 12 },
+      );
+    } else {
+      map.setView([54.5, -3], 6);
+    }
+
+    document.querySelectorAll('[data-layer]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        btn.classList.toggle('is-active');
+        const layer = btn.dataset.layer === 'locations' ? locationsLayer : eventsLayer;
+        if (btn.classList.contains('is-active')) {
+          layer.addTo(map);
+        } else {
+          map.removeLayer(layer);
+        }
+      });
+    });
+
+    const mapEl = document.getElementById('baes-map');
+    const listEl = document.querySelector('.mapview__list');
+    document.querySelectorAll('[data-view]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('[data-view]').forEach((b) => b.classList.remove('is-active'));
+        btn.classList.add('is-active');
+        const showMap = btn.dataset.view === 'map';
+        mapEl.hidden = !showMap;
+        listEl.hidden = showMap;
+        if (showMap) map.invalidateSize();
+      });
+    });
+  }
+</script>
+
+<style>
+  .mapview {
+    border: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .mapview__controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .mapview__group {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .mapview__pill {
+    font-family: var(--font-body);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    background: transparent;
+    border: 1px solid var(--border);
+    padding: 0.5rem 0.9rem;
+    cursor: pointer;
+    transition: color 0.2s var(--ease-out), border-color 0.2s var(--ease-out);
+  }
+
+  .mapview__pill.is-active {
+    color: var(--crimson-bright);
+    border-color: var(--crimson);
+  }
+
+  .mapview__map {
+    height: 480px;
+    width: 100%;
+    background: #0d0d0d;
+  }
+
+  .mapview__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .mapview__list-item {
+    display: grid;
+    grid-template-columns: 180px 1fr auto;
+    gap: 1rem;
+    align-items: center;
+    padding: 0.9rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .mapview__list-item:last-child {
+    border-bottom: none;
+  }
+
+  .mapview__list-tag {
+    color: var(--text-secondary);
+  }
+
+  .mapview__list-tag--event {
+    color: var(--crimson-bright);
+  }
+
+  .mapview__list-name {
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .mapview__list-meta {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    text-align: right;
+  }
+
+  .mapview__list-empty {
+    padding: 2rem 1.25rem;
+    color: var(--text-secondary);
+    text-align: center;
+  }
+
+  @media (max-width: 640px) {
+    .mapview__list-item {
+      grid-template-columns: 1fr;
+      gap: 0.35rem;
+    }
+
+    .mapview__list-meta {
+      text-align: left;
+    }
+  }
+
+  :global(.map-pin) {
+    display: block;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--crimson-bright);
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 2px rgba(200, 16, 46, 0.4);
+  }
+
+  :global(.map-pin--pulse) {
+    position: relative;
+  }
+
+  :global(.map-pin--pulse::after) {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border-radius: 50%;
+    background: var(--crimson-bright);
+    opacity: 0.6;
+    animation: map-pulse 1.8s var(--ease-out) infinite;
+  }
+
+  :global(.leaflet-popup-content-wrapper),
+  :global(.leaflet-popup-tip) {
+    background: var(--surface-alt);
+    color: var(--text-primary-dim);
+    border: 1px solid var(--border);
+  }
+
+  :global(.leaflet-popup-content) {
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+  }
+
+  @keyframes map-pulse {
+    0% {
+      transform: scale(1);
+      opacity: 0.6;
+    }
+    100% {
+      transform: scale(2.4);
+      opacity: 0;
+    }
+  }
+</style>

@@ -1,0 +1,231 @@
+---
+export interface Props {
+  active?: string;
+}
+const { active } = Astro.props;
+
+const links = [
+  { label: 'Disciplines', href: '/disciplines' },
+  { label: 'Corps', href: '/corps' },
+  { label: 'Events', href: '/events' },
+  { label: 'News', href: '/news' },
+  { label: 'Creators', href: '/creators' },
+  { label: 'Locations', href: '/locations' },
+  { label: 'About', href: '/about' },
+];
+---
+
+<header class="nav">
+  <div class="nav__inner container">
+    <a class="nav__brand" href="/">
+      <svg class="nav__jack" viewBox="0 0 60 30" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <rect width="60" height="30" fill="#00247d"></rect>
+        <g stroke="#fff" stroke-width="6">
+          <path d="M0,0 L60,30"></path>
+          <path d="M60,0 L0,30"></path>
+        </g>
+        <clipPath id="jack-counterchange">
+          <polygon points="0,0 30,15 60,0 60,3 33,15 60,27 60,30 57,30 30,18 3,30 0,30 0,27 27,15 0,3"></polygon>
+        </clipPath>
+        <g stroke="#cf142b" stroke-width="4" clip-path="url(#jack-counterchange)">
+          <path d="M0,0 L60,30"></path>
+          <path d="M60,0 L0,30"></path>
+        </g>
+        <rect x="24" width="12" height="30" fill="#fff"></rect>
+        <rect y="12" width="60" height="6" fill="#fff"></rect>
+        <rect x="26" width="8" height="30" fill="#cf142b"></rect>
+        <rect y="13" width="60" height="4" fill="#cf142b"></rect>
+      </svg>
+      <span class="nav__wordmark">
+        <span class="nav__wordmark-line">
+          <span class="nav__wordmark-white">BRITISH ARMY</span>
+        </span>
+        <span class="nav__wordmark-crimson">ESPORTS</span>
+      </span>
+    </a>
+
+    <input type="checkbox" id="nav-toggle" class="nav__toggle-input" />
+    <label for="nav-toggle" class="nav__toggle" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </label>
+
+    <nav class="nav__links" aria-label="Primary">
+      {links.map((link) => (
+        <a
+          href={link.href}
+          class:list={['nav__link', { 'nav__link--active': active === link.label }]}
+        >
+          {link.label}
+        </a>
+      ))}
+    </nav>
+
+    <div class="nav__actions">
+      <a href="/join" class="nav__cta clip-tl-sm">Join Us</a>
+    </div>
+  </div>
+</header>
+
+<style>
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(10, 10, 10, 0.88);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav__inner {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    height: 72px;
+  }
+
+  .nav__brand {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    flex-shrink: 0;
+  }
+
+  .nav__jack {
+    width: 28px;
+    height: 14px;
+    border: 1px solid var(--border);
+  }
+
+  .nav__wordmark {
+    display: flex;
+    flex-direction: column;
+    line-height: 1;
+  }
+
+  .nav__wordmark-white,
+  .nav__wordmark-crimson {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+
+  .nav__wordmark-white {
+    color: var(--text-primary);
+    font-size: 0.8rem;
+  }
+
+  .nav__wordmark-crimson {
+    color: var(--crimson-bright);
+    font-size: 1.15rem;
+  }
+
+  .nav__links {
+    display: flex;
+    align-items: center;
+    gap: 1.75rem;
+    margin: 0 auto;
+  }
+
+  .nav__link {
+    font-family: var(--font-body);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 0.75rem;
+    color: var(--text-secondary-alt);
+    padding-bottom: 4px;
+    border-bottom: 2px solid transparent;
+    transition: color 0.2s var(--ease-out), border-color 0.2s var(--ease-out);
+    white-space: nowrap;
+  }
+
+  .nav__link:hover {
+    color: var(--text-primary);
+  }
+
+  .nav__link--active {
+    color: var(--crimson-bright);
+    border-bottom-color: var(--crimson-bright);
+  }
+
+  .nav__actions {
+    flex-shrink: 0;
+  }
+
+  .nav__cta {
+    display: inline-block;
+    background: var(--crimson);
+    color: #fff;
+    font-family: var(--font-body);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.75rem;
+    padding: 0.65rem 1.25rem;
+    transition: background 0.2s var(--ease-out);
+  }
+
+  .nav__cta:hover {
+    background: var(--crimson-bright);
+  }
+
+  .nav__toggle-input {
+    display: none;
+  }
+
+  .nav__toggle {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    cursor: pointer;
+    margin-left: auto;
+    padding: 8px;
+  }
+
+  .nav__toggle span {
+    width: 22px;
+    height: 2px;
+    background: var(--text-primary);
+  }
+
+  @media (max-width: 860px) {
+    .nav__toggle {
+      display: flex;
+    }
+
+    .nav__actions {
+      display: none;
+    }
+
+    .nav__links {
+      position: absolute;
+      top: 72px;
+      left: 0;
+      right: 0;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0;
+      background: var(--bg-base-alt);
+      border-bottom: 1px solid var(--border);
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.25s var(--ease-out);
+    }
+
+    .nav__toggle-input:checked ~ .nav__links {
+      max-height: 480px;
+    }
+
+    .nav__link {
+      width: 100%;
+      padding: 0.9rem clamp(1rem, 3vw, 2.5rem);
+      border-bottom: 1px solid var(--border);
+      border-left: 2px solid transparent;
+    }
+
+    .nav__link--active {
+      border-bottom: 1px solid var(--border);
+      border-left-color: var(--crimson-bright);
+    }
+  }
+</style>

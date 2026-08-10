@@ -1,17 +1,88 @@
 ---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import Card from '../components/Card.astro';
+import Table from '../components/Table.astro';
+import MapView from '../components/MapView.astro';
 
+const disciplines = await getCollection('disciplines');
+const corps = await getCollection('corps');
+
+const demoStandings = [
+  { name: 'Team A', played: 6, won: 5, lost: 1, gd: 11, pts: 15 },
+  { name: 'Team B', played: 6, won: 4, lost: 2, gd: 6, pts: 12 },
+  { name: 'Team C', played: 6, won: 2, lost: 4, gd: -4, pts: 6 },
+  { name: 'Team D', played: 6, won: 1, lost: 5, gd: -13, pts: 3 },
+];
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<BaseLayout title="Home" active="Home">
+  <Hero />
+
+  <section class="section container">
+    <h2 class="section__heading">Disciplines</h2>
+    <div class="grid">
+      {
+        disciplines.map((d) => (
+          <Card
+            category="Discipline"
+            title={d.data.name}
+            meta={d.data.tagline}
+            href={`/disciplines/${d.id}`}
+          />
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="section container">
+    <h2 class="section__heading">Corps</h2>
+    <div class="grid">
+      {
+        corps.map((c) => (
+          <Card
+            category="Corps"
+            title={c.data.name}
+            meta={c.data.summary}
+            href={`/corps/${c.id}`}
+          />
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="section container">
+    <h2 class="section__heading">Standings</h2>
+    <p class="section__note label">Sample layout — pending real Results data</p>
+    <Table caption="Sample League — Placeholder Data" rows={demoStandings} />
+  </section>
+
+  <section class="section container">
+    <h2 class="section__heading">Locations &amp; Events</h2>
+    <MapView />
+  </section>
+</BaseLayout>
+
+<style>
+  .section {
+    padding-top: clamp(2.5rem, 6vw, 4rem);
+    padding-bottom: clamp(2.5rem, 6vw, 4rem);
+  }
+
+  .section__heading {
+    font-size: clamp(1.75rem, 3vw, 2.5rem);
+    margin-bottom: 0.5rem;
+  }
+
+  .section__note {
+    margin-bottom: 1.5rem;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
+    margin-top: 1.5rem;
+  }
+</style>
