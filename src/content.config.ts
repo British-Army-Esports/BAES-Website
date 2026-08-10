@@ -53,4 +53,22 @@ const events = defineCollection({
   }),
 });
 
-export const collections = { disciplines, corps, events };
+const locations = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/locations' }),
+  schema: z.object({
+    name: z.string(),
+    type: z.enum(['training-facility', 'dedicated-arena', 'garrison-gaming-room']),
+    corps: reference('corps').optional(),
+    address: z.string(),
+    location: z.object({
+      lat: z.number(),
+      long: z.number(),
+    }),
+    equipment: z.array(z.string()).optional(),
+    bookingContact: z.string().optional(),
+    photos: z.array(z.string()).optional(),
+    active: z.boolean().default(true),
+  }),
+});
+
+export const collections = { disciplines, corps, events, locations };
