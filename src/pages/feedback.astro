@@ -1,0 +1,86 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Feedback"
+  description="Send feedback, corrections, or suggestions about the British Army Esports site."
+>
+  <section class="section container">
+    <h1 class="section__heading">Feedback</h1>
+    <p class="section__intro">
+      Spotted something wrong, missing, or have a suggestion for the site? Let us know below.
+      Submissions go to the site team — not published anywhere.
+    </p>
+
+    <form
+      name="feedback"
+      method="POST"
+      action="/feedback/thanks"
+      data-netlify="true"
+      netlify-honeypot="bot-field"
+      class="feedback-form"
+    >
+      <input type="hidden" name="form-name" value="feedback" />
+      <p class="form-honeypot">
+        <label>
+          Don't fill this out if you're human: <input name="bot-field" />
+        </label>
+      </p>
+
+      <div class="form-field">
+        <label for="name">Name (optional)</label>
+        <input type="text" id="name" name="name" autocomplete="name" />
+      </div>
+
+      <div class="form-field">
+        <label for="email">Email (optional — only needed if you want a reply)</label>
+        <input type="email" id="email" name="email" autocomplete="email" />
+      </div>
+
+      <div class="form-field">
+        <label for="topic">Topic</label>
+        <select id="topic" name="topic">
+          <option>General feedback</option>
+          <option>Correction (wrong or outdated info)</option>
+          <option>Bug report</option>
+          <option>Suggestion</option>
+          <option>Other</option>
+        </select>
+      </div>
+
+      <div class="form-field">
+        <label for="message">Message</label>
+        <textarea id="message" name="message" required></textarea>
+      </div>
+
+      <button type="submit" class="form-submit clip-tl-sm">
+        Send Feedback
+        <span>→</span>
+      </button>
+    </form>
+  </section>
+</BaseLayout>
+
+<style>
+  .section {
+    padding-top: clamp(2.5rem, 6vw, 4rem);
+    padding-bottom: clamp(3rem, 8vw, 5rem);
+    max-width: 640px;
+  }
+
+  .section__heading {
+    font-size: clamp(1.75rem, 3vw, 2.5rem);
+    margin-bottom: 1rem;
+  }
+
+  .section__intro {
+    color: var(--text-secondary-alt);
+    margin: 0 0 2rem;
+    line-height: 1.6;
+  }
+
+  .feedback-form {
+    margin-top: 1rem;
+  }
+</style>

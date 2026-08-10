@@ -1,0 +1,46 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Thank You" description="Thanks for your feedback.">
+  <section class="section container">
+    <h1 class="section__heading">Thanks — <span class="crimson">Received.</span></h1>
+    <p class="section__body">
+      Your feedback has been sent to the site team. If you left an email address and it needs a
+      reply, we'll be in touch.
+    </p>
+    <a href="/" class="back-link">← Back to home</a>
+  </section>
+</BaseLayout>
+
+<style>
+  .section {
+    padding-top: clamp(4rem, 12vw, 7rem);
+    padding-bottom: clamp(4rem, 12vw, 7rem);
+    text-align: center;
+  }
+
+  .section__heading {
+    font-size: clamp(2rem, 5vw, 3rem);
+  }
+
+  .crimson {
+    color: var(--crimson-bright);
+  }
+
+  .section__body {
+    color: var(--text-secondary-alt);
+    max-width: 480px;
+    margin: 1.25rem auto 2rem;
+    line-height: 1.6;
+  }
+
+  .back-link {
+    font-family: var(--font-body);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.8rem;
+    color: var(--crimson-bright);
+  }
+</style>
