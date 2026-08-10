@@ -6,6 +6,8 @@ const events = await getCollection('events');
 
 const liveEvent = events.find((event) => {
   if (event.data.presenceType === 'community-outreach') return false;
+  // An unconfirmed/provisional date can't honestly be shown as "live now".
+  if (event.data.dateStatus && event.data.dateStatus !== 'confirmed') return false;
   const start = event.data.date;
   const end = event.data.endDate ?? new Date(start.getTime() + 24 * 60 * 60 * 1000);
   return now >= start && now <= end;
@@ -21,7 +23,8 @@ const liveEvent = events.find((event) => {
           Live Now
         </span>
         <span class="ticker__info">
-          {liveEvent.data.title} — {liveEvent.data.location.name}
+          {liveEvent.data.title}
+          {liveEvent.data.location && <> — {liveEvent.data.location.name}</>}
         </span>
         <a href={liveEvent.data.externalLink ?? '#'} class="ticker__watch">
           Watch Live →

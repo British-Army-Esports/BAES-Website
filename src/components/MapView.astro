@@ -1,9 +1,12 @@
 ---
 import 'leaflet/dist/leaflet.css';
 import { getCollection } from 'astro:content';
+import { formatEventDate } from '../lib/eventDate';
 
 const allLocations = await getCollection('locations', ({ data }) => data.active);
-const allEvents = await getCollection('events');
+// Only fixtures with a fixed physical venue can be plotted here — online
+// qualifiers and not-yet-located internal fixtures aren't shown on this map.
+const allEvents = (await getCollection('events')).filter((event) => event.data.location);
 
 const locationPoints = allLocations.map((loc) => ({
   id: loc.id,
@@ -21,9 +24,13 @@ const eventPoints = allEvents.map((event) => ({
   scale: event.data.scale,
   presenceType: event.data.presenceType,
   date: event.data.date.toISOString(),
-  locationName: event.data.location.name,
-  lat: event.data.location.lat,
-  long: event.data.location.long,
+  endDate: event.data.endDate?.toISOString(),
+  dateStatus: event.data.dateStatus,
+  dateOptions: event.data.dateOptions,
+  dateLabel: formatEventDate(event.data).text,
+  locationName: event.data.location!.name,
+  lat: event.data.location!.lat,
+  long: event.data.location!.long,
   upcoming: new Date(event.data.date).getTime() >= now,
 }));
 
@@ -68,7 +75,7 @@ const typeLabels: Record<string, string> = {
           </span>
           <span class="mapview__list-name">{event.name}</span>
           <span class="mapview__list-meta">
-            {event.locationName} · {new Date(event.date).toLocaleDateString('en-GB')}
+            {event.locationName} · {event.dateLabel}
           </span>
         </li>
       ))
@@ -122,9 +129,7 @@ const typeLabels: Record<string, string> = {
     const eventsLayer = L.layerGroup(
       eventPoints.map((event) =>
         L.marker([event.lat, event.long], { icon: makeIcon(event.upcoming) }).bindPopup(
-          `<strong>${event.name}</strong><br>${event.locationName}<br>${new Date(
-            event.date,
-          ).toLocaleDateString('en-GB')}`,
+          `<strong>${event.name}</strong><br>${event.locationName}<br>${event.dateLabel}`,
         ),
       ),
     );

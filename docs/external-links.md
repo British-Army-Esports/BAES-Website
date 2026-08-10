@@ -10,3 +10,4 @@ Source list of external links to integrate across the site. Each has been wired 
 | https://www.twitch.tv/britisharmyesports | Nav social icon + Footer (Community) |
 | https://www.twitch.tv/rsignals | `src/content/corps/rs.md` `twitch` field — stored, not yet surfaced in UI (no Corps detail pages built yet) |
 | https://x.com/BritArmyesports | Nav social icon + Footer (Community) |
+| https://bfbsesports.com/ | Footer (Wider Esports Ecosystem) |

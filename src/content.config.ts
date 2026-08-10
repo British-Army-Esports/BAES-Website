@@ -30,7 +30,9 @@ const events = defineCollection({
   loader: glob({ pattern: '**/*.{yaml,yml}', base: './src/content/events' }),
   schema: z.object({
     title: z.string(),
-    discipline: reference('disciplines'),
+    // Optional: some real fixtures (multi-title leagues, defence-wide
+    // festivals) don't map to a single game.
+    discipline: reference('disciplines').optional(),
     corps: reference('corps').optional(),
     scale: z.enum([
       'unit-garrison',
@@ -43,11 +45,21 @@ const events = defineCollection({
     presenceType: z.enum(['competitive', 'community-outreach', 'mixed']),
     date: z.coerce.date(),
     endDate: z.coerce.date().optional(),
-    location: z.object({
-      name: z.string(),
-      lat: z.number(),
-      long: z.number(),
-    }),
+    // confirmed: render `date`/`endDate` as-is.
+    // provisional: render a "likely [window]" chip, using dateOptions if present.
+    // tbc: render a "Date TBC" badge; `date` is an internal sort anchor only,
+    // never shown as a real date.
+    dateStatus: z.enum(['confirmed', 'provisional', 'tbc']).default('confirmed'),
+    dateOptions: z.array(z.string()).optional(),
+    // Optional: online-only fixtures and unconfirmed internal fixtures have
+    // no fixed physical venue.
+    location: z
+      .object({
+        name: z.string(),
+        lat: z.number(),
+        long: z.number(),
+      })
+      .optional(),
     description: z.string().optional(),
     resultsSummary: z.string().optional(),
     externalLink: z.string().url().optional(),
