@@ -1,8 +1,35 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const whyPoints = [
+  {
+    title: 'Recruitment & Engagement',
+    body: 'Esports reaches a demographic and skillset that traditional sport doesn’t always reach — digital-native talent, not necessarily athletic in the conventional sense.',
+  },
+  {
+    title: 'Skills That Transfer',
+    body: 'Decision-making under pressure, situational awareness, rapid reaction, and coordination under stress — the cognitive half of what sport builds physically.',
+  },
+  {
+    title: 'Inclusion',
+    body: 'Esports doesn’t require the physical fitness standards that gate most Army sport — injured personnel, those on medical downgrade, and others can still compete, represent, and belong. Not a lesser version of "real" Army sport — a complementary pathway.',
+  },
+  {
+    title: 'Retention & Cohesion',
+    body: 'The same unit cohesion and team identity that sport builds, through a different medium — often at lower physical and logistical cost.',
+  },
+  {
+    title: 'Digital & Cyber-Adjacent Skills',
+    body: 'A genuine skills and education pathway — reaction time, systems thinking, communication under load. A plausible adjacency to digitally-loaded trades, not a claim that gaming trains cyber operators.',
+  },
+  {
+    title: 'Legitimacy',
+    body: 'Esports is formally recognised at governmental and Olympic-adjacent levels — the Global Esports Federation, Commonwealth Esports Championships. Not a fringe hobby claiming legitimacy; an already-legitimised competitive discipline the Army takes part in.',
+  },
+];
 ---
 
-<BaseLayout title="About" active="About" description="About British Army Esports.">
+<BaseLayout title="About" active="About" description="About British Army Esports — why it exists and how it's governed.">
   <section class="section container">
     <p class="section__eyebrow label">About</p>
     <h1 class="section__heading">About British Army Esports</h1>
@@ -13,19 +40,78 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
         and Corps, not a replacement for what individual Corps publish themselves. It brings
         together disciplines, Corps, events, results, and locations in one place.
       </p>
+    </div>
+
+    <h2 class="section__subheading">Why Esports in the Army</h2>
+    <div class="why-grid">
+      {
+        whyPoints.map((point) => (
+          <div class="why-card clip-br">
+            <h3 class="why-card__title">{point.title}</h3>
+            <p class="why-card__body">{point.body}</p>
+          </div>
+        ))
+      }
+    </div>
+    <p class="responsible-note">
+      <strong>Responsible play:</strong> esports comes with the same real considerations as any
+      screen-based activity — regular breaks, good ergonomics, and healthy play limits. That's
+      taken seriously here, not treated as an afterthought.
+    </p>
+
+    <h2 class="section__subheading">Governance &amp; Wider Ecosystem</h2>
+    <p class="prose-lead">
+      Esports sits under <a href="https://britisharmysport.com/" target="_blank" rel="noopener noreferrer">Army Sport</a>{' '}
+      governance, itself part of UK Armed Forces Sport. British Army Esports also sits alongside
+      sister-service esports programmes and the UK's national esports body.
+    </p>
+
+    <div class="gov-groups">
+      <div class="gov-group">
+        <p class="gov-group__label label">Reports To</p>
+        <ul class="gov-list">
+          <li>UK Armed Forces Sport</li>
+          <li>
+            <a href="https://britisharmysport.com/" target="_blank" rel="noopener noreferrer">Army Sport</a>
+          </li>
+        </ul>
+      </div>
+      <div class="gov-group">
+        <p class="gov-group__label label">Sister Services</p>
+        <ul class="gov-list">
+          <li>
+            <a href="https://x.com/RAF_Esports" target="_blank" rel="noopener noreferrer">RAF Esports</a>
+          </li>
+          <li>
+            <a href="https://www.royalnavy.mod.uk/navy-sport/all-sports/esports" target="_blank" rel="noopener noreferrer">RN Esports</a>
+          </li>
+        </ul>
+      </div>
+      <div class="gov-group">
+        <p class="gov-group__label label">Wider Recognition</p>
+        <ul class="gov-list">
+          <li>
+            <a href="https://britishesports.org/" target="_blank" rel="noopener noreferrer">British Esports Federation</a>
+          </li>
+          <li>
+            <a href="http://ideg.gg/" target="_blank" rel="noopener noreferrer">International Defence Esports Games</a>
+          </li>
+          <li>
+            <a href="https://bfbsesports.com/" target="_blank" rel="noopener noreferrer">BFBS Esports</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="corps-note">
+      Individual Corps sit alongside this structure, not within it — see the{' '}
+      <a href="/corps">Corps directory</a>.
+    </p>
+
+    <div class="prose">
       <p>
-        Esports sits under <a href="https://britisharmysport.com/" target="_blank" rel="noopener noreferrer">Army Sport</a>
-        governance — see their <a href="https://britisharmysport.com/army-e-sports/" target="_blank" rel="noopener noreferrer">esports page</a> too.
-      </p>
-      <p>
-        British Army Esports is also part of a wider UK Armed Forces and defence esports
-        ecosystem — see the links in the footer, including the
-        <a href="http://ideg.gg/" target="_blank" rel="noopener noreferrer">International Defence Esports Games</a>
-        and <a href="https://bfbsesports.com/" target="_blank" rel="noopener noreferrer">BFBS Esports</a>.
-      </p>
-      <p>
-        Got a question, correction, or something to report? Use the
-        <a href="/feedback">Feedback</a> page.
+        Got a question, correction, or something to report? Use the <a href="/feedback">Feedback</a>{' '}
+        page.
       </p>
     </div>
   </section>
@@ -35,7 +121,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
   .section {
     padding-top: clamp(2.5rem, 6vw, 4rem);
     padding-bottom: clamp(3rem, 8vw, 5rem);
-    max-width: 640px;
+    max-width: 760px;
   }
 
   .section__eyebrow {
@@ -48,16 +134,108 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
     margin-bottom: 1.5rem;
   }
 
-  .prose {
+  .section__subheading {
+    font-size: 1.4rem;
+    margin: 3rem 0 1.5rem;
+  }
+
+  .prose,
+  .prose-lead {
     color: var(--text-secondary-alt);
     line-height: 1.7;
+  }
+
+  .prose {
     display: flex;
     flex-direction: column;
     gap: 1rem;
   }
 
-  .prose a {
+  .prose-lead {
+    margin: 0 0 1.75rem;
+  }
+
+  .prose a,
+  .prose-lead a,
+  .corps-note a {
     color: var(--crimson-bright);
     font-weight: 600;
+  }
+
+  .why-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1.1rem;
+  }
+
+  .why-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1.25rem;
+  }
+
+  .why-card__title {
+    font-size: 1rem;
+    margin-bottom: 0.6rem;
+    color: var(--crimson-bright);
+  }
+
+  .why-card__body {
+    color: var(--text-secondary-alt);
+    font-size: 0.9rem;
+    line-height: 1.55;
+    margin: 0;
+  }
+
+  .responsible-note {
+    margin-top: 1.5rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    border-left: 2px solid var(--border);
+    padding-left: 1rem;
+  }
+
+  .gov-groups {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+  }
+
+  .gov-group__label {
+    color: var(--text-secondary);
+    margin: 0 0 0.75rem;
+  }
+
+  .gov-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .gov-list li {
+    color: var(--text-primary-dim);
+    font-size: 0.9rem;
+  }
+
+  .gov-list a {
+    color: var(--text-primary-dim);
+    font-weight: 600;
+  }
+
+  .gov-list a:hover {
+    color: var(--crimson-bright);
+  }
+
+  .corps-note {
+    margin: 1.5rem 0 2.5rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
   }
 </style>

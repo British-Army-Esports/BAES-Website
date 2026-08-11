@@ -1,0 +1,63 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('news');
+  return posts.map((post) => ({
+    params: { id: post.id },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+---
+
+<BaseLayout title={post.data.title} active="News" description={post.data.summary}>
+  <article class="section container">
+    <p class="section__eyebrow label">
+      {post.data.date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+    </p>
+    <h1 class="section__heading">{post.data.title}</h1>
+    <div class="prose">
+      <Content />
+    </div>
+    <a href="/news" class="back-link">← All news</a>
+  </article>
+</BaseLayout>
+
+<style>
+  .section {
+    padding-top: clamp(2.5rem, 6vw, 4rem);
+    padding-bottom: clamp(3rem, 8vw, 5rem);
+    max-width: 680px;
+  }
+
+  .section__eyebrow {
+    color: var(--crimson-bright);
+    margin-bottom: 0.75rem;
+  }
+
+  .section__heading {
+    font-size: clamp(1.75rem, 4vw, 2.75rem);
+    margin-bottom: 1.5rem;
+  }
+
+  .prose {
+    color: var(--text-secondary-alt);
+    line-height: 1.75;
+  }
+
+  .prose :global(p) {
+    margin: 0 0 1.25rem;
+  }
+
+  .back-link {
+    display: inline-block;
+    margin-top: 2rem;
+    color: var(--crimson-bright);
+    font-weight: 600;
+    font-size: 0.85rem;
+  }
+</style>

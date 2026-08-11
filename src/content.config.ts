@@ -9,6 +9,8 @@ const disciplines = defineCollection({
     icon: z.string().optional(),
     color: z.string().optional(),
     order: z.number().optional(),
+    // Official "download and play" link for the game itself.
+    externalLink: z.string().url().optional(),
     active: z.boolean().default(true),
   }),
 });
@@ -30,9 +32,10 @@ const events = defineCollection({
   loader: glob({ pattern: '**/*.{yaml,yml}', base: './src/content/events' }),
   schema: z.object({
     title: z.string(),
-    // Optional: some real fixtures (multi-title leagues, defence-wide
-    // festivals) don't map to a single game.
-    discipline: reference('disciplines').optional(),
+    // Array, not singular: many real fixtures (multi-title leagues,
+    // defence-wide festivals) span more than one game. Optional because
+    // some fixtures (broad festivals with no fixed game list) have none.
+    disciplines: z.array(reference('disciplines')).optional(),
     corps: reference('corps').optional(),
     scale: z.enum([
       'unit-garrison',
@@ -85,4 +88,26 @@ const locations = defineCollection({
   }),
 });
 
-export const collections = { disciplines, corps, events, locations };
+const news = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/news' }),
+  schema: z.object({
+    title: z.string(),
+    date: z.coerce.date(),
+    summary: z.string().optional(),
+    relatedEvent: reference('events').optional(),
+  }),
+});
+
+const sponsors = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/sponsors' }),
+  schema: z.object({
+    name: z.string(),
+    logo: z.string(),
+    website: z.string().url(),
+    // When and how the partnership works — real details pending from the
+    // programme; leave narrative-body placeholders honest until then.
+    active: z.boolean().default(true),
+  }),
+});
+
+export const collections = { disciplines, corps, events, locations, news, sponsors };

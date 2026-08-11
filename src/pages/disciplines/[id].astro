@@ -15,7 +15,7 @@ const { discipline } = Astro.props;
 const { Content } = await render(discipline);
 
 const relatedEvents = (await getCollection('events'))
-  .filter((e) => e.data.discipline?.id === discipline.id)
+  .filter((e) => e.data.disciplines?.some((d) => d.id === discipline.id))
   .sort((a, b) => a.data.date.getTime() - b.data.date.getTime());
 ---
 

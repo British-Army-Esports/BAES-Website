@@ -1,24 +1,48 @@
 ---
+import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import Card from '../../components/Card.astro';
+
+const posts = (await getCollection('news')).sort(
+  (a, b) => b.data.date.getTime() - a.data.date.getTime(),
+);
 ---
 
 <BaseLayout title="News" active="News" description="News from British Army Esports.">
   <section class="section container">
     <p class="section__eyebrow label">News</p>
-    <h1 class="section__heading">Coming Soon</h1>
+    <h1 class="section__heading">News</h1>
     <p class="section__intro">
-      Match results, roster news, and programme updates will appear here. In the meantime, follow
-      along on <a href="https://x.com/BritArmyesports" target="_blank" rel="noopener noreferrer">X</a>
-      or <a href="https://www.twitch.tv/britisharmyesports" target="_blank" rel="noopener noreferrer">Twitch</a>.
+      Match results, roster news, and programme updates. Follow along on{' '}
+      <a href="https://x.com/BritArmyesports" target="_blank" rel="noopener noreferrer">X</a>{' '}
+      or <a href="https://www.twitch.tv/britisharmyesports" target="_blank" rel="noopener noreferrer">Twitch</a>{' '}
+      too.
     </p>
+
+    <div class="grid">
+      {
+        posts.map((post) => (
+          <Card
+            category={post.data.date.toLocaleDateString('en-GB', {
+              day: 'numeric',
+              month: 'short',
+              year: 'numeric',
+            })}
+            title={post.data.title}
+            meta={post.data.summary}
+            href={`/news/${post.id}`}
+          />
+        ))
+      }
+      {posts.length === 0 && <p class="empty">No news posted yet.</p>}
+    </div>
   </section>
 </BaseLayout>
 
 <style>
   .section {
-    padding-top: clamp(3rem, 8vw, 5rem);
-    padding-bottom: clamp(4rem, 10vw, 6rem);
-    text-align: center;
+    padding-top: clamp(2.5rem, 6vw, 4rem);
+    padding-bottom: clamp(3rem, 8vw, 5rem);
   }
 
   .section__eyebrow {
@@ -28,18 +52,28 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 
   .section__heading {
     font-size: clamp(1.75rem, 4vw, 3rem);
-    margin-bottom: 1rem;
+    margin-bottom: 0.75rem;
   }
 
   .section__intro {
     color: var(--text-secondary-alt);
-    max-width: 480px;
-    margin: 0 auto;
+    max-width: 640px;
     line-height: 1.6;
+    margin: 0 0 2rem;
   }
 
   .section__intro a {
     color: var(--crimson-bright);
     font-weight: 600;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
+  }
+
+  .empty {
+    color: var(--text-secondary);
   }
 </style>

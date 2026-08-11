@@ -1,0 +1,128 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const sponsors = await getCollection('sponsors', ({ data }) => data.active);
+const rendered = await Promise.all(
+  sponsors.map(async (sponsor) => ({ sponsor, Content: (await render(sponsor)).Content })),
+);
+---
+
+<BaseLayout title="Sponsors" description="British Army Esports partners and sponsors.">
+  <section class="section container">
+    <p class="section__eyebrow label">Partners</p>
+    <h1 class="section__heading">Sponsors</h1>
+    <p class="section__intro">
+      The partners who support British Army Esports with equipment and expertise.
+    </p>
+
+    <div class="sponsor-list">
+      {
+        rendered.map(({ sponsor, Content }) => (
+          <div class="sponsor-card">
+            <div class="sponsor-card__header">
+              <div class="sponsor-card__chip clip-tl-sm">
+                <img src={sponsor.data.logo} alt={sponsor.data.name} />
+              </div>
+              <a
+                href={sponsor.data.website}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="sponsor-card__link"
+              >
+                {sponsor.data.name} ↗
+              </a>
+            </div>
+            <div class="sponsor-card__body">
+              <Content />
+            </div>
+          </div>
+        ))
+      }
+      {sponsors.length === 0 && <p class="empty">No sponsors published yet.</p>}
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .section {
+    padding-top: clamp(2.5rem, 6vw, 4rem);
+    padding-bottom: clamp(3rem, 8vw, 5rem);
+    max-width: 720px;
+  }
+
+  .section__eyebrow {
+    color: var(--crimson-bright);
+    margin-bottom: 0.75rem;
+  }
+
+  .section__heading {
+    font-size: clamp(1.75rem, 4vw, 3rem);
+    margin-bottom: 0.75rem;
+  }
+
+  .section__intro {
+    color: var(--text-secondary-alt);
+    line-height: 1.6;
+    margin: 0 0 2rem;
+  }
+
+  .sponsor-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .sponsor-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+  }
+
+  .sponsor-card__header {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    margin-bottom: 1rem;
+  }
+
+  .sponsor-card__chip {
+    background: #f2f2f2;
+    padding: 0.6rem 1.25rem;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .sponsor-card__chip img {
+    height: 28px;
+    width: auto;
+    max-width: 140px;
+    object-fit: contain;
+  }
+
+  .sponsor-card__link {
+    color: var(--crimson-bright);
+    font-weight: 700;
+    font-family: var(--font-display);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: 1.1rem;
+  }
+
+  .sponsor-card__body {
+    color: var(--text-secondary-alt);
+    line-height: 1.7;
+  }
+
+  .sponsor-card__body :global(p) {
+    margin: 0 0 1rem;
+  }
+
+  .sponsor-card__body :global(p:last-child) {
+    margin-bottom: 0;
+  }
+
+  .empty {
+    color: var(--text-secondary);
+  }
+</style>

@@ -1,5 +1,6 @@
 title: "C.O.D.E. Bowl VII"
-discipline: "call-of-duty"
+disciplines:
+  - "call-of-duty"
 scale: "inter-service-international"
 presenceType: "competitive"
 date: 2026-06-20

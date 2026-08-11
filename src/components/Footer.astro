@@ -12,7 +12,7 @@ const year = new Date().getFullYear();
           <span class="footer__wordmark-crimson">ESPORTS</span>
         </span>
       </a>
-      <p class="footer__tagline label">Excellence. Adaptability. Together.</p>
+      <p class="footer__tagline label">Together. Excellence. Adaptability.</p>
       <div class="footer__social">
         <a href="https://x.com/BritArmyesports" aria-label="X (Twitter)" target="_blank" rel="noopener noreferrer">
           <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.9 2h3.3l-7.2 8.2L23.5 22h-6.6l-5.2-6.8L5.8 22H2.5l7.7-8.8L1.5 2h6.8l4.7 6.2L18.9 2Zm-1.2 18h1.8L7.4 3.9H5.5L17.7 20Z"/></svg>
@@ -46,8 +46,13 @@ const year = new Date().getFullYear();
   <div class="container footer__sponsors">
     <p class="footer__col-heading label">Partners</p>
     <div class="footer__sponsor-row">
-      <img src="/logos/sponsors/wired2fire.png" alt="Wired2Fire" />
-      <img src="/logos/sponsors/coolermaster.svg" alt="Cooler Master" />
+      <a href="/sponsors" class="footer__sponsor-chip clip-tl-sm">
+        <img src="/logos/sponsors/wired2fire.png" alt="Wired2Fire" />
+      </a>
+      <a href="/sponsors" class="footer__sponsor-chip clip-tl-sm">
+        <img src="/logos/sponsors/coolermaster.svg" alt="Cooler Master" />
+      </a>
+      <a href="/sponsors" class="footer__sponsor-more">All Partners →</a>
     </div>
   </div>
 
@@ -158,19 +163,32 @@ const year = new Date().getFullYear();
     flex-wrap: wrap;
   }
 
-  .footer__sponsor-row img {
-    height: 32px;
-    width: auto;
-    max-width: 140px;
-    object-fit: contain;
-    filter: grayscale(1) brightness(1.6);
-    opacity: 0.75;
-    transition: opacity 0.2s var(--ease-out), filter 0.2s var(--ease-out);
+  /* Sponsor logos vary in colour — some are near-black. A light chip behind
+     each one guarantees legibility regardless of the logo's own palette,
+     rather than relying on filters that don't help a black-on-black logo. */
+  .footer__sponsor-chip {
+    display: inline-flex;
+    align-items: center;
+    background: #f2f2f2;
+    padding: 0.6rem 1.25rem;
+    transition: transform 0.2s var(--ease-out);
   }
 
-  .footer__sponsor-row img:hover {
-    filter: none;
-    opacity: 1;
+  .footer__sponsor-chip:hover {
+    transform: translateY(-2px);
+  }
+
+  .footer__sponsor-row img {
+    height: 24px;
+    width: auto;
+    max-width: 120px;
+    object-fit: contain;
+  }
+
+  .footer__sponsor-more {
+    color: var(--crimson-bright);
+    font-weight: 600;
+    font-size: 0.85rem;
   }
 
   .footer__bottom {

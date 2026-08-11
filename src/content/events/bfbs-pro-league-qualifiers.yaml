@@ -1,4 +1,8 @@
 title: "BFBS Pro League Qualifiers"
+disciplines:
+  - "rocket-league"
+  - "f1-25-iracing"
+  - "league-of-legends"
 scale: "inter-service-international"
 presenceType: "competitive"
 date: 2026-06-01
