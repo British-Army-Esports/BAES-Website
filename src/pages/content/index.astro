@@ -29,8 +29,11 @@ const corpsChannels = [
     <p class="section__eyebrow label">Content</p>
     <h1 class="section__heading">Content</h1>
     <p class="section__intro">
-      Watch live on the channels below, or click through to Twitch. Some of our players also
-      stream in their own right, listed separately further down.
+      Watch live on the channels below, or click through to Twitch. Match VODs and highlights are
+      on{' '}
+      <a href="https://www.youtube.com/c/BritishArmyEsports" target="_blank" rel="noopener noreferrer">
+        YouTube
+      </a>. Some of our players also stream in their own right, listed separately further down.
     </p>
 
     <h2 class="section__subheading">British Army Esports</h2>
@@ -137,6 +140,11 @@ const corpsChannels = [
     max-width: 640px;
     line-height: 1.6;
     margin: 0 0 2rem;
+  }
+
+  .section__intro a {
+    color: var(--crimson-bright);
+    font-weight: 600;
   }
 
   .section__subheading {

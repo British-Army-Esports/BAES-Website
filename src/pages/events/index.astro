@@ -1,36 +1,56 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import EventCard from '../../components/EventCard.astro';
 import { formatEventDate } from '../../lib/eventDate';
 
 const allDisciplines = await getCollection('disciplines', ({ data }) => data.active);
-const disciplineNames = new Map(allDisciplines.map((d) => [d.id, d.data.name]));
+const disciplineInfo = new Map(
+  allDisciplines.map((d) => [d.id, { name: d.data.name, color: d.data.color }]),
+);
+
+const now = Date.now();
 
 const events = (await getCollection('events'))
   .map((event) => {
     const disciplineIds = (event.data.disciplines ?? []).map((d) => d.id);
-    const now = Date.now();
+    const disciplineNames = disciplineIds.map((id) => disciplineInfo.get(id)?.name).filter(Boolean);
+    const accentColor = disciplineIds.map((id) => disciplineInfo.get(id)?.color).find(Boolean);
+
+    const start = event.data.date.getTime();
     const end = (event.data.endDate ?? event.data.date).getTime();
     // A TBC date is, by definition, not a known point in time, so it can
     // never honestly be classified as "past" — it always sits in Upcoming
     // until someone confirms a real date.
     const isPast = event.data.dateStatus !== 'tbc' && end < now;
+    // "In progress" mirrors the Ticker/MapView live rule: only a confirmed,
+    // genuinely competitive/mixed presence counts, never TBC/provisional.
+    const isLive =
+      event.data.presenceType !== 'community-outreach' &&
+      (event.data.dateStatus ?? 'confirmed') === 'confirmed' &&
+      now >= start &&
+      now <= end;
+
     return {
       id: event.id,
       title: event.data.title,
       scale: event.data.scale,
       disciplineIds,
-      disciplineNames: disciplineIds.map((id) => disciplineNames.get(id)).filter(Boolean),
+      disciplineNames,
+      accentColor,
       locationName: event.data.location?.name ?? 'Online / TBC',
       externalLink: event.data.externalLink,
-      sortDate: event.data.date.getTime(),
+      resultsSummary: event.data.resultsSummary,
+      sortDate: start,
       isPast,
+      isLive,
       ...formatEventDate(event.data),
     };
   })
   .sort((a, b) => a.sortDate - b.sortDate);
 
-const upcoming = events.filter((e) => !e.isPast);
+const inProgress = events.filter((e) => e.isLive);
+const upcoming = events.filter((e) => !e.isPast && !e.isLive);
 const past = events.filter((e) => e.isPast).reverse();
 
 // Only offer filter pills for disciplines that actually have at least one event.
@@ -71,69 +91,38 @@ const scaleLabels: Record<string, string> = {
       )
     }
 
+    {
+      inProgress.length > 0 && (
+        <>
+          <h2 class="section__subheading section__subheading--live">
+            <span class="live-dot" /> In Progress
+          </h2>
+          <div class="event-grid">
+            {inProgress.map((event) => (
+              <EventCard event={event} scaleLabels={scaleLabels} live />
+            ))}
+          </div>
+        </>
+      )
+    }
+
     <h2 class="section__subheading">Upcoming</h2>
-    <ul class="event-list">
-      {
-        upcoming.map((event) => (
-          <li class="event-list__item" data-disciplines={event.disciplineIds.join(',')}>
-            <span class:list={['event-list__date', `event-list__date--${event.badge}`]}>
-              {event.text}
-            </span>
-            <div class="event-list__body">
-              {
-                event.externalLink ? (
-                  <a href={event.externalLink} target="_blank" rel="noopener noreferrer" class="event-list__title event-list__title--link">
-                    {event.title} ↗
-                  </a>
-                ) : (
-                  <span class="event-list__title">{event.title}</span>
-                )
-              }
-              <span class="event-list__scale label">
-                {scaleLabels[event.scale]}
-                {event.disciplineNames.length > 0 && ` · ${event.disciplineNames.join(', ')}`}
-              </span>
-            </div>
-            <span class="event-list__meta">{event.locationName}</span>
-          </li>
-        ))
-      }
-      {upcoming.length === 0 && <li class="empty">No upcoming fixtures published yet.</li>}
-    </ul>
+    <div class="event-grid">
+      {upcoming.map((event) => <EventCard event={event} scaleLabels={scaleLabels} />)}
+      {upcoming.length === 0 && <p class="empty">No upcoming fixtures published yet.</p>}
+    </div>
 
     <h2 class="section__subheading">Past &amp; History</h2>
-    <ul class="event-list">
-      {
-        past.map((event) => (
-          <li class="event-list__item" data-disciplines={event.disciplineIds.join(',')}>
-            <span class="event-list__date">{event.text}</span>
-            <div class="event-list__body">
-              {
-                event.externalLink ? (
-                  <a href={event.externalLink} target="_blank" rel="noopener noreferrer" class="event-list__title event-list__title--link">
-                    {event.title} ↗
-                  </a>
-                ) : (
-                  <span class="event-list__title">{event.title}</span>
-                )
-              }
-              <span class="event-list__scale label">
-                {scaleLabels[event.scale]}
-                {event.disciplineNames.length > 0 && ` · ${event.disciplineNames.join(', ')}`}
-              </span>
-            </div>
-            <span class="event-list__meta">{event.locationName}</span>
-          </li>
-        ))
-      }
-      {past.length === 0 && <li class="empty">No past fixtures logged yet.</li>}
-    </ul>
+    <div class="event-grid">
+      {past.map((event) => <EventCard event={event} scaleLabels={scaleLabels} />)}
+      {past.length === 0 && <p class="empty">No past fixtures logged yet.</p>}
+    </div>
   </section>
 </BaseLayout>
 
 <script>
   const pills = document.querySelectorAll('.filters__pill');
-  const items = document.querySelectorAll('.event-list__item');
+  const items = document.querySelectorAll('[data-disciplines]');
 
   pills.forEach((pill) => {
     pill.addEventListener('click', () => {
@@ -179,6 +168,32 @@ const scaleLabels: Record<string, string> = {
   .section__subheading {
     font-size: 1.25rem;
     margin: 2.5rem 0 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .section__subheading--live {
+    color: var(--crimson-bright);
+  }
+
+  .live-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--crimson-bright);
+    animation: pulse-dot-events 1.6s var(--ease-out) infinite;
+  }
+
+  @keyframes pulse-dot-events {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.3;
+    }
   }
 
   .filters {
@@ -207,82 +222,18 @@ const scaleLabels: Record<string, string> = {
     border-color: var(--crimson);
   }
 
-  .event-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    border: 1px solid var(--border);
-    background: var(--surface);
-  }
-
-  .event-list__item {
+  .event-grid {
     display: grid;
-    grid-template-columns: 200px 1fr auto;
-    gap: 1.25rem;
-    align-items: center;
-    padding: 1rem 1.25rem;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .event-list__item:last-child {
-    border-bottom: none;
-  }
-
-  .event-list__date {
-    font-weight: 600;
-    font-size: 0.9rem;
-    color: var(--text-primary);
-  }
-
-  .event-list__date--provisional,
-  .event-list__date--tbc {
-    color: var(--text-secondary);
-    font-style: italic;
-  }
-
-  .event-list__body {
-    display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
-  }
-
-  .event-list__title {
-    font-weight: 600;
-    color: var(--text-primary);
-  }
-
-  .event-list__title--link {
-    color: var(--text-primary);
-    text-decoration: none;
-  }
-
-  .event-list__title--link:hover {
-    color: var(--crimson-bright);
-  }
-
-  .event-list__scale {
-    color: var(--text-secondary);
-  }
-
-  .event-list__meta {
-    color: var(--text-secondary);
-    font-size: 0.85rem;
-    text-align: right;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.1rem;
   }
 
   .empty {
     padding: 2rem 1.25rem;
     color: var(--text-secondary);
     text-align: center;
-  }
-
-  @media (max-width: 640px) {
-    .event-list__item {
-      grid-template-columns: 1fr;
-      gap: 0.4rem;
-    }
-    .event-list__meta {
-      text-align: left;
-    }
+    background: var(--surface);
+    border: 1px solid var(--border);
+    grid-column: 1 / -1;
   }
 </style>

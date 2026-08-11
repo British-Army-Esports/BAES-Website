@@ -125,4 +125,27 @@ const sponsors = defineCollection({
   }),
 });
 
-export const collections = { disciplines, corps, events, locations, news, sponsors };
+const standings = defineCollection({
+  loader: glob({ pattern: '**/*.yaml', base: './src/content/standings' }),
+  schema: z.object({
+    discipline: reference('disciplines'),
+    season: z.string(),
+    // The official tournament: Corps are the teams. Empty until results
+    // exist to publish — the UI shows a "not yet published" state rather
+    // than fabricated rows.
+    rows: z
+      .array(
+        z.object({
+          corps: reference('corps'),
+          played: z.number().default(0),
+          won: z.number().default(0),
+          lost: z.number().default(0),
+          gd: z.number().default(0),
+          pts: z.number().default(0),
+        }),
+      )
+      .default([]),
+  }),
+});
+
+export const collections = { disciplines, corps, events, locations, news, sponsors, standings };

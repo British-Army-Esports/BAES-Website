@@ -1,0 +1,152 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Table from '../../components/Table.astro';
+
+const disciplines = (await getCollection('disciplines', ({ data }) => data.active)).sort(
+  (a, b) => (a.data.order ?? 99) - (b.data.order ?? 99),
+);
+const allStandings = await getCollection('standings');
+const allCorps = await getCollection('corps');
+const corpsNames = new Map(allCorps.map((c) => [c.id, c.data.name]));
+
+const disciplineStandings = disciplines.map((discipline) => {
+  const entry = allStandings.find((s) => s.data.discipline.id === discipline.id);
+  const rows = (entry?.data.rows ?? [])
+    .map((row) => ({
+      name: corpsNames.get(row.corps.id) ?? row.corps.id,
+      played: row.played,
+      won: row.won,
+      lost: row.lost,
+      gd: row.gd,
+      pts: row.pts,
+    }))
+    .sort((a, b) => b.pts - a.pts);
+  return { discipline, rows };
+});
+
+// Overall Corps ranking: total points summed across every discipline's
+// standings. Naturally empty until individual standings exist.
+const overallPoints = new Map<string, number>();
+for (const s of allStandings) {
+  for (const row of s.data.rows) {
+    const current = overallPoints.get(row.corps.id) ?? 0;
+    overallPoints.set(row.corps.id, current + row.pts);
+  }
+}
+const overallRows = [...overallPoints.entries()]
+  .map(([corpsId, pts]) => ({
+    name: corpsNames.get(corpsId) ?? corpsId,
+    played: 0,
+    won: 0,
+    lost: 0,
+    gd: 0,
+    pts,
+  }))
+  .sort((a, b) => b.pts - a.pts);
+---
+
+<BaseLayout
+  title="2026 Esports Cup"
+  description="The 2026 British Army Esports Cup: Corps standings across every discipline."
+>
+  <section class="section container">
+    <p class="section__eyebrow label">Compete</p>
+    <h1 class="section__heading">2026 Esports Cup</h1>
+    <p class="section__intro">
+      The Corps are the teams. This page pulls together standings from every discipline into one
+      season summary.
+    </p>
+
+    <h2 class="section__subheading">Overall Corps Ranking</h2>
+    <p class="section__note label">Points summed across every discipline</p>
+    {
+      overallRows.length > 0 ? (
+        <Table rows={overallRows} />
+      ) : (
+        <p class="empty">The 2026 Cup hasn't started yet. Check back once results come in.</p>
+      )
+    }
+
+    <h2 class="section__subheading">By Discipline</h2>
+    <div class="discipline-standings">
+      {
+        disciplineStandings.map(({ discipline, rows }) => (
+          <div class="discipline-block">
+            <a href={`/disciplines/${discipline.id}`} class="discipline-block__title">
+              {discipline.data.name} →
+            </a>
+            {rows.length > 0 ? (
+              <Table rows={rows} />
+            ) : (
+              <p class="empty">Standings not yet published.</p>
+            )}
+          </div>
+        ))
+      }
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .section {
+    padding-top: clamp(2.5rem, 6vw, 4rem);
+    padding-bottom: clamp(3rem, 8vw, 5rem);
+  }
+
+  .section__eyebrow {
+    color: var(--crimson-bright);
+    margin-bottom: 0.75rem;
+  }
+
+  .section__heading {
+    font-size: clamp(1.75rem, 4vw, 3rem);
+    margin-bottom: 0.75rem;
+  }
+
+  .section__intro {
+    color: var(--text-secondary-alt);
+    max-width: 640px;
+    line-height: 1.6;
+    margin: 0 0 2rem;
+  }
+
+  .section__subheading {
+    font-size: 1.3rem;
+    margin: 3rem 0 0.5rem;
+  }
+
+  .section__note {
+    color: var(--text-secondary);
+    margin: 0 0 1rem;
+  }
+
+  .discipline-standings {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+    margin-top: 1rem;
+  }
+
+  .discipline-block__title {
+    display: inline-block;
+    font-family: var(--font-display);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+    margin-bottom: 0.75rem;
+  }
+
+  .discipline-block__title:hover {
+    color: var(--crimson-bright);
+  }
+
+  .empty {
+    color: var(--text-secondary);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1.25rem;
+  }
+</style>

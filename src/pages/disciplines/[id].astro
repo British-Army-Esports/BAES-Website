@@ -1,6 +1,7 @@
 ---
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import Table from '../../components/Table.astro';
 import { formatEventDate } from '../../lib/eventDate';
 
 export async function getStaticPaths() {
@@ -17,6 +18,28 @@ const { Content } = await render(discipline);
 const relatedEvents = (await getCollection('events'))
   .filter((e) => e.data.disciplines?.some((d) => d.id === discipline.id))
   .sort((a, b) => a.data.date.getTime() - b.data.date.getTime());
+
+// Standings: Corps are the teams in the official tournament. Empty (no
+// content file yet, or a file with zero rows) shows an honest "not yet
+// published" state rather than fabricated placeholder rows.
+const standingsEntry = (await getCollection('standings')).find(
+  (s) => s.data.discipline.id === discipline.id,
+);
+const standingsRows = (standingsEntry?.data.rows ?? [])
+  .map((row) => ({
+    name: row.corps.id,
+    played: row.played,
+    won: row.won,
+    lost: row.lost,
+    gd: row.gd,
+    pts: row.pts,
+  }))
+  .sort((a, b) => b.pts - a.pts);
+// Resolve Corps names for display (row.corps is just a reference id at this
+// point since content-layer references aren't auto-resolved).
+const allCorps = await getCollection('corps');
+const corpsNames = new Map(allCorps.map((c) => [c.id, c.data.name]));
+const standingsTableRows = standingsRows.map((r) => ({ ...r, name: corpsNames.get(r.name) ?? r.name }));
 ---
 
 <BaseLayout title={discipline.data.name} active="Disciplines" description={discipline.data.tagline}>
@@ -28,6 +51,16 @@ const relatedEvents = (await getCollection('events'))
     <div class="prose">
       <Content />
     </div>
+
+    <h2 class="section__subheading">Standings</h2>
+    <p class="section__note label">2026 Esports Cup: Corps standings</p>
+    {
+      standingsTableRows.length > 0 ? (
+        <Table rows={standingsTableRows} />
+      ) : (
+        <p class="empty">Standings not yet published for 2026.</p>
+      )
+    }
 
     <h2 class="section__subheading">Fixtures</h2>
     {
@@ -78,6 +111,11 @@ const relatedEvents = (await getCollection('events'))
   .section__subheading {
     font-size: 1.3rem;
     margin: 2.5rem 0 1rem;
+  }
+
+  .section__note {
+    color: var(--text-secondary);
+    margin: -0.5rem 0 1rem;
   }
 
   .event-list {

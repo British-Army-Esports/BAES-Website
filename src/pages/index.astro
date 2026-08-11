@@ -9,12 +9,28 @@ import MapView from '../components/MapView.astro';
 const disciplines = await getCollection('disciplines');
 const corps = await getCollection('corps');
 
-const demoStandings = [
-  { name: 'Team A', played: 6, won: 5, lost: 1, gd: 11, pts: 15 },
-  { name: 'Team B', played: 6, won: 4, lost: 2, gd: 6, pts: 12 },
-  { name: 'Team C', played: 6, won: 2, lost: 4, gd: -4, pts: 6 },
-  { name: 'Team D', played: 6, won: 1, lost: 5, gd: -13, pts: 3 },
-];
+// Overall Corps ranking for the 2026 Esports Cup: points summed across
+// every discipline's standings. Real data, not a placeholder — naturally
+// empty until results exist.
+const allStandings = await getCollection('standings');
+const allCorpsForNames = await getCollection('corps');
+const corpsNames = new Map(allCorpsForNames.map((c) => [c.id, c.data.name]));
+const overallPoints = new Map<string, number>();
+for (const s of allStandings) {
+  for (const row of s.data.rows) {
+    overallPoints.set(row.corps.id, (overallPoints.get(row.corps.id) ?? 0) + row.pts);
+  }
+}
+const overallRows = [...overallPoints.entries()]
+  .map(([corpsId, pts]) => ({
+    name: corpsNames.get(corpsId) ?? corpsId,
+    played: 0,
+    won: 0,
+    lost: 0,
+    gd: 0,
+    pts,
+  }))
+  .sort((a, b) => b.pts - a.pts);
 ---
 
 <BaseLayout title="Home" active="Home">
@@ -54,9 +70,17 @@ const demoStandings = [
   </section>
 
   <section class="section container">
-    <h2 class="section__heading">Standings</h2>
-    <p class="section__note label">Sample layout — pending real Results data</p>
-    <Table caption="Sample League — Placeholder Data" rows={demoStandings} />
+    <h2 class="section__heading">2026 Esports Cup</h2>
+    <p class="section__note label">
+      Overall Corps ranking, points summed across every discipline. <a href="/2026-esports-cup">Full breakdown →</a>
+    </p>
+    {
+      overallRows.length > 0 ? (
+        <Table rows={overallRows} />
+      ) : (
+        <p class="empty">The 2026 Cup hasn't started yet. Check back once results come in.</p>
+      )
+    }
   </section>
 
   <section class="section container">
@@ -78,6 +102,17 @@ const demoStandings = [
 
   .section__note {
     margin-bottom: 1.5rem;
+  }
+
+  .section__note a {
+    color: var(--crimson-bright);
+  }
+
+  .empty {
+    color: var(--text-secondary);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1.25rem;
   }
 
   .grid {
