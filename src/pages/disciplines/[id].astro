@@ -45,8 +45,13 @@ const standingsTableRows = standingsRows.map((r) => ({ ...r, name: corpsNames.ge
 <BaseLayout title={discipline.data.name} active="Disciplines" description={discipline.data.tagline}>
   <section class="section container">
     <p class="section__eyebrow label">Discipline</p>
-    <h1 class="section__heading">{discipline.data.name}</h1>
-    {discipline.data.tagline && <p class="section__tagline">{discipline.data.tagline}</p>}
+    <div class="header">
+      {discipline.data.icon && <img class="header__icon clip-tl-sm" src={discipline.data.icon} alt="" />}
+      <div>
+        <h1 class="section__heading">{discipline.data.name}</h1>
+        {discipline.data.tagline && <p class="section__tagline">{discipline.data.tagline}</p>}
+      </div>
+    </div>
 
     <div class="prose">
       <Content />
@@ -101,6 +106,20 @@ const standingsTableRows = standingsRows.map((r) => ({ ...r, name: corpsNames.ge
   .section__tagline {
     color: var(--text-secondary-alt);
     margin: 0 0 1.5rem;
+  }
+
+  .header {
+    display: flex;
+    gap: 1.25rem;
+    align-items: flex-start;
+  }
+
+  .header__icon {
+    width: 88px;
+    height: 88px;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 1px solid var(--border);
   }
 
   .prose {

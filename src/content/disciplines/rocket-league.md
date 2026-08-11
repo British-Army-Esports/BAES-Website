@@ -2,6 +2,7 @@
 name: "Rocket League"
 tagline: "Car football: fast, team-based, easy to pick up"
 externalLink: "https://www.rocketleague.com/download"
+icon: "/logos/disciplines/rocket-league.jpg"
 color: "#1f8ecd"
 order: 3
 active: true

@@ -25,6 +25,7 @@ const disciplines = (await getCollection('disciplines', ({ data }) => data.activ
             title={d.data.name}
             meta={d.data.tagline}
             href={`/disciplines/${d.id}`}
+            image={d.data.icon}
           />
         ))
       }
