@@ -6,18 +6,70 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
   <section class="section container">
     <p class="section__eyebrow label">Get Involved</p>
     <h1 class="section__heading">Join Us</h1>
+    <p class="section__intro">
+      The Discord is where everything happens — fixtures, roster calls, and the wider community.
+    </p>
 
-    <div class="prose">
-      <p>
-        Serving and want to get involved? Start with your unit's PES/welfare staff or your Corps'
-        esports lead — they'll know what's running locally and how to link in with the wider
-        programme.
+    <a
+      href="https://discord.gg/D5SrQ6xAdw"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="discord-cta clip-tl"
+    >
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" class="discord-cta__icon">
+        <path d="M20.3 5.3A18 18 0 0 0 15.9 4l-.3.6a15 15 0 0 1 3.8 1.4 15.6 15.6 0 0 0-13 0 15 15 0 0 1 3.8-1.4L10 4a18 18 0 0 0-4.4 1.3C2.6 9.1 1.9 12.8 2.2 16.4a18.2 18.2 0 0 0 5.5 2.7l.9-1.4a11.6 11.6 0 0 1-1.9-.9l.5-.4a13 13 0 0 0 11.6 0l.5.4a11.6 11.6 0 0 1-1.9.9l.9 1.4a18.1 18.1 0 0 0 5.5-2.7c.4-4.1-.6-7.8-3.5-11.1ZM9.7 14.3c-.8 0-1.5-.8-1.5-1.7s.7-1.7 1.5-1.7 1.6.8 1.5 1.7c0 1-.7 1.7-1.5 1.7Zm5.1 0c-.8 0-1.5-.8-1.5-1.7s.7-1.7 1.5-1.7 1.6.8 1.5 1.7c0 1-.6 1.7-1.5 1.7Z"></path>
+      </svg>
+      <span class="discord-cta__text">
+        <span class="discord-cta__title">Join the Discord</span>
+        <span class="discord-cta__sub">Complete verification and pick your roles to get access</span>
+      </span>
+    </a>
+
+    <h2 class="section__subheading">General Enquiries</h2>
+    <p class="section__body">
+      Prefer email, or have something that isn't a fit for Discord? Send it here.
+    </p>
+
+    <form
+      name="general-enquiries"
+      method="POST"
+      action="/feedback/thanks"
+      data-netlify="true"
+      netlify-honeypot="bot-field"
+      class="enquiry-form"
+    >
+      <input type="hidden" name="form-name" value="general-enquiries" />
+      <p class="form-honeypot">
+        <label>
+          Don't fill this out if you're human: <input name="bot-field" />
+        </label>
       </p>
-      <p>
-        Want to follow along or ask a question first? Join the community{' '}
-        <a href="https://discord.gg/D5SrQ6xAdw" target="_blank" rel="noopener noreferrer">Discord</a>.
-      </p>
-    </div>
+
+      <div class="form-field">
+        <label for="name">Your Name</label>
+        <input type="text" id="name" name="name" required autocomplete="name" />
+      </div>
+
+      <div class="form-field">
+        <label for="email">Your Email</label>
+        <input type="email" id="email" name="email" required autocomplete="email" />
+      </div>
+
+      <div class="form-field">
+        <label for="unit">Unit / Corps (optional)</label>
+        <input type="text" id="unit" name="unit" />
+      </div>
+
+      <div class="form-field">
+        <label for="message">Enquiry</label>
+        <textarea id="message" name="message" required></textarea>
+      </div>
+
+      <button type="submit" class="form-submit clip-tl-sm">
+        Send Enquiry
+        <span>→</span>
+      </button>
+    </form>
   </section>
 </BaseLayout>
 
@@ -35,19 +87,65 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 
   .section__heading {
     font-size: clamp(1.75rem, 4vw, 3rem);
-    margin-bottom: 1.5rem;
+    margin-bottom: 0.75rem;
   }
 
-  .prose {
+  .section__intro {
     color: var(--text-secondary-alt);
-    line-height: 1.7;
+    line-height: 1.6;
+    margin: 0 0 2rem;
+  }
+
+  .discord-cta {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    background: var(--crimson);
+    color: #fff;
+    padding: 1.5rem 1.75rem;
+    transition: background 0.2s var(--ease-out), transform 0.2s var(--ease-out);
+  }
+
+  .discord-cta:hover {
+    background: var(--crimson-bright);
+    transform: translateY(-2px);
+  }
+
+  .discord-cta__icon {
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+  }
+
+  .discord-cta__text {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 0.35rem;
   }
 
-  .prose a {
-    color: var(--crimson-bright);
-    font-weight: 600;
+  .discord-cta__title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    font-size: 1.5rem;
+    line-height: 1;
+  }
+
+  .discord-cta__sub {
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    opacity: 0.9;
+  }
+
+  .section__subheading {
+    font-size: 1.3rem;
+    margin: 3rem 0 0.75rem;
+  }
+
+  .section__body {
+    color: var(--text-secondary-alt);
+    line-height: 1.6;
+    margin: 0 0 1.5rem;
   }
 </style>
