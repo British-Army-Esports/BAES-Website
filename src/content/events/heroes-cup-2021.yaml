@@ -1,0 +1,15 @@
+title: "Heroes Cup 2021"
+disciplines:
+  - "counter-strike-2"
+  - "league-of-legends"
+  - "rocket-league"
+scale: "mixed-community"
+presenceType: "competitive"
+date: 2021-12-13
+dateStatus: "confirmed"
+location:
+  name: "Overworld Studios, Camberley"
+  lat: 51.3392845
+  long: -0.7460981
+description: "The Army's annual esports competition, spanning CS:GO, League of Legends and Rocket League, raised £1,857 for Combat Stress."
+resultsSummary: "£1,857 raised for Combat Stress"

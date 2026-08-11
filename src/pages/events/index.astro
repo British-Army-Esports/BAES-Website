@@ -11,6 +11,10 @@ const events = (await getCollection('events'))
     const disciplineIds = (event.data.disciplines ?? []).map((d) => d.id);
     const now = Date.now();
     const end = (event.data.endDate ?? event.data.date).getTime();
+    // A TBC date is, by definition, not a known point in time, so it can
+    // never honestly be classified as "past" — it always sits in Upcoming
+    // until someone confirms a real date.
+    const isPast = event.data.dateStatus !== 'tbc' && end < now;
     return {
       id: event.id,
       title: event.data.title,
@@ -18,8 +22,9 @@ const events = (await getCollection('events'))
       disciplineIds,
       disciplineNames: disciplineIds.map((id) => disciplineNames.get(id)).filter(Boolean),
       locationName: event.data.location?.name ?? 'Online / TBC',
+      externalLink: event.data.externalLink,
       sortDate: event.data.date.getTime(),
-      isPast: end < now,
+      isPast,
       ...formatEventDate(event.data),
     };
   })
@@ -47,7 +52,7 @@ const scaleLabels: Record<string, string> = {
     <p class="section__eyebrow label">Compete</p>
     <h1 class="section__heading">Events &amp; Competitions</h1>
     <p class="section__intro">
-      The fixtures programme — from Corps-level matches to national and international
+      The fixtures programme: Corps-level matches through to national and international
       competitions. Dates marked "Likely" or "TBC" aren't confirmed yet.
     </p>
 
@@ -75,7 +80,15 @@ const scaleLabels: Record<string, string> = {
               {event.text}
             </span>
             <div class="event-list__body">
-              <span class="event-list__title">{event.title}</span>
+              {
+                event.externalLink ? (
+                  <a href={event.externalLink} target="_blank" rel="noopener noreferrer" class="event-list__title event-list__title--link">
+                    {event.title} ↗
+                  </a>
+                ) : (
+                  <span class="event-list__title">{event.title}</span>
+                )
+              }
               <span class="event-list__scale label">
                 {scaleLabels[event.scale]}
                 {event.disciplineNames.length > 0 && ` · ${event.disciplineNames.join(', ')}`}
@@ -95,7 +108,15 @@ const scaleLabels: Record<string, string> = {
           <li class="event-list__item" data-disciplines={event.disciplineIds.join(',')}>
             <span class="event-list__date">{event.text}</span>
             <div class="event-list__body">
-              <span class="event-list__title">{event.title}</span>
+              {
+                event.externalLink ? (
+                  <a href={event.externalLink} target="_blank" rel="noopener noreferrer" class="event-list__title event-list__title--link">
+                    {event.title} ↗
+                  </a>
+                ) : (
+                  <span class="event-list__title">{event.title}</span>
+                )
+              }
               <span class="event-list__scale label">
                 {scaleLabels[event.scale]}
                 {event.disciplineNames.length > 0 && ` · ${event.disciplineNames.join(', ')}`}
@@ -228,6 +249,15 @@ const scaleLabels: Record<string, string> = {
   .event-list__title {
     font-weight: 600;
     color: var(--text-primary);
+  }
+
+  .event-list__title--link {
+    color: var(--text-primary);
+    text-decoration: none;
+  }
+
+  .event-list__title--link:hover {
+    color: var(--crimson-bright);
   }
 
   .event-list__scale {

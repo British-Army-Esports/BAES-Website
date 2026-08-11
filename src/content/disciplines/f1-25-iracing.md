@@ -1,6 +1,6 @@
 ---
-name: "F1 25 / iRacing"
-tagline: "Sim racing — Formula 1 and endurance/oval racing"
+name: "Sim Racing"
+tagline: "Formula 1 and endurance/oval racing: F1 25 and iRacing"
 externalLink: "https://www.ea.com/games/f1/f1-25/buy"
 order: 5
 active: true

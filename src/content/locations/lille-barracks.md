@@ -1,6 +1,6 @@
 ---
 name: "Lille Barracks Gaming Hub"
-type: "garrison-gaming-room"
+type: "unspecified"
 corps:
   - "inf"
 address: "Lille Barracks, Aldershot, Hampshire, GU14 6GX"

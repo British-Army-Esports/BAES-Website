@@ -1,4 +1,8 @@
 title: "IDEG26 Finals"
+disciplines:
+  - "counter-strike-2"
+  - "rocket-league"
+  - "f1-25-iracing"
 scale: "inter-service-international"
 presenceType: "competitive"
 date: 2026-10-09
@@ -8,5 +12,5 @@ location:
   name: "British Arena, Sunderland"
   lat: 54.9143393
   long: -1.3852023
-description: "International Defence Esports Games finals, hosted at the National Gaming and Esports Arena (British Arena), Sunderland."
+description: "International Defence Esports Games finals, hosted at the National Gaming and Esports Arena (British Arena), Sunderland. Also features Velocidrone (drone racing). Competing teams are UK Armed Forces (tri-service) squads rather than British Army Esports alone."
 externalLink: "http://ideg.gg/"

@@ -1,6 +1,6 @@
 ---
 name: "Falcon Squadron Gaming Hub"
-type: "garrison-gaming-room"
+type: "unspecified"
 corps:
   - "re"
 address: "Harman Lines, Warminster Garrison, Wiltshire, BA12 0DZ"

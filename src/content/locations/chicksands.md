@@ -1,6 +1,6 @@
 ---
 name: "Chicksands Gaming Hub"
-type: "garrison-gaming-room"
+type: "unspecified"
 corps:
   - "int"
 address: "Chicksands, Bedfordshire"

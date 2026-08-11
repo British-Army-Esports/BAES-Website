@@ -30,7 +30,7 @@ const {
 
   <div class="hero__inner container">
     <p class="hero__kicker label">{kicker}</p>
-    <h1 class="hero__headline">
+    <h1 class="hero__headline" id="hero-headline">
       {headlineLines.map((line) => <span class="hero__line">{line}</span>)}
       <span class="hero__line hero__line--crimson">{crimsonWord}</span>
     </h1>
@@ -84,6 +84,14 @@ const {
     font-size: clamp(3rem, 9vw, 6.5rem);
     line-height: 0.95;
     gap: 0.05em;
+    /* Hidden until the display font is confirmed loaded (see script below) —
+       avoids the fallback-font-then-reflow "pop" on first paint. */
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+
+  .hero__headline.is-ready {
+    opacity: 1;
   }
 
   .hero__line--crimson {
@@ -122,3 +130,19 @@ const {
     transform: translateX(3px);
   }
 </style>
+
+<script>
+  const headline = document.getElementById('hero-headline');
+  if (headline) {
+    const reveal = () => headline.classList.add('is-ready');
+    if ('fonts' in document) {
+      // Wait for the display font, but never block longer than 400ms —
+      // if font loading is slow or fails, show the text anyway.
+      Promise.race([document.fonts.ready, new Promise((resolve) => setTimeout(resolve, 400))]).then(
+        reveal,
+      );
+    } else {
+      reveal();
+    }
+  }
+</script>

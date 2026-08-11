@@ -1,0 +1,14 @@
+title: "1 RSME Call of Duty: Warzone Competition"
+corps: "re"
+disciplines:
+  - "call-of-duty"
+scale: "unit-garrison"
+presenceType: "competitive"
+date: 2021-06-15
+dateStatus: "provisional"
+dateOptions: ["2021"]
+location:
+  name: "Gibraltar Barracks, Minley"
+  lat: 51.318001
+  long: -0.819546
+description: "Call of Duty: Warzone competition held by 1 RSME."

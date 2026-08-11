@@ -1,6 +1,6 @@
 ---
 name: "CTF Gibraltar Barracks Gaming Hub"
-type: "garrison-gaming-room"
+type: "arena-venue"
 corps:
   - "re"
 address: "Gibraltar Barracks, Minley, Camberley, Hampshire, GU17 9LP"

@@ -1,0 +1,228 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const baesChannels = [
+  { handle: 'britisharmyesports', label: 'British Army Esports' },
+  { handle: 'britisharmyxtra', label: 'British Army Xtra' },
+  { handle: 'rafesports', label: 'RAF Esports' },
+  { handle: 'royalnavyesports', label: 'Royal Navy Esports' },
+  { handle: 'bfbsesports', label: 'BFBS Esports' },
+  { handle: 'ukveteransgaming', label: 'UK Veterans Gaming' },
+];
+
+const corpsChannels = [
+  { handle: 'royalarmouredcorps', label: 'Royal Armoured Corps' },
+  { handle: 'remeesports', label: 'REME Esports' },
+  { handle: 'rlcesportsofficial', label: 'RLC Esports' },
+  { handle: 'sappersgg', label: 'Royal Engineers' },
+  { handle: 'esportsagc', label: 'AGC Esports' },
+  { handle: 'britishinfantryesports', label: 'British Infantry Esports' },
+];
+---
+
+<BaseLayout
+  title="Content"
+  active="Content"
+  description="British Army Esports and Corps Twitch channels, and personal streams from players."
+>
+  <section class="section container">
+    <p class="section__eyebrow label">Content</p>
+    <h1 class="section__heading">Content</h1>
+    <p class="section__intro">
+      Watch live on the channels below, or click through to Twitch. Some of our players also
+      stream in their own right, listed separately further down.
+    </p>
+
+    <h2 class="section__subheading">British Army Esports</h2>
+    <div class="channel-grid">
+      {
+        baesChannels.map((c) => (
+          <div class="channel-card">
+            <div class="channel-card__player" data-channel={c.handle}>
+              <a
+                href={`https://www.twitch.tv/${c.handle}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="channel-card__link"
+              >
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" class="channel-card__icon">
+                  <path d="M4.2 2 2 7.4v13.3h5.1V24h3l3-3.3h4.4L23 15.4V2H4.2Zm16.7 12.4-3.4 3.4h-4.6l-3 3.3v-3.3H5.7V4.1h15.2v10.3Z" />
+                  <path d="M17.4 7.1h1.9v5.7h-1.9zM12 7.1h1.9v5.7H12z" />
+                </svg>
+                <span>{c.label}</span>
+              </a>
+              <button type="button" class="channel-card__watch" data-watch-btn>
+                Watch ▶
+              </button>
+            </div>
+          </div>
+        ))
+      }
+    </div>
+
+    <h2 class="section__subheading">Corps</h2>
+    <div class="channel-grid">
+      {
+        corpsChannels.map((c) => (
+          <div class="channel-card">
+            <div class="channel-card__player" data-channel={c.handle}>
+              <a
+                href={`https://www.twitch.tv/${c.handle}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="channel-card__link"
+              >
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" class="channel-card__icon">
+                  <path d="M4.2 2 2 7.4v13.3h5.1V24h3l3-3.3h4.4L23 15.4V2H4.2Zm16.7 12.4-3.4 3.4h-4.6l-3 3.3v-3.3H5.7V4.1h15.2v10.3Z" />
+                  <path d="M17.4 7.1h1.9v5.7h-1.9zM12 7.1h1.9v5.7H12z" />
+                </svg>
+                <span>{c.label}</span>
+              </a>
+              <button type="button" class="channel-card__watch" data-watch-btn>
+                Watch ▶
+              </button>
+            </div>
+          </div>
+        ))
+      }
+    </div>
+
+    <p class="disclaimer">
+      Some of our players also have their own personal streams. Views and content on individual
+      channels are the individual's own and don't represent the British Army or this
+      organisation.
+    </p>
+  </section>
+</BaseLayout>
+
+<script>
+  // Twitch's embed player already shows live video or an offline banner on
+  // its own; loading 12 of them at once on page load would be heavy, so
+  // each channel stays a compact link until someone actually clicks Watch,
+  // at which point its player loads inline in place of the button.
+  document.querySelectorAll('[data-watch-btn]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const wrapper = btn.closest('[data-channel]');
+      const channel = wrapper.dataset.channel;
+      const parent = window.location.hostname;
+      const iframe = document.createElement('iframe');
+      iframe.src = `https://player.twitch.tv/?channel=${channel}&parent=${parent}&muted=true`;
+      iframe.className = 'channel-card__iframe';
+      iframe.allowFullscreen = true;
+      wrapper.innerHTML = '';
+      wrapper.appendChild(iframe);
+      wrapper.classList.add('is-expanded');
+    });
+  });
+</script>
+
+<style>
+  .section {
+    padding-top: clamp(2.5rem, 6vw, 4rem);
+    padding-bottom: clamp(3rem, 8vw, 5rem);
+  }
+
+  .section__eyebrow {
+    color: var(--crimson-bright);
+    margin-bottom: 0.75rem;
+  }
+
+  .section__heading {
+    font-size: clamp(1.75rem, 4vw, 3rem);
+    margin-bottom: 0.75rem;
+  }
+
+  .section__intro {
+    color: var(--text-secondary-alt);
+    max-width: 640px;
+    line-height: 1.6;
+    margin: 0 0 2rem;
+  }
+
+  .section__subheading {
+    font-size: 1.3rem;
+    margin: 2.5rem 0 1.25rem;
+  }
+
+  .channel-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1rem;
+  }
+
+  .channel-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+  }
+
+  .channel-card__player {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+  }
+
+  .channel-card__player.is-expanded {
+    display: block;
+    padding: 0;
+    aspect-ratio: 16 / 9;
+  }
+
+  .channel-card__link {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: var(--text-primary-dim);
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+
+  .channel-card__link:hover {
+    color: var(--crimson-bright);
+  }
+
+  .channel-card__icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    color: var(--text-secondary);
+  }
+
+  .channel-card__watch {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-family: var(--font-body);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 0.7rem;
+    padding: 0.4rem 0.7rem;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: color 0.2s var(--ease-out), border-color 0.2s var(--ease-out);
+  }
+
+  .channel-card__watch:hover {
+    color: var(--crimson-bright);
+    border-color: var(--crimson);
+  }
+
+  .channel-card__iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+  }
+
+  .disclaimer {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    line-height: 1.6;
+    max-width: 640px;
+  }
+</style>

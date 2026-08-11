@@ -14,6 +14,10 @@ export interface Props {
 const { showEvents = true } = Astro.props;
 
 const allLocations = await getCollection('locations', ({ data }) => data.active);
+// Inactive locations are hubs we know about but haven't confirmed/gone live
+// with yet (see the "active: false" note on their content files) — shown as
+// grey "planned" markers, distinct from confirmed active hubs.
+const plannedLocations = await getCollection('locations', ({ data }) => !data.active);
 // Only fixtures with a fixed physical venue can be plotted here — online
 // qualifiers and not-yet-located internal fixtures aren't shown on this map.
 const allEvents = showEvents
@@ -25,6 +29,16 @@ const locationPoints = allLocations.map((loc) => ({
   name: loc.data.name,
   type: loc.data.type,
   address: loc.data.address,
+  equipment: loc.data.equipment ?? [],
+  lat: loc.data.location.lat,
+  long: loc.data.location.long,
+}));
+
+const plannedPoints = plannedLocations.map((loc) => ({
+  id: loc.id,
+  name: loc.data.name,
+  address: loc.data.address,
+  status: loc.data.status,
   lat: loc.data.location.lat,
   long: loc.data.location.long,
 }));
@@ -56,9 +70,11 @@ const eventPoints = allEvents.map((event) => {
 });
 
 const typeLabels: Record<string, string> = {
-  'training-facility': 'Training Facility',
-  'dedicated-arena': 'Dedicated Arena',
-  'garrison-gaming-room': 'Garrison Gaming Room',
+  'arena-venue': 'Arena Venue',
+  'competition-venue': 'Competition Venue',
+  'training-venue': 'Training Venue',
+  'limited-setup': 'Limited Setup',
+  unspecified: 'Gaming Room',
 };
 ---
 
@@ -68,6 +84,13 @@ const typeLabels: Record<string, string> = {
       <button type="button" class="mapview__pill is-active" data-layer="locations">
         Our Locations
       </button>
+      {
+        plannedPoints.length > 0 && (
+          <button type="button" class="mapview__pill is-active" data-layer="planned">
+            Planned
+          </button>
+        )
+      }
       {
         showEvents && (
           <button type="button" class="mapview__pill is-active" data-layer="events">
@@ -89,7 +112,12 @@ const typeLabels: Record<string, string> = {
       locationPoints.map((loc) => (
         <li class="mapview__list-item">
           <span class="mapview__list-tag label">{typeLabels[loc.type] ?? loc.type}</span>
-          <span class="mapview__list-name">{loc.name}</span>
+          <span class="mapview__list-name">
+            {loc.name}
+            {loc.equipment.length > 0 && (
+              <span class="mapview__list-equipment">{loc.equipment.join(' · ')}</span>
+            )}
+          </span>
           <span class="mapview__list-meta">
             {loc.address}
             {' · '}
@@ -97,6 +125,15 @@ const typeLabels: Record<string, string> = {
               Request Access
             </a>
           </span>
+        </li>
+      ))
+    }
+    {
+      plannedPoints.map((loc) => (
+        <li class="mapview__list-item">
+          <span class="mapview__list-tag label mapview__list-tag--planned">Planned</span>
+          <span class="mapview__list-name">{loc.name}</span>
+          <span class="mapview__list-meta">{loc.address}</span>
         </li>
       ))
     }
@@ -115,20 +152,20 @@ const typeLabels: Record<string, string> = {
       ))
     }
     {
-      locationPoints.length === 0 && eventPoints.length === 0 && (
+      locationPoints.length === 0 && plannedPoints.length === 0 && eventPoints.length === 0 && (
         <li class="mapview__list-empty">No locations or events published yet.</li>
       )
     }
   </ul>
 </section>
 
-<script type="application/json" id="baes-map-data" set:html={JSON.stringify({ locationPoints, eventPoints, typeLabels })}></script>
+<script type="application/json" id="baes-map-data" set:html={JSON.stringify({ locationPoints, plannedPoints, eventPoints, typeLabels })}></script>
 
 <script>
   import L from 'leaflet';
 
   const dataEl = document.getElementById('baes-map-data');
-  const { locationPoints, eventPoints, typeLabels } = JSON.parse(dataEl.textContent);
+  const { locationPoints, plannedPoints, eventPoints, typeLabels } = JSON.parse(dataEl.textContent);
 
   {
     const map = L.map('baes-map', {
@@ -173,6 +210,16 @@ const typeLabels: Record<string, string> = {
       ),
     );
 
+    // Planned hubs: known about, not yet confirmed/active. Grey pins, no
+    // request link since no such page exists for them yet.
+    const plannedLayer = L.layerGroup(
+      plannedPoints.map((loc) =>
+        L.marker([loc.lat, loc.long], { icon: makeIcon('planned', false) }).bindPopup(
+          `<strong>${loc.name}</strong><br>Planned (unconfirmed)<br>${loc.address}`,
+        ),
+      ),
+    );
+
     const eventsLayer = L.layerGroup(
       eventPoints.map((event) =>
         L.marker([event.lat, event.long], { icon: makeIcon('event', event.live) }).bindPopup(
@@ -182,22 +229,35 @@ const typeLabels: Record<string, string> = {
     );
 
     locationsLayer.addTo(map);
+    plannedLayer.addTo(map);
     eventsLayer.addTo(map);
 
-    const allPoints = [...locationPoints, ...eventPoints];
-    if (allPoints.length > 0) {
+    // Frame the initial view on permanent locations only, not events. Events
+    // can be anywhere in the world (C.O.D.E Bowl VII is in San Diego), and
+    // including them here would drag the initial view off the UK to fit an
+    // outlier. Locations are always UK-based, so they give a stable, sane
+    // home view every time; international event pins are still on the map,
+    // just reachable by panning rather than driving the initial framing.
+    const homeRegionPoints = [...locationPoints, ...plannedPoints];
+    if (homeRegionPoints.length > 0) {
       map.fitBounds(
-        allPoints.map((p) => [p.lat, p.long]),
+        homeRegionPoints.map((p) => [p.lat, p.long]),
+        { padding: [40, 40], maxZoom: 12 },
+      );
+    } else if (eventPoints.length > 0) {
+      map.fitBounds(
+        eventPoints.map((p) => [p.lat, p.long]),
         { padding: [40, 40], maxZoom: 12 },
       );
     } else {
       map.setView([54.5, -3], 6);
     }
 
+    const layersByName = { locations: locationsLayer, planned: plannedLayer, events: eventsLayer };
     document.querySelectorAll('[data-layer]').forEach((btn) => {
       btn.addEventListener('click', () => {
         btn.classList.toggle('is-active');
-        const layer = btn.dataset.layer === 'locations' ? locationsLayer : eventsLayer;
+        const layer = layersByName[btn.dataset.layer];
         if (btn.classList.contains('is-active')) {
           layer.addTo(map);
         } else {
@@ -300,6 +360,10 @@ const typeLabels: Record<string, string> = {
     color: var(--crimson-bright);
   }
 
+  .mapview__list-tag--planned {
+    color: #9e9e9e;
+  }
+
   .mapview__live-dot {
     display: inline-block;
     width: 6px;
@@ -323,6 +387,15 @@ const typeLabels: Record<string, string> = {
   .mapview__list-name {
     font-weight: 600;
     color: var(--text-primary);
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .mapview__list-equipment {
+    font-weight: 400;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
   }
 
   .mapview__list-meta {
@@ -365,6 +438,14 @@ const typeLabels: Record<string, string> = {
     background: var(--crimson-bright);
     border: 2px solid #fff;
     box-shadow: 0 0 0 2px rgba(200, 16, 46, 0.4);
+  }
+
+  /* Planned (unconfirmed) hubs: dim grey, deliberately understated */
+  :global(.map-pin--planned) {
+    width: 10px;
+    height: 10px;
+    background: #6b6b6b;
+    border: 2px solid #3a3a3a;
   }
 
   /* Events (temporary): hollow white ring — visually distinct from a

@@ -1,6 +1,6 @@
 ---
 name: "League of Legends"
-tagline: "5v5 team strategy — the BFBS Pro League's newest addition for 2026"
+tagline: "5v5 team strategy: the BFBS Pro League's newest addition for 2026"
 externalLink: "https://www.leagueoflegends.com/en-us/download/"
 order: 2
 active: true

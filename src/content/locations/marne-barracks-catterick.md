@@ -1,6 +1,6 @@
 ---
 name: "Marne Barracks Gaming Hub"
-type: "garrison-gaming-room"
+type: "competition-venue"
 corps:
   - "ra"
   - "re"

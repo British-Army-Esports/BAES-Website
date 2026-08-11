@@ -73,7 +73,18 @@ const locations = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/locations' }),
   schema: z.object({
     name: z.string(),
-    type: z.enum(['training-facility', 'dedicated-arena', 'garrison-gaming-room']),
+    // Scale of team play the hub can actually support, not a generic room
+    // label: arena-venue (biggest, e.g. Minley's 35+ PCs), competition-venue
+    // (2x 5-player teams, ~10+ PCs), training-venue (1x 5-player team),
+    // limited-setup (console-only or a handful of PCs), unspecified (no
+    // equipment count known yet).
+    type: z.enum([
+      'arena-venue',
+      'competition-venue',
+      'training-venue',
+      'limited-setup',
+      'unspecified',
+    ]),
     corps: z.array(reference('corps')).optional(),
     address: z.string(),
     location: z.object({

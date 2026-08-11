@@ -1,0 +1,16 @@
+title: "Ex Mercury Ludus 2025"
+corps: "re"
+disciplines:
+  - "league-of-legends"
+  - "counter-strike-2"
+  - "call-of-duty"
+scale: "inter-corps"
+presenceType: "competitive"
+date: 2025-06-15
+dateStatus: "provisional"
+dateOptions: ["2025"]
+location:
+  name: "Blandford Camp, Dorset"
+  lat: 50.8746359
+  long: -2.1169029
+description: "Royal Signals hosted another LAN event, pitting British Army Esports teams against each other. RE sent Corps teams for League of Legends, CS and Call of Duty."

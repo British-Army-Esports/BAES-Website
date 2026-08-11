@@ -1,0 +1,14 @@
+title: "Sapper Games 2022"
+corps: "re"
+scale: "corps"
+presenceType: "competitive"
+date: 2022-06-15
+dateStatus: "provisional"
+dateOptions: ["2022"]
+location:
+  name: "32 Engineer Regiment, Catterick Garrison"
+  lat: 54.379543
+  long: -1.740865
+description: "Esports made its debut as a sport at Sapper Games for the first (and so far only) time. It was the most subscribed-to sport, with one of the largest crowds throughout the event."
+resultsSummary: "Esports was the most subscribed sport at the event"
+externalLink: "https://sappergames.co.uk/"

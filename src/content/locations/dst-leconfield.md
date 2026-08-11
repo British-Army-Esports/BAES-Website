@@ -1,6 +1,6 @@
 ---
 name: "DST Leconfield Gaming Hub"
-type: "garrison-gaming-room"
+type: "competition-venue"
 corps:
   - "rlc"
 address: "Defence School of Transport, Normandy Barracks, Leconfield, East Yorkshire, HU17 7LX"

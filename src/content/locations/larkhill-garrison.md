@@ -1,6 +1,6 @@
 ---
 name: "Larkhill Garrison Gaming Hub"
-type: "garrison-gaming-room"
+type: "competition-venue"
 corps:
   - "ra"
 address: "Larkhill Garrison, Durrington, Wiltshire, SP4 8QT"

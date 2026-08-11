@@ -1,6 +1,6 @@
 ---
 name: "Tidworth Training Facility Gaming Hub"
-type: "garrison-gaming-room"
+type: "unspecified"
 corps:
   - "rac"
 address: "Tidworth Garrison, Wiltshire"

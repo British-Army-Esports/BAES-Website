@@ -1,6 +1,6 @@
 ---
 name: "Blandford Camp Gaming Hub"
-type: "garrison-gaming-room"
+type: "unspecified"
 corps:
   - "rs"
 address: "Blandford Camp, Blandford Forum, Dorset, DT11 8RE"

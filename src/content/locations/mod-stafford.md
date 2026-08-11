@@ -1,6 +1,6 @@
 ---
 name: "MOD Stafford Gaming Hub"
-type: "garrison-gaming-room"
+type: "competition-venue"
 corps:
   - "rs"
 address: "Beacon Barracks, MOD Stafford, Staffordshire, ST18 0AQ"

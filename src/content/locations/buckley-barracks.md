@@ -1,6 +1,6 @@
 ---
 name: "Buckley Barracks Gaming Hub"
-type: "garrison-gaming-room"
+type: "competition-venue"
 corps:
   - "rlc"
 address: "Buckley Barracks, Stanton St Quintin, Wiltshire, SN14 6BT"

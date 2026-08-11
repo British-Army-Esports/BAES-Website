@@ -41,6 +41,22 @@ const rendered = await Promise.all(
       }
       {sponsors.length === 0 && <p class="empty">No sponsors published yet.</p>}
     </div>
+
+    <h2 class="section__subheading">Partner Organisations</h2>
+    <div class="sponsor-list">
+      <div class="sponsor-card">
+        <div class="sponsor-card__header">
+          <a
+            href="https://cheesybeans.netlify.app/"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="sponsor-card__link"
+          >
+            Cheesy Beans ↗
+          </a>
+        </div>
+      </div>
+    </div>
   </section>
 </BaseLayout>
 
@@ -65,6 +81,11 @@ const rendered = await Promise.all(
     color: var(--text-secondary-alt);
     line-height: 1.6;
     margin: 0 0 2rem;
+  }
+
+  .section__subheading {
+    font-size: 1.3rem;
+    margin: 3rem 0 1.25rem;
   }
 
   .sponsor-list {

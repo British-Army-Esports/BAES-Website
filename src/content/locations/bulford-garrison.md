@@ -1,6 +1,6 @@
 ---
 name: "Bulford Garrison Gaming Hub"
-type: "garrison-gaming-room"
+type: "limited-setup"
 corps:
   - "rs"
 address: "Bulford Camp, Bulford, Wiltshire, SP4"
