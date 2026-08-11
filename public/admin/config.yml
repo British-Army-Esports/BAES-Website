@@ -1,0 +1,166 @@
+backend:
+  name: github
+  repo: British-Army-Esports/BAES-Website
+  branch: main
+
+# Editorial workflow: edits land as a draft + GitHub PR that someone with
+# repo write access reviews and merges, rather than going straight to the
+# live site. Safer default for an official Army-affiliated public site;
+# switch to `publish_mode: simple` later if the review step becomes friction
+# once there's a trusted, established set of editors.
+publish_mode: editorial_workflow
+
+media_folder: "public/uploads"
+public_folder: "/uploads"
+
+collections:
+  - name: "events"
+    label: "Events"
+    label_singular: "Event"
+    description: "Fixtures and competitions shown on the Events page."
+    folder: "src/content/events"
+    create: true
+    delete: true
+    identifier_field: "title"
+    slug: "{{slug}}"
+    extension: "yaml"
+    format: "yaml"
+    summary: "{{title}} — {{date}}"
+    sortable_fields: ["title", "date"]
+    fields:
+      - label: "Title"
+        name: "title"
+        widget: "string"
+        hint: "e.g. \"EPIC49 (with Intel)\" or \"C.O.D.E. Bowl VII\""
+
+      - label: "Disciplines"
+        name: "disciplines"
+        widget: "relation"
+        collection: "disciplines"
+        search_fields: ["name"]
+        value_field: "{{slug}}"
+        display_fields: ["name"]
+        multiple: true
+        required: false
+        hint: "Which game(s) this fixture is for. Leave blank for general festival/outreach presence with no fixed game."
+
+      - label: "Corps"
+        name: "corps"
+        widget: "relation"
+        collection: "corps"
+        search_fields: ["name"]
+        value_field: "{{slug}}"
+        display_fields: ["name"]
+        required: false
+        hint: "Only set this if it's a specific Corps' own team, not a central BAES/UKAF fixture."
+
+      - label: "Scale"
+        name: "scale"
+        widget: "select"
+        hint: "How big/what kind of competition this is — see the label for what each means."
+        options:
+          - { label: "Engagement — outreach/festival presence, not a formal bracket", value: "engagement" }
+          - { label: "Single Service — within the Army only (Corps-vs-Corps, unit, Army-wide)", value: "single-service" }
+          - { label: "Military — UK tri-service, not national/international", value: "military" }
+          - { label: "UK National — representing all four home nations", value: "uk-national" }
+          - { label: "International Military — against other countries' militaries", value: "international-military" }
+          - { label: "European — civilian European-level competition (e.g. FACEIT ESEA)", value: "european" }
+
+      - label: "Team"
+        name: "team"
+        widget: "select"
+        required: false
+        hint: "Who actually fielded the team. Leave blank if there's no clean team qualifier (most outreach presences)."
+        options:
+          - { label: "Corps team (set which Corps above)", value: "corps" }
+          - { label: "BAES central team", value: "baes" }
+          - { label: "UK Armed Forces (tri-service) team", value: "ukaf" }
+
+      - label: "Presence Type"
+        name: "presenceType"
+        widget: "select"
+        options:
+          - { label: "Competitive fixture", value: "competitive" }
+          - { label: "Community outreach (festival stand, no formal result)", value: "community-outreach" }
+          - { label: "Mixed", value: "mixed" }
+
+      - label: "Start Date"
+        name: "date"
+        widget: "datetime"
+        format: "YYYY-MM-DD"
+        date_format: true
+        time_format: false
+
+      - label: "End Date"
+        name: "endDate"
+        widget: "datetime"
+        format: "YYYY-MM-DD"
+        date_format: true
+        time_format: false
+        required: false
+        hint: "Only for multi-day events. Leave blank for single-day fixtures."
+
+      - label: "Date Status"
+        name: "dateStatus"
+        widget: "select"
+        default: "confirmed"
+        options:
+          - { label: "Confirmed", value: "confirmed" }
+          - { label: "Provisional — likely but not locked in yet", value: "provisional" }
+          - { label: "TBC — date genuinely not known yet", value: "tbc" }
+
+      - label: "Rough Date Options"
+        name: "dateOptions"
+        widget: "list"
+        required: false
+        hint: "Only used when Date Status is Provisional, e.g. \"2026-09\". Leave blank otherwise."
+
+      - label: "Location"
+        name: "location"
+        widget: "object"
+        required: false
+        hint: "Leave the whole thing blank for online-only or not-yet-fixed fixtures."
+        fields:
+          - { label: "Venue Name", name: "name", widget: "string" }
+          - { label: "Latitude", name: "lat", widget: "number", value_type: "float" }
+          - { label: "Longitude", name: "long", widget: "number", value_type: "float" }
+
+      - label: "Description"
+        name: "description"
+        widget: "text"
+        required: false
+
+      - label: "Results Summary"
+        name: "resultsSummary"
+        widget: "string"
+        required: false
+        hint: "Only for events that have already happened, e.g. \"British Army Esports: Winners, beat US Navy in the final\"."
+
+      - label: "External Link"
+        name: "externalLink"
+        widget: "string"
+        required: false
+        hint: "The event's own official page, if it has one. Leave blank to show a \"more info coming soon\" placeholder instead."
+
+  # Reference-only collections so the relation fields above can look up real
+  # disciplines/Corps. Hidden from the editor's main nav — not meant to be
+  # edited here, just to power the dropdowns on the Events form.
+  - name: "disciplines"
+    label: "Disciplines"
+    hide: true
+    folder: "src/content/disciplines"
+    extension: "md"
+    format: "frontmatter"
+    fields:
+      - { label: "Name", name: "name", widget: "string" }
+      - { label: "Body", name: "body", widget: "markdown", required: false }
+
+  - name: "corps"
+    label: "Corps"
+    hide: true
+    folder: "src/content/corps"
+    extension: "md"
+    format: "frontmatter"
+    fields:
+      - { label: "Name", name: "name", widget: "string" }
+      - { label: "Body", name: "body", widget: "markdown", required: false }
