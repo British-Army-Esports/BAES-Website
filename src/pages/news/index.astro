@@ -36,6 +36,53 @@ const posts = (await getCollection('news')).sort(
       }
       {posts.length === 0 && <p class="empty">No news posted yet.</p>}
     </div>
+
+    <h2 class="section__subheading">Got a Story?</h2>
+    <p class="section__body">
+      Seen coverage of British Army Esports, or have your own news to share? Send the link and a
+      couple of lines and we'll turn it into a post.
+    </p>
+
+    <form
+      name="news-tip"
+      method="POST"
+      action="/feedback/thanks"
+      data-netlify="true"
+      netlify-honeypot="bot-field"
+      class="tip-form"
+    >
+      <input type="hidden" name="form-name" value="news-tip" />
+      <p class="form-honeypot">
+        <label>
+          Don't fill this out if you're human: <input name="bot-field" />
+        </label>
+      </p>
+
+      <div class="form-field">
+        <label for="name">Your Name</label>
+        <input type="text" id="name" name="name" required autocomplete="name" />
+      </div>
+
+      <div class="form-field">
+        <label for="email">Your Email (optional)</label>
+        <input type="email" id="email" name="email" autocomplete="email" />
+      </div>
+
+      <div class="form-field">
+        <label for="url">Story URL</label>
+        <input type="url" id="url" name="url" required placeholder="https://" />
+      </div>
+
+      <div class="form-field">
+        <label for="summary">Quick Summary</label>
+        <textarea id="summary" name="summary" required></textarea>
+      </div>
+
+      <button type="submit" class="form-submit clip-tl-sm">
+        Send Tip
+        <span>→</span>
+      </button>
+    </form>
   </section>
 </BaseLayout>
 
@@ -75,5 +122,21 @@ const posts = (await getCollection('news')).sort(
 
   .empty {
     color: var(--text-secondary);
+  }
+
+  .section__subheading {
+    font-size: 1.3rem;
+    margin: 3.5rem 0 0.75rem;
+  }
+
+  .section__body {
+    color: var(--text-secondary-alt);
+    line-height: 1.6;
+    max-width: 560px;
+    margin: 0 0 1.5rem;
+  }
+
+  .tip-form {
+    max-width: 560px;
   }
 </style>

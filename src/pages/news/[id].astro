@@ -23,6 +23,22 @@ const { Content } = await render(post);
     <div class="prose">
       <Content />
     </div>
+    {
+      post.data.sources && post.data.sources.length > 0 && (
+        <div class="sources">
+          <p class="sources__label label">Further Coverage</p>
+          <ul class="sources__list">
+            {post.data.sources.map((source: { label: string; url: string }) => (
+              <li>
+                <a href={source.url} target="_blank" rel="noopener noreferrer">
+                  {source.label} ↗
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )
+    }
     <a href="/news" class="back-link">← All news</a>
   </article>
 </BaseLayout>
@@ -51,6 +67,32 @@ const { Content } = await render(post);
 
   .prose :global(p) {
     margin: 0 0 1.25rem;
+  }
+
+  .sources {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .sources__label {
+    color: var(--text-secondary);
+    margin: 0 0 0.75rem;
+  }
+
+  .sources__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .sources__list a {
+    color: var(--crimson-bright);
+    font-weight: 600;
+    font-size: 0.9rem;
   }
 
   .back-link {

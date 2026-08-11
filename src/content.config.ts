@@ -97,6 +97,8 @@ const news = defineCollection({
     date: z.coerce.date(),
     summary: z.string().optional(),
     relatedEvent: reference('events').optional(),
+    // External press coverage of the same story — outlet name + link.
+    sources: z.array(z.object({ label: z.string(), url: z.string().url() })).optional(),
   }),
 });
 
