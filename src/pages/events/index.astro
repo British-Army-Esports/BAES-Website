@@ -36,6 +36,7 @@ const events = (await getCollection('events'))
       title: event.data.title,
       scale: event.data.scale,
       team: event.data.team,
+      presenceType: event.data.presenceType,
       disciplineIds,
       disciplineNames,
       accentColor,
@@ -54,7 +55,8 @@ const inProgress = events.filter((e) => e.isLive);
 const upcoming = events.filter((e) => !e.isPast && !e.isLive);
 const past = events.filter((e) => e.isPast).reverse();
 
-// Only offer filter pills for disciplines that actually have at least one event.
+// Only offer filter options for disciplines/scales that actually have at
+// least one event, so the dropdowns never show a choice with zero results.
 const usedDisciplineIds = new Set(events.flatMap((e) => e.disciplineIds));
 const filterDisciplines = allDisciplines.filter((d) => usedDisciplineIds.has(d.id));
 
@@ -67,11 +69,25 @@ const scaleLabels: Record<string, string> = {
   european: 'European',
 };
 
+const scaleOrder = Object.keys(scaleLabels);
+const usedScales = new Set(events.map((e) => e.scale));
+const filterScales = scaleOrder.filter((s) => usedScales.has(s));
+
 const teamLabels: Record<string, string> = {
   corps: 'Corps Team',
   baes: 'BAES Team',
   ukaf: 'UKAF Team',
 };
+
+const presenceLabels: Record<string, string> = {
+  competitive: 'Competitive',
+  'community-outreach': 'Community Outreach',
+  mixed: 'Mixed',
+};
+
+const presenceOrder = Object.keys(presenceLabels);
+const usedPresenceTypes = new Set(events.map((e) => e.presenceType));
+const filterPresenceTypes = presenceOrder.filter((p) => usedPresenceTypes.has(p));
 ---
 
 <BaseLayout title="Events" active="Events" description="Upcoming and past British Army Esports fixtures.">
@@ -83,20 +99,55 @@ const teamLabels: Record<string, string> = {
       competitions. Dates marked "Likely" or "TBC" aren't confirmed yet.
     </p>
 
-    {
-      filterDisciplines.length > 0 && (
-        <div class="filters" role="group" aria-label="Filter by game">
-          <button type="button" class="filters__pill is-active" data-filter="all">
-            All Games
-          </button>
-          {filterDisciplines.map((d) => (
-            <button type="button" class="filters__pill" data-filter={d.id}>
-              {d.data.name}
-            </button>
-          ))}
-        </div>
-      )
-    }
+    <div class="filters clip-tl-sm">
+      {
+        filterDisciplines.length > 0 && (
+          <div class="filters__field">
+            <label class="label" for="filter-discipline">
+              Discipline
+            </label>
+            <select id="filter-discipline" class="filters__select">
+              <option value="all">All Games</option>
+              {filterDisciplines.map((d) => (
+                <option value={d.id}>{d.data.name}</option>
+              ))}
+            </select>
+          </div>
+        )
+      }
+
+      {
+        filterScales.length > 0 && (
+          <div class="filters__field">
+            <label class="label" for="filter-scale">
+              Level
+            </label>
+            <select id="filter-scale" class="filters__select">
+              <option value="all">All Levels</option>
+              {filterScales.map((s) => (
+                <option value={s}>{scaleLabels[s]}</option>
+              ))}
+            </select>
+          </div>
+        )
+      }
+
+      {
+        filterPresenceTypes.length > 0 && (
+          <div class="filters__field">
+            <span class="label">Event Type</span>
+            <div class="filters__checks" role="group" aria-label="Filter by event type">
+              {filterPresenceTypes.map((p) => (
+                <label class="filters__check">
+                  <input type="checkbox" value={p} class="filter-presence-check" />
+                  {presenceLabels[p]}
+                </label>
+              ))}
+            </div>
+          </div>
+        )
+      }
+    </div>
 
     {
       inProgress.length > 0 && (
@@ -114,39 +165,63 @@ const teamLabels: Record<string, string> = {
     }
 
     <h2 class="section__subheading">Upcoming</h2>
-    <div class="event-grid">
-      {upcoming.map((event) => <EventCard event={event} scaleLabels={scaleLabels} teamLabels={teamLabels} />)}
-      {upcoming.length === 0 && <p class="empty">No upcoming fixtures published yet.</p>}
+    <div class="event-scroll clip-tl-sm">
+      <div class="event-grid" id="upcoming-grid">
+        {upcoming.map((event) => <EventCard event={event} scaleLabels={scaleLabels} teamLabels={teamLabels} />)}
+        {upcoming.length === 0 && <p class="empty">No upcoming fixtures published yet.</p>}
+      </div>
     </div>
 
-    <h2 class="section__subheading">Past &amp; History</h2>
-    <div class="event-grid">
-      {past.map((event) => <EventCard event={event} scaleLabels={scaleLabels} teamLabels={teamLabels} />)}
-      {past.length === 0 && <p class="empty">No past fixtures logged yet.</p>}
-    </div>
+    <h2 class="section__subheading section__subheading--muted">Past &amp; History</h2>
+    <ul class="past-list">
+      {
+        past.map((event) => (
+          <li data-disciplines={event.disciplineIds.join(',')} data-scale={event.scale} data-presence={event.presenceType}>
+            <a href={event.externalLink ?? `/events/${event.id}`} target={event.externalLink ? '_blank' : undefined} rel={event.externalLink ? 'noopener noreferrer' : undefined}>
+              {event.title}
+            </a>
+            <span class="past-list__meta">
+              {event.text}
+              {event.locationName && ` · ${event.locationName}`}
+              {event.resultsSummary && ` · ${event.resultsSummary}`}
+            </span>
+          </li>
+        ))
+      }
+      {past.length === 0 && <li class="empty">No past fixtures logged yet.</li>}
+    </ul>
   </section>
 </BaseLayout>
 
 <script>
-  const pills = document.querySelectorAll('.filters__pill');
+  const disciplineSelect = document.getElementById('filter-discipline');
+  const scaleSelect = document.getElementById('filter-scale');
+  const presenceChecks = document.querySelectorAll('.filter-presence-check');
   const items = document.querySelectorAll('[data-disciplines]');
 
-  pills.forEach((pill) => {
-    pill.addEventListener('click', () => {
-      pills.forEach((p) => p.classList.remove('is-active'));
-      pill.classList.add('is-active');
-      const filter = pill.getAttribute('data-filter');
+  function applyFilters() {
+    const discipline = disciplineSelect?.value ?? 'all';
+    const scale = scaleSelect?.value ?? 'all';
+    const checkedPresence = Array.from(presenceChecks)
+      .filter((c) => c.checked)
+      .map((c) => c.value);
 
-      items.forEach((item) => {
-        if (filter === 'all') {
-          item.hidden = false;
-          return;
-        }
-        const ids = (item.getAttribute('data-disciplines') || '').split(',');
-        item.hidden = !ids.includes(filter);
-      });
+    items.forEach((item) => {
+      const ids = (item.getAttribute('data-disciplines') || '').split(',');
+      const itemScale = item.getAttribute('data-scale') || '';
+      const itemPresence = item.getAttribute('data-presence') || '';
+
+      const disciplineMatch = discipline === 'all' || ids.includes(discipline);
+      const scaleMatch = scale === 'all' || itemScale === scale;
+      const presenceMatch = checkedPresence.length === 0 || checkedPresence.includes(itemPresence);
+
+      item.hidden = !(disciplineMatch && scaleMatch && presenceMatch);
     });
-  });
+  }
+
+  disciplineSelect?.addEventListener('change', applyFilters);
+  scaleSelect?.addEventListener('change', applyFilters);
+  presenceChecks.forEach((c) => c.addEventListener('change', applyFilters));
 </script>
 
 <style>
@@ -163,6 +238,10 @@ const teamLabels: Record<string, string> = {
   .section__heading {
     font-size: clamp(1.75rem, 4vw, 3rem);
     margin-bottom: 0.75rem;
+    background: linear-gradient(120deg, var(--text-primary) 55%, var(--crimson-bright) 130%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
 
   .section__intro {
@@ -178,10 +257,18 @@ const teamLabels: Record<string, string> = {
     display: flex;
     align-items: center;
     gap: 0.6rem;
+    padding-left: 0.75rem;
+    border-left: 3px solid var(--crimson);
   }
 
   .section__subheading--live {
     color: var(--crimson-bright);
+    border-left-color: var(--crimson-bright);
+  }
+
+  .section__subheading--muted {
+    color: var(--text-secondary);
+    border-left-color: var(--border);
   }
 
   .live-dot {
@@ -206,33 +293,89 @@ const teamLabels: Record<string, string> = {
   .filters {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.6rem;
-    margin-bottom: 1rem;
+    gap: 1.5rem;
+    align-items: flex-end;
+    margin-bottom: 1.75rem;
+    padding: 1.1rem 1.25rem;
+    background: var(--surface);
+    border: 1px solid transparent;
+    border-image: linear-gradient(100deg, var(--crimson) 0%, var(--border) 35%, var(--border) 100%) 1;
   }
 
-  .filters__pill {
+  .filters__field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+
+  .filters__select {
     font-family: var(--font-body);
     font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    font-size: 0.7rem;
-    color: var(--text-secondary);
-    background: transparent;
+    font-size: 0.85rem;
+    color: var(--text-primary-dim);
+    background: var(--bg-base-alt);
     border: 1px solid var(--border);
-    padding: 0.5rem 0.9rem;
+    padding: 0.55rem 0.75rem;
+    min-width: 180px;
     cursor: pointer;
-    transition: color 0.2s var(--ease-out), border-color 0.2s var(--ease-out);
+    transition: border-color 0.2s var(--ease-out);
   }
 
-  .filters__pill.is-active {
-    color: var(--crimson-bright);
+  .filters__select:focus,
+  .filters__select:hover {
+    outline: none;
     border-color: var(--crimson);
+  }
+
+  .filters__checks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    min-height: 2.35rem;
+    align-items: center;
+  }
+
+  .filters__check {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.85rem;
+    color: var(--text-secondary-alt);
+    cursor: pointer;
+  }
+
+  .filters__check input {
+    accent-color: var(--crimson);
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
   }
 
   .event-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 1.1rem;
+  }
+
+  .event-scroll {
+    max-height: 620px;
+    overflow-y: auto;
+    padding: 0.3rem 0.3rem 0.6rem;
+    border: 1px solid transparent;
+    border-image: linear-gradient(100deg, var(--crimson) 0%, var(--border) 25%, var(--border) 100%) 1;
+    background: linear-gradient(180deg, rgba(200, 16, 46, 0.04) 0%, transparent 15%);
+  }
+
+  .event-scroll::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .event-scroll::-webkit-scrollbar-track {
+    background: var(--bg-base-alt);
+  }
+
+  .event-scroll::-webkit-scrollbar-thumb {
+    background: var(--crimson);
   }
 
   .empty {
@@ -242,5 +385,53 @@ const teamLabels: Record<string, string> = {
     background: var(--surface);
     border: 1px solid var(--border);
     grid-column: 1 / -1;
+  }
+
+  .past-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border: 1px solid var(--border);
+    background: var(--bg-base-alt);
+  }
+
+  .past-list li {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.4rem 1.5rem;
+    padding: 0.65rem 1.1rem;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.85rem;
+  }
+
+  .past-list li:last-child {
+    border-bottom: none;
+  }
+
+  .past-list li[hidden] {
+    display: none;
+  }
+
+  .past-list a {
+    color: var(--text-secondary-alt);
+    font-weight: 600;
+    transition: color 0.2s var(--ease-out);
+  }
+
+  .past-list a:hover {
+    color: var(--crimson-bright);
+  }
+
+  .past-list__meta {
+    color: var(--text-secondary);
+    text-align: right;
+  }
+
+  .past-list .empty {
+    text-align: left;
+    background: none;
+    border: none;
+    padding: 0.65rem 1.1rem;
   }
 </style>

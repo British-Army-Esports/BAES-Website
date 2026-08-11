@@ -4,6 +4,7 @@ export interface EventCardData {
   title: string;
   scale: string;
   team?: string;
+  presenceType: string;
   disciplineIds: string[];
   disciplineNames: string[];
   accentColor?: string;
@@ -28,9 +29,12 @@ const accent = event.accentColor || '#c8102e';
 <div
   class:list={['event-card', 'clip-tl', { 'event-card--live': live }]}
   data-disciplines={event.disciplineIds.join(',')}
+  data-scale={event.scale}
+  data-presence={event.presenceType}
   style={`--accent: ${accent}`}
 >
   <div class="event-card__bar"></div>
+  <div class="event-card__corner-glow"></div>
   <div class="event-card__body">
     <div class="event-card__top">
       <span class:list={['event-card__date', `event-card__date--${event.badge}`]}>{event.text}</span>
@@ -43,7 +47,7 @@ const accent = event.accentColor || '#c8102e';
             {event.title} ↗
           </a>
         ) : (
-          event.title
+          <a href={`/events/${event.id}`}>{event.title}</a>
         )
       }
     </h3>
@@ -69,27 +73,44 @@ const accent = event.accentColor || '#c8102e';
     position: relative;
     display: flex;
     flex-direction: column;
-    background: var(--surface);
-    border: 1px solid var(--border);
+    background: linear-gradient(165deg, var(--surface) 0%, var(--bg-base-alt) 100%);
+    border: 1px solid transparent;
+    border-image: linear-gradient(140deg, var(--accent) 0%, var(--border) 40%, var(--border) 100%) 1;
     overflow: hidden;
-    transition: transform 0.2s var(--ease-out), border-color 0.2s var(--ease-out),
+    transition: transform 0.2s var(--ease-out), border-image 0.2s var(--ease-out),
       box-shadow 0.2s var(--ease-out);
+  }
+
+  .event-card[hidden] {
+    display: none;
   }
 
   .event-card:hover {
     transform: translateY(-3px);
-    border-color: #3a3a3a;
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+    border-image: linear-gradient(140deg, var(--accent) 0%, var(--accent) 70%, var(--border) 100%) 1;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45), 0 0 22px -6px var(--accent);
   }
 
   .event-card--live {
+    border-image: none;
     border-color: var(--crimson);
-    box-shadow: 0 0 0 1px var(--crimson);
+    box-shadow: 0 0 0 1px var(--crimson), 0 0 24px -4px var(--crimson-bright);
+  }
+
+  .event-card__corner-glow {
+    position: absolute;
+    top: -20px;
+    right: -20px;
+    width: 90px;
+    height: 90px;
+    background: radial-gradient(circle, var(--accent) 0%, transparent 72%);
+    opacity: 0.25;
+    pointer-events: none;
   }
 
   .event-card__bar {
     height: 4px;
-    background: var(--accent);
+    background: linear-gradient(90deg, var(--accent) 0%, transparent 130%);
   }
 
   .event-card__body {
