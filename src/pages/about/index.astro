@@ -4,41 +4,48 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 const whyPoints = [
   {
     title: 'Recruitment & Engagement',
-    body: 'Esports reaches a demographic and skillset that traditional sport doesn’t always reach — digital-native talent, not necessarily athletic in the conventional sense.',
+    body: 'Esports reaches digital-native talent that traditional sport doesn’t always reach. It gives people a route in who aren’t necessarily athletic in the conventional sense.',
   },
   {
     title: 'Skills That Transfer',
-    body: 'Decision-making under pressure, situational awareness, rapid reaction, and coordination under stress — the cognitive half of what sport builds physically.',
+    body: 'Decision-making under pressure, situational awareness, rapid reaction, coordination under stress. It builds the cognitive side of what sport builds physically.',
   },
   {
     title: 'Inclusion',
-    body: 'Esports doesn’t require the physical fitness standards that gate most Army sport — injured personnel, those on medical downgrade, and others can still compete, represent, and belong. Not a lesser version of "real" Army sport — a complementary pathway.',
+    body: 'Esports doesn’t require the physical fitness standards that gate most Army sport. Injured personnel, those on medical downgrade, and others can still compete, represent, and belong through a genuinely complementary pathway.',
   },
   {
     title: 'Retention & Cohesion',
-    body: 'The same unit cohesion and team identity that sport builds, through a different medium — often at lower physical and logistical cost.',
+    body: 'It builds the same unit cohesion and team identity that sport does, through a different medium, often at lower physical and logistical cost.',
   },
   {
     title: 'Digital & Cyber-Adjacent Skills',
-    body: 'A genuine skills and education pathway — reaction time, systems thinking, communication under load. A plausible adjacency to digitally-loaded trades, not a claim that gaming trains cyber operators.',
+    body: 'A genuine skills and education pathway covering reaction time, systems thinking, and communication under load. These carry a plausible adjacency into digitally-loaded trades.',
   },
   {
     title: 'Legitimacy',
-    body: 'Esports is formally recognised at governmental and Olympic-adjacent levels — the Global Esports Federation, Commonwealth Esports Championships. Not a fringe hobby claiming legitimacy; an already-legitimised competitive discipline the Army takes part in.',
+    body: 'Esports is formally recognised at governmental and Olympic-adjacent levels, through bodies like the Global Esports Federation and the Commonwealth Esports Championships. It’s an already-legitimised competitive discipline that the Army takes part in.',
   },
 ];
 ---
 
-<BaseLayout title="About" active="About" description="About British Army Esports — why it exists and how it's governed.">
+<BaseLayout title="About" active="About" description="What British Army Esports is, why it exists, and how it's governed.">
   <section class="section container">
     <p class="section__eyebrow label">About</p>
     <h1 class="section__heading">About British Army Esports</h1>
 
+    <h2 class="section__subheading section__subheading--first">What Is British Army Esports</h2>
     <div class="prose">
       <p>
-        This site is the official directory for British Army esports — a hub across disciplines
-        and Corps, not a replacement for what individual Corps publish themselves. It brings
-        together disciplines, Corps, events, results, and locations in one place.
+        British Army Esports is the Army's competitive gaming programme. Players from across
+        every Corps and Regiment train and compete under its banner, representing their unit and
+        the wider Army in games from Call of Duty to Rocket League.
+      </p>
+      <p>
+        Squads form at unit and Corps level and build up through the season toward national and
+        international fixtures, including the C.O.D.E. Bowl and the International Defence
+        Esports Games. It sits alongside the Army's established sports as another way for
+        personnel to compete, represent, and belong.
       </p>
     </div>
 
@@ -55,8 +62,8 @@ const whyPoints = [
     </div>
     <p class="responsible-note">
       <strong>Responsible play:</strong> esports comes with the same real considerations as any
-      screen-based activity — regular breaks, good ergonomics, and healthy play limits. That's
-      taken seriously here, not treated as an afterthought.
+      screen-based activity: regular breaks, good ergonomics, and healthy play limits. That's
+      taken seriously here.
     </p>
 
     <h2 class="section__subheading">Governance &amp; Wider Ecosystem</h2>
@@ -104,8 +111,8 @@ const whyPoints = [
     </div>
 
     <p class="corps-note">
-      Individual Corps sit alongside this structure, not within it — see the{' '}
-      <a href="/corps">Corps directory</a>.
+      Individual Corps make up British Army Esports itself, sitting outside this reporting
+      structure. See the <a href="/corps">Corps directory</a>.
     </p>
 
     <div class="prose">
@@ -137,6 +144,10 @@ const whyPoints = [
   .section__subheading {
     font-size: 1.4rem;
     margin: 3rem 0 1.5rem;
+  }
+
+  .section__subheading--first {
+    margin-top: 0;
   }
 
   .prose,
