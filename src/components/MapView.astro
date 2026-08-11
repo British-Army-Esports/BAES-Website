@@ -85,6 +85,11 @@ const typeLabels: Record<string, string> = {
   'limited-setup': 'Limited Setup',
   unspecified: 'Gaming Room',
 };
+
+// Only offer a filter for venue types that actually have at least one
+// location, in the same fixed order as typeLabels rather than whatever
+// order they happen to appear in the content files.
+const usedTypes = Object.keys(typeLabels).filter((t) => locationPoints.some((loc) => loc.type === t));
 ---
 
 <section class="mapview">
@@ -108,6 +113,17 @@ const typeLabels: Record<string, string> = {
         )
       }
     </div>
+    {
+      usedTypes.length > 1 && (
+        <div class="mapview__group" role="group" aria-label="Venue type">
+          {usedTypes.map((t) => (
+            <button type="button" class="mapview__pill is-active" data-type-filter={t}>
+              {typeLabels[t]}
+            </button>
+          ))}
+        </div>
+      )
+    }
     <div class="mapview__group" role="group" aria-label="View mode">
       <button type="button" class="mapview__pill is-active" data-view="map">View as Map</button>
       <button type="button" class="mapview__pill" data-view="list">View as List</button>
@@ -119,7 +135,7 @@ const typeLabels: Record<string, string> = {
   <ul class="mapview__list" hidden>
     {
       locationPoints.map((loc) => (
-        <li class="mapview__list-item">
+        <li class="mapview__list-item" data-type={loc.type}>
           <span class="mapview__list-tag label">{typeLabels[loc.type] ?? loc.type}</span>
           <span class="mapview__list-name">
             {loc.name}
@@ -211,13 +227,16 @@ const typeLabels: Record<string, string> = {
         iconAnchor: [8, 8],
       });
 
-    const locationsLayer = L.layerGroup(
-      locationPoints.map((loc) =>
-        L.marker([loc.lat, loc.long], { icon: makeIcon('location', false) }).bindPopup(
-          `<strong>${loc.name}</strong><br>${typeLabels[loc.type] ?? loc.type}<br>${loc.address}<br><a href="/locations/${loc.id}/request">Request Access →</a>`,
-        ),
+    // Kept as individual marker+type pairs, not a flat layerGroup, so the
+    // venue-type filter pills can add/remove single pins rather than only
+    // being able to toggle the whole "Our Locations" layer at once.
+    const locationMarkers = locationPoints.map((loc) => ({
+      type: loc.type,
+      marker: L.marker([loc.lat, loc.long], { icon: makeIcon('location', false) }).bindPopup(
+        `<strong>${loc.name}</strong><br>${typeLabels[loc.type] ?? loc.type}<br>${loc.address}<br><a href="/locations/${loc.id}/request">Request Access →</a>`,
       ),
-    );
+    }));
+    const locationsLayer = L.layerGroup(locationMarkers.map((entry) => entry.marker));
 
     // Planned hubs: known about, not yet confirmed/active. Grey pins, no
     // request link since no such page exists for them yet.
@@ -272,6 +291,40 @@ const typeLabels: Record<string, string> = {
         } else {
           map.removeLayer(layer);
         }
+      });
+    });
+
+    // Venue-type filter: select/deselect individual types rather than only
+    // being able to hide "Our Locations" as a whole. Drives both the map
+    // pins (add/remove single markers from locationsLayer) and the list
+    // view (hide/show matching <li> rows) from the same active-types set.
+    const typeFilterBtns = document.querySelectorAll('[data-type-filter]');
+    const activeTypes = new Set(Array.from(typeFilterBtns).map((btn) => btn.dataset.typeFilter));
+    const listTypeItems = document.querySelectorAll('.mapview__list-item[data-type]');
+
+    function applyTypeFilter() {
+      locationMarkers.forEach(({ type, marker }) => {
+        if (activeTypes.has(type)) {
+          locationsLayer.addLayer(marker);
+        } else {
+          locationsLayer.removeLayer(marker);
+        }
+      });
+      listTypeItems.forEach((item) => {
+        item.hidden = !activeTypes.has(item.dataset.type);
+      });
+    }
+
+    typeFilterBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        btn.classList.toggle('is-active');
+        const type = btn.dataset.typeFilter;
+        if (btn.classList.contains('is-active')) {
+          activeTypes.add(type);
+        } else {
+          activeTypes.delete(type);
+        }
+        applyTypeFilter();
       });
     });
 
@@ -355,6 +408,10 @@ const typeLabels: Record<string, string> = {
     align-items: center;
     padding: 0.9rem 1.25rem;
     border-bottom: 1px solid var(--border);
+  }
+
+  .mapview__list-item[hidden] {
+    display: none;
   }
 
   .mapview__list-item:last-child {
