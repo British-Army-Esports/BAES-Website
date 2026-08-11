@@ -1,6 +1,14 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import MapView from '../../components/MapView.astro';
+
+const venueKey = [
+  { label: 'Arena', body: 'Competition venue plus a good audience viewing setup.' },
+  { label: 'Comp Venue', body: '2x5 PCs and a streaming setup.' },
+  { label: 'Training Venue', body: '1x 5 PCs.' },
+  { label: 'Limited Setup', body: 'Not enough PCs for a full team, e.g. 4 rigs or console-only.' },
+  { label: 'Gaming Room', body: "Equipment on hand hasn't been confirmed yet." },
+];
 ---
 
 <BaseLayout title="Locations" active="Locations" description="Permanent British Army Esports gaming hubs.">
@@ -11,6 +19,20 @@ import MapView from '../../components/MapView.astro';
       Permanent gaming hubs across garrisons. For fixtures and events, see the{' '}
       <a href="/events">Events</a> page.
     </p>
+
+    <details class="key">
+      <summary class="key__summary label">What do the venue types mean?</summary>
+      <dl class="key__list">
+        {
+          venueKey.map((v) => (
+            <div class="key__row">
+              <dt>{v.label}</dt>
+              <dd>{v.body}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </details>
   </section>
   <section class="container">
     <MapView showEvents={false} />
@@ -43,6 +65,55 @@ import MapView from '../../components/MapView.astro';
   .section__intro a {
     color: var(--crimson-bright);
     font-weight: 600;
+  }
+
+  .key {
+    max-width: 640px;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .key__summary {
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    color: var(--text-secondary-alt);
+  }
+
+  .key__summary:hover {
+    color: var(--crimson-bright);
+  }
+
+  .key__list {
+    margin: 0;
+    padding: 0 1rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .key__row {
+    display: grid;
+    grid-template-columns: 130px 1fr;
+    gap: 0.75rem;
+    font-size: 0.85rem;
+  }
+
+  .key__row dt {
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  .key__row dd {
+    margin: 0;
+    color: var(--text-secondary);
+  }
+
+  @media (max-width: 480px) {
+    .key__row {
+      grid-template-columns: 1fr;
+      gap: 0.15rem;
+    }
   }
 
   .container {

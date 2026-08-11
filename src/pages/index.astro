@@ -5,9 +5,72 @@ import Hero from '../components/Hero.astro';
 import Card from '../components/Card.astro';
 import Table from '../components/Table.astro';
 import MapView from '../components/MapView.astro';
+import EventCard from '../components/EventCard.astro';
+import { formatEventDate } from '../lib/eventDate';
 
 const disciplines = await getCollection('disciplines');
-const corps = await getCollection('corps');
+
+const allDisciplines = await getCollection('disciplines', ({ data }) => data.active);
+const disciplineInfo = new Map(
+  allDisciplines.map((d) => [d.id, { name: d.data.name, color: d.data.color }]),
+);
+
+const now = Date.now();
+
+// Key Events: the next few fixtures worth front-page billing — genuinely
+// competitive/mixed presences at a national level or above, not every
+// festival stand or outreach appearance.
+const keyScales = new Set(['uk-national', 'international-military', 'military', 'european']);
+const keyEvents = (await getCollection('events'))
+  .filter((e) => e.data.presenceType !== 'community-outreach' && keyScales.has(e.data.scale))
+  .map((event) => {
+    const disciplineIds = (event.data.disciplines ?? []).map((d) => d.id);
+    const disciplineNames = disciplineIds.map((id) => disciplineInfo.get(id)?.name).filter(Boolean);
+    const accentColor = disciplineIds.map((id) => disciplineInfo.get(id)?.color).find(Boolean);
+    const start = event.data.date.getTime();
+    const end = (event.data.endDate ?? event.data.date).getTime();
+    const isPast = event.data.dateStatus !== 'tbc' && end < now;
+    const isLive =
+      event.data.presenceType !== 'community-outreach' &&
+      (event.data.dateStatus ?? 'confirmed') === 'confirmed' &&
+      now >= start &&
+      now <= end;
+    return {
+      id: event.id,
+      title: event.data.title,
+      scale: event.data.scale,
+      team: event.data.team,
+      presenceType: event.data.presenceType,
+      disciplineIds,
+      disciplineNames,
+      accentColor,
+      locationName: event.data.location?.name ?? 'Online / TBC',
+      externalLink: event.data.externalLink,
+      resultsSummary: event.data.resultsSummary,
+      sortDate: start,
+      isPast,
+      isLive,
+      ...formatEventDate(event.data),
+    };
+  })
+  .filter((e) => !e.isPast)
+  .sort((a, b) => a.sortDate - b.sortDate)
+  .slice(0, 3);
+
+const keyEventScaleLabels: Record<string, string> = {
+  engagement: 'Engagement',
+  'single-service': 'Single Service',
+  military: 'Military (Tri-Service)',
+  'uk-national': 'UK National',
+  'international-military': 'International Military',
+  european: 'European',
+};
+
+const keyEventTeamLabels: Record<string, string> = {
+  corps: 'Corps Team',
+  baes: 'BAES Team',
+  ukaf: 'UKAF Team',
+};
 
 // Overall Corps ranking for the 2026 Esports Cup: points summed across
 // every discipline's standings. Real data, not a placeholder — naturally
@@ -53,20 +116,21 @@ const overallRows = [...overallPoints.entries()]
   </section>
 
   <section class="section container">
-    <h2 class="section__heading">Corps</h2>
-    <div class="grid">
-      {
-        corps.map((c) => (
-          <Card
-            category={c.data.abbreviation}
-            title={c.data.name}
-            meta={c.data.summary}
-            href={`/corps/${c.id}`}
-            image={c.data.crest}
-          />
-        ))
-      }
-    </div>
+    <h2 class="section__heading">Key Events</h2>
+    <p class="section__note label">
+      National-level fixtures and above, coming up. <a href="/events">Full fixtures list →</a>
+    </p>
+    {
+      keyEvents.length > 0 ? (
+        <div class="grid">
+          {keyEvents.map((event) => (
+            <EventCard event={event} scaleLabels={keyEventScaleLabels} teamLabels={keyEventTeamLabels} />
+          ))}
+        </div>
+      ) : (
+        <p class="empty">No national-level fixtures confirmed yet. Check the full fixtures list.</p>
+      )
+    }
   </section>
 
   <section class="section container">

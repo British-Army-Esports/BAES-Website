@@ -56,6 +56,14 @@ const eventPoints = allEvents.map((event) => {
     (event.data.dateStatus ?? 'confirmed') === 'confirmed' &&
     now >= start &&
     now <= end;
+  // Past events fade out the further back they happened, so the map reads
+  // at a glance as "what's current" rather than an even mix of everything
+  // that's ever happened. A TBC date has no real "past" to measure, so it
+  // never fades. Floors at 0.2 opacity rather than disappearing entirely —
+  // still findable on hover/click, just visually out of the way.
+  const isPast = event.data.dateStatus !== 'tbc' && end < now;
+  const daysSinceEnd = isPast ? (now - end) / (1000 * 60 * 60 * 24) : 0;
+  const opacity = isPast ? Math.max(0.2, 1 - daysSinceEnd / 240) : 1;
   return {
     id: event.id,
     name: event.data.title,
@@ -66,6 +74,7 @@ const eventPoints = allEvents.map((event) => {
     lat: event.data.location!.lat,
     long: event.data.location!.long,
     live: isLive,
+    opacity,
   };
 });
 
@@ -194,10 +203,10 @@ const typeLabels: Record<string, string> = {
     // Locations (permanent) are solid crimson pins. Events are hollow
     // white-ring pins so the two are visually distinct at a glance — only a
     // genuinely *live* event gets the pulsing ring, never just "upcoming".
-    const makeIcon = (variant, pulsing) =>
+    const makeIcon = (variant, pulsing, opacity = 1) =>
       L.divIcon({
         className: '',
-        html: `<span class="map-pin map-pin--${variant}${pulsing ? ' map-pin--pulse' : ''}"></span>`,
+        html: `<span class="map-pin map-pin--${variant}${pulsing ? ' map-pin--pulse' : ''}" style="opacity:${opacity}"></span>`,
         iconSize: [16, 16],
         iconAnchor: [8, 8],
       });
@@ -222,7 +231,7 @@ const typeLabels: Record<string, string> = {
 
     const eventsLayer = L.layerGroup(
       eventPoints.map((event) =>
-        L.marker([event.lat, event.long], { icon: makeIcon('event', event.live) }).bindPopup(
+        L.marker([event.lat, event.long], { icon: makeIcon('event', event.live, event.opacity) }).bindPopup(
           `<strong>${event.name}</strong>${event.live ? ' <span class="popup-live">● LIVE NOW</span>' : ''}<br>${event.locationName}<br>${event.dateLabel}`,
         ),
       ),

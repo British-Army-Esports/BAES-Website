@@ -1,0 +1,65 @@
+Other things I'm tracking:
+
+- Visual update (in particular a text font issue that bugs me) in line with design guidance
+
+- Add the F1 schedule that got posted recently
+
+- Fixtures lists are a bit naff in the discipline tabs, should emphasise current fixtures and de-emphasise (and split) past and future. Also date order.
+
+- No need to link both Army Sport and Army Sport Esport in the footer (add RAF / RN)
+
+- Swap the "Join Us" button to "Get Involved" and fix the strapline.
+
+- Tie "current fixtures" to "current standings" somehow
+
+- Add the CB logo
+
+- Tidy the "governance" page because it's a bit incorrect / unclear
+
+- Get instagram created & added...
+
+- Maybe don't allow literally anyone to add a "news" story? Not sure how that feature actually works right now...
+
+- "already-legitimised". English.
+
+- https://britisharmyesports.netlify.app/feedback/thanks still broken
+
+- Fade event locations by age on the front page map
+
+- On Locations page, add a Key that explains roughly what people can expect for a given venue type:
+
+Arena = competition venue + a good audience viewing setup
+
+Comp venue = 2x5 PCs and a streaming setup
+
+Training venue = 1x 5 PCs
+
+Other = Not enough PCs (e.g. 4 rigs or console-only)
+
+Or maybe which games it supports (particularly for Sim Racing)?
+
+- Add RAF, RN and Civvy locations (either default to off or add a second map for "external" facilities)
+
+- Swap the tagline so "Together" is last?
+
+- Get, like, way more graphics and/or images.
+
+- Sponsor paragraphs & links
+
+- Fix RAMS graphic and https://twitch.tv/ams_esports
+
+- Check the UOTC badge. Still Elizabeth...
+
+- Highlight interservices somehow. Actually, on front page, remove Corps and add Key Events instead.
+
+- On Corps page, fix red text to a consistent "ticker"
+
+- On Content, swap "British Army Esports" to "Watch the Army team compete" and "Corps" to "Grassroots competitions". Also, fix the page heading "some of our players". Maybe clarify that this is akin to watching a match from the sidelines.
+
+- Get some sort of Mental Health outreach going; maybe mention the Headspace partnership.
+
+- Stack the Disciplines page so that it populates the info when you select the card, rather than passing the user through to a separate page that they then have to "back" out of.
+
+
+
+This is my backlog. 

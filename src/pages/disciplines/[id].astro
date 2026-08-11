@@ -15,9 +15,35 @@ export async function getStaticPaths() {
 const { discipline } = Astro.props;
 const { Content } = await render(discipline);
 
+const now = Date.now();
+
 const relatedEvents = (await getCollection('events'))
   .filter((e) => e.data.disciplines?.some((d) => d.id === discipline.id))
-  .sort((a, b) => a.data.date.getTime() - b.data.date.getTime());
+  .map((event) => {
+    const start = event.data.date.getTime();
+    const end = (event.data.endDate ?? event.data.date).getTime();
+    // Mirrors the Events page rules: a TBC date can never honestly be
+    // "past", and "live" only counts a confirmed, non-outreach fixture.
+    const isPast = event.data.dateStatus !== 'tbc' && end < now;
+    const isLive =
+      event.data.presenceType !== 'community-outreach' &&
+      (event.data.dateStatus ?? 'confirmed') === 'confirmed' &&
+      now >= start &&
+      now <= end;
+    return {
+      title: event.data.title,
+      locationName: event.data.location?.name ?? 'Online / TBC',
+      sortDate: start,
+      isPast,
+      isLive,
+      ...formatEventDate(event.data),
+    };
+  })
+  .sort((a, b) => a.sortDate - b.sortDate);
+
+const liveFixtures = relatedEvents.filter((e) => e.isLive);
+const upcomingFixtures = relatedEvents.filter((e) => !e.isPast && !e.isLive);
+const pastFixtures = relatedEvents.filter((e) => e.isPast).reverse();
 
 // Standings: Corps are the teams in the official tournament. Empty (no
 // content file yet, or a file with zero rows) shows an honest "not yet
@@ -67,20 +93,56 @@ const standingsTableRows = standingsRows.map((r) => ({ ...r, name: corpsNames.ge
       )
     }
 
-    <h2 class="section__subheading">Fixtures</h2>
     {
-      relatedEvents.length > 0 ? (
+      liveFixtures.length > 0 && (
+        <>
+          <h2 class="section__subheading section__subheading--live">
+            <span class="live-dot" /> In Progress
+          </h2>
+          <ul class="event-list">
+            {liveFixtures.map((event) => (
+              <li class="event-list__item">
+                <span class="event-list__date">{event.text}</span>
+                <span class="event-list__title">{event.title}</span>
+                <span class="event-list__meta">{event.locationName}</span>
+              </li>
+            ))}
+          </ul>
+        </>
+      )
+    }
+
+    <h2 class="section__subheading">Upcoming Fixtures</h2>
+    {
+      upcomingFixtures.length > 0 ? (
         <ul class="event-list">
-          {relatedEvents.map((event) => (
+          {upcomingFixtures.map((event) => (
             <li class="event-list__item">
-              <span class="event-list__date">{formatEventDate(event.data).text}</span>
-              <span class="event-list__title">{event.data.title}</span>
-              <span class="event-list__meta">{event.data.location?.name ?? 'Online / TBC'}</span>
+              <span class="event-list__date">{event.text}</span>
+              <span class="event-list__title">{event.title}</span>
+              <span class="event-list__meta">{event.locationName}</span>
             </li>
           ))}
         </ul>
       ) : (
-        <p class="empty">No fixtures published yet for this discipline.</p>
+        <p class="empty">No upcoming fixtures published yet for this discipline.</p>
+      )
+    }
+
+    <h2 class="section__subheading section__subheading--muted">Past Fixtures</h2>
+    {
+      pastFixtures.length > 0 ? (
+        <ul class="event-list event-list--past">
+          {pastFixtures.map((event) => (
+            <li class="event-list__item">
+              <span class="event-list__date">{event.text}</span>
+              <span class="event-list__title">{event.title}</span>
+              <span class="event-list__meta">{event.locationName}</span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p class="empty">No past fixtures logged yet for this discipline.</p>
       )
     }
   </section>
@@ -130,6 +192,37 @@ const standingsTableRows = standingsRows.map((r) => ({ ...r, name: corpsNames.ge
   .section__subheading {
     font-size: 1.3rem;
     margin: 2.5rem 0 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .section__subheading--live {
+    color: var(--crimson-bright);
+  }
+
+  .section__subheading--muted {
+    color: var(--text-secondary);
+    font-size: 1.05rem;
+  }
+
+  .live-dot {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--crimson-bright);
+    animation: pulse-dot-discipline 1.6s var(--ease-out) infinite;
+  }
+
+  @keyframes pulse-dot-discipline {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.3;
+    }
   }
 
   .section__note {
@@ -143,6 +236,20 @@ const standingsTableRows = standingsRows.map((r) => ({ ...r, name: corpsNames.ge
     padding: 0;
     border: 1px solid var(--border);
     background: var(--surface);
+  }
+
+  .event-list--past {
+    background: var(--bg-base-alt);
+  }
+
+  .event-list--past .event-list__date {
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+
+  .event-list--past .event-list__title {
+    color: var(--text-secondary-alt);
+    font-weight: 500;
   }
 
   .event-list__item {
