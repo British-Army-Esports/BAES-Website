@@ -81,6 +81,8 @@ const locations = defineCollection({
       long: z.number(),
     }),
     equipment: z.array(z.string()).optional(),
+    // Short public operational status/setup note — no personal data.
+    status: z.string().optional(),
     pocName: z.string().optional(),
     pocRole: z.string().optional(),
     photos: z.array(z.string()).optional(),

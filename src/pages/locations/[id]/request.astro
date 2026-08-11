@@ -3,7 +3,7 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 
 export async function getStaticPaths() {
-  const locations = await getCollection('locations');
+  const locations = await getCollection('locations', ({ data }) => data.active);
   return locations.map((location) => ({
     params: { id: location.id },
     props: { location },
@@ -22,12 +22,14 @@ const formName = `hub-request-${location.id}`;
     <p class="section__eyebrow label">Request Access</p>
     <h1 class="section__heading">{location.data.name}</h1>
     <p class="section__address">{location.data.address}</p>
+    {location.data.status && <p class="section__status">{location.data.status}</p>}
     {
-      location.data.pocName && (
-        <p class="section__poc">
-          Point of contact: {location.data.pocName}
-          {location.data.pocRole && ` — ${location.data.pocRole}`}
-        </p>
+      location.data.equipment && location.data.equipment.length > 0 && (
+        <ul class="equipment-list">
+          {location.data.equipment.map((item: string) => (
+            <li>{item}</li>
+          ))}
+        </ul>
       )
     }
 
@@ -103,10 +105,27 @@ const formName = `hub-request-${location.id}`;
     margin: 0 0 0.5rem;
   }
 
-  .section__poc {
+  .section__status {
     color: var(--text-secondary);
     font-size: 0.9rem;
+    margin: 0 0 1rem;
+  }
+
+  .equipment-list {
+    list-style: none;
     margin: 0 0 1.5rem;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .equipment-list li {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-secondary-alt);
+    font-size: 0.8rem;
+    padding: 0.35rem 0.75rem;
   }
 
   .section__intro {
