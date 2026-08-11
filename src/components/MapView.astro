@@ -63,7 +63,13 @@ const typeLabels: Record<string, string> = {
         <li class="mapview__list-item">
           <span class="mapview__list-tag label">{typeLabels[loc.type] ?? loc.type}</span>
           <span class="mapview__list-name">{loc.name}</span>
-          <span class="mapview__list-meta">{loc.address}</span>
+          <span class="mapview__list-meta">
+            {loc.address}
+            {' · '}
+            <a href={`/locations/${loc.id}/request`} class="mapview__list-request">
+              Request Access
+            </a>
+          </span>
         </li>
       ))
     }
@@ -121,7 +127,7 @@ const typeLabels: Record<string, string> = {
     const locationsLayer = L.layerGroup(
       locationPoints.map((loc) =>
         L.marker([loc.lat, loc.long], { icon: makeIcon(false) }).bindPopup(
-          `<strong>${loc.name}</strong><br>${typeLabels[loc.type] ?? loc.type}<br>${loc.address}`,
+          `<strong>${loc.name}</strong><br>${typeLabels[loc.type] ?? loc.type}<br>${loc.address}<br><a href="/locations/${loc.id}/request">Request Access →</a>`,
         ),
       ),
     );
@@ -257,6 +263,11 @@ const typeLabels: Record<string, string> = {
     text-align: right;
   }
 
+  .mapview__list-request {
+    color: var(--crimson-bright);
+    font-weight: 600;
+  }
+
   .mapview__list-empty {
     padding: 2rem 1.25rem;
     color: var(--text-secondary);
@@ -308,6 +319,11 @@ const typeLabels: Record<string, string> = {
   :global(.leaflet-popup-content) {
     font-family: var(--font-body);
     font-size: 0.85rem;
+  }
+
+  :global(.leaflet-popup-content a) {
+    color: var(--crimson-bright);
+    font-weight: 600;
   }
 
   @keyframes map-pulse {

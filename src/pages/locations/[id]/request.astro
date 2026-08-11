@@ -1,0 +1,121 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+  const locations = await getCollection('locations');
+  return locations.map((location) => ({
+    params: { id: location.id },
+    props: { location },
+  }));
+}
+
+const { location } = Astro.props;
+const formName = `hub-request-${location.id}`;
+---
+
+<BaseLayout
+  title={`Request Access — ${location.data.name}`}
+  description={`Request access or ask a question about ${location.data.name}.`}
+>
+  <section class="section container">
+    <p class="section__eyebrow label">Request Access</p>
+    <h1 class="section__heading">{location.data.name}</h1>
+    <p class="section__address">{location.data.address}</p>
+    {
+      location.data.pocName && (
+        <p class="section__poc">
+          Point of contact: {location.data.pocName}
+          {location.data.pocRole && ` — ${location.data.pocRole}`}
+        </p>
+      )
+    }
+
+    <p class="section__intro">
+      Fill in the form below to request access, ask a question, or arrange a visit. Your message
+      goes directly to this hub's point of contact — their email address is never published or
+      exposed on this site.
+    </p>
+
+    <form
+      name={formName}
+      method="POST"
+      action="/feedback/thanks"
+      data-netlify="true"
+      netlify-honeypot="bot-field"
+      class="request-form"
+    >
+      <input type="hidden" name="form-name" value={formName} />
+      <input type="hidden" name="hub" value={location.data.name} />
+      <p class="form-honeypot">
+        <label>
+          Don't fill this out if you're human: <input name="bot-field" />
+        </label>
+      </p>
+
+      <div class="form-field">
+        <label for="name">Your Name</label>
+        <input type="text" id="name" name="name" required autocomplete="name" />
+      </div>
+
+      <div class="form-field">
+        <label for="email">Your Email</label>
+        <input type="email" id="email" name="email" required autocomplete="email" />
+      </div>
+
+      <div class="form-field">
+        <label for="unit">Unit / Corps (optional)</label>
+        <input type="text" id="unit" name="unit" />
+      </div>
+
+      <div class="form-field">
+        <label for="message">What are you requesting?</label>
+        <textarea id="message" name="message" required></textarea>
+      </div>
+
+      <button type="submit" class="form-submit clip-tl-sm">
+        Send Request
+        <span>→</span>
+      </button>
+    </form>
+  </section>
+</BaseLayout>
+
+<style>
+  .section {
+    padding-top: clamp(2.5rem, 6vw, 4rem);
+    padding-bottom: clamp(3rem, 8vw, 5rem);
+    max-width: 640px;
+  }
+
+  .section__eyebrow {
+    color: var(--crimson-bright);
+    margin-bottom: 0.75rem;
+  }
+
+  .section__heading {
+    font-size: clamp(1.75rem, 3vw, 2.5rem);
+    margin-bottom: 0.4rem;
+  }
+
+  .section__address {
+    color: var(--text-secondary-alt);
+    margin: 0 0 0.5rem;
+  }
+
+  .section__poc {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin: 0 0 1.5rem;
+  }
+
+  .section__intro {
+    color: var(--text-secondary-alt);
+    margin: 0 0 2rem;
+    line-height: 1.6;
+  }
+
+  .request-form {
+    margin-top: 1rem;
+  }
+</style>
