@@ -3,7 +3,8 @@ corps: "re"
 disciplines:
   - "counter-strike-2"
   - "call-of-duty"
-scale: "inter-corps"
+scale: "single-service"
+team: "corps"
 presenceType: "competitive"
 date: 2024-06-15
 dateStatus: "provisional"

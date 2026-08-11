@@ -5,7 +5,8 @@ disciplines:
   - "counter-strike-2"
   - "league-of-legends"
   - "rocket-league"
-scale: "inter-corps"
+scale: "single-service"
+team: "corps"
 presenceType: "competitive"
 date: 2021-06-15
 dateStatus: "provisional"

@@ -3,6 +3,7 @@ export interface EventCardData {
   id: string;
   title: string;
   scale: string;
+  team?: string;
   disciplineIds: string[];
   disciplineNames: string[];
   accentColor?: string;
@@ -16,10 +17,11 @@ export interface EventCardData {
 export interface Props {
   event: EventCardData;
   scaleLabels: Record<string, string>;
+  teamLabels: Record<string, string>;
   live?: boolean;
 }
 
-const { event, scaleLabels, live = false } = Astro.props;
+const { event, scaleLabels, teamLabels, live = false } = Astro.props;
 const accent = event.accentColor || '#c8102e';
 ---
 
@@ -47,6 +49,7 @@ const accent = event.accentColor || '#c8102e';
     </h3>
     <p class="event-card__scale label">
       {scaleLabels[event.scale]}
+      {event.team && ` · ${teamLabels[event.team]}`}
       {event.disciplineNames.length > 0 && ` · ${event.disciplineNames.join(', ')}`}
     </p>
     {

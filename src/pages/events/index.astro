@@ -35,6 +35,7 @@ const events = (await getCollection('events'))
       id: event.id,
       title: event.data.title,
       scale: event.data.scale,
+      team: event.data.team,
       disciplineIds,
       disciplineNames,
       accentColor,
@@ -58,12 +59,18 @@ const usedDisciplineIds = new Set(events.flatMap((e) => e.disciplineIds));
 const filterDisciplines = allDisciplines.filter((d) => usedDisciplineIds.has(d.id));
 
 const scaleLabels: Record<string, string> = {
-  'unit-garrison': 'Unit / Garrison',
-  corps: 'Corps',
-  'inter-corps': 'Inter-Corps',
-  army: 'Army (National)',
-  'inter-service-international': 'Inter-Service / International',
-  'mixed-community': 'Mixed / Community',
+  engagement: 'Engagement',
+  'single-service': 'Single Service',
+  military: 'Military (Tri-Service)',
+  'uk-national': 'UK National',
+  'international-military': 'International Military',
+  european: 'European',
+};
+
+const teamLabels: Record<string, string> = {
+  corps: 'Corps Team',
+  baes: 'BAES Team',
+  ukaf: 'UKAF Team',
 };
 ---
 
@@ -99,7 +106,7 @@ const scaleLabels: Record<string, string> = {
           </h2>
           <div class="event-grid">
             {inProgress.map((event) => (
-              <EventCard event={event} scaleLabels={scaleLabels} live />
+              <EventCard event={event} scaleLabels={scaleLabels} teamLabels={teamLabels} live />
             ))}
           </div>
         </>
@@ -108,13 +115,13 @@ const scaleLabels: Record<string, string> = {
 
     <h2 class="section__subheading">Upcoming</h2>
     <div class="event-grid">
-      {upcoming.map((event) => <EventCard event={event} scaleLabels={scaleLabels} />)}
+      {upcoming.map((event) => <EventCard event={event} scaleLabels={scaleLabels} teamLabels={teamLabels} />)}
       {upcoming.length === 0 && <p class="empty">No upcoming fixtures published yet.</p>}
     </div>
 
     <h2 class="section__subheading">Past &amp; History</h2>
     <div class="event-grid">
-      {past.map((event) => <EventCard event={event} scaleLabels={scaleLabels} />)}
+      {past.map((event) => <EventCard event={event} scaleLabels={scaleLabels} teamLabels={teamLabels} />)}
       {past.length === 0 && <p class="empty">No past fixtures logged yet.</p>}
     </div>
   </section>

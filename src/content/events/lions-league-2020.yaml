@@ -3,7 +3,8 @@ corps: "re"
 disciplines:
   - "counter-strike-2"
   - "league-of-legends"
-scale: "inter-corps"
+scale: "single-service"
+team: "corps"
 presenceType: "competitive"
 date: 2020-06-15
 dateStatus: "provisional"

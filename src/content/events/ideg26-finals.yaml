@@ -3,7 +3,8 @@ disciplines:
   - "counter-strike-2"
   - "rocket-league"
   - "f1-25-iracing"
-scale: "inter-service-international"
+scale: "international-military"
+team: "ukaf"
 presenceType: "competitive"
 date: 2026-10-09
 endDate: 2026-10-11

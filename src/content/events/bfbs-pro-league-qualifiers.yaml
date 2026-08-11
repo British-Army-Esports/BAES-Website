@@ -3,10 +3,11 @@ disciplines:
   - "rocket-league"
   - "f1-25-iracing"
   - "league-of-legends"
-scale: "inter-service-international"
+scale: "military"
+team: "baes"
 presenceType: "competitive"
 date: 2026-06-01
 endDate: 2026-07-31
 dateStatus: "confirmed"
-description: "BFBS Pro League qualifiers — a recurring June–July window, consistent year-on-year. Online — no fixed physical venue. 2026 season spans Rocket League, F1 25, League of Legends, plus the new BFBS Open Series for beginners."
+description: "BFBS Pro League qualifiers: a recurring June to July window, consistent year-on-year. Online, no fixed physical venue. 2026 season spans Rocket League, F1 25, League of Legends, plus the new BFBS Open Series for beginners."
 externalLink: "https://bfbsesports.com/"

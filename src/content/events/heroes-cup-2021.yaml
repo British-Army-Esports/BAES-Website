@@ -3,7 +3,7 @@ disciplines:
   - "counter-strike-2"
   - "league-of-legends"
   - "rocket-league"
-scale: "mixed-community"
+scale: "single-service"
 presenceType: "competitive"
 date: 2021-12-13
 dateStatus: "confirmed"

@@ -1,9 +1,10 @@
 title: "EPIC Tabletop Weekender"
-scale: "mixed-community"
+scale: "engagement"
+team: "baes"
 presenceType: "community-outreach"
 date: 2026-11-21
 dateStatus: "provisional"
-dateOptions: ["2026-11-XX"]
+dateOptions: ["2026-11"]
 location:
   name: "Coventry Building Society Arena, Coventry"
   lat: 52.4481582

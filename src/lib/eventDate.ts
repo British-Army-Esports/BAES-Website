@@ -59,11 +59,17 @@ export function formatEventDate(event: EventDateInfo): FormattedEventDate {
   }
 
   if (status === 'provisional') {
-    if (event.dateOptions && event.dateOptions.length > 0) {
-      const windows = event.dateOptions.map(formatRoughOption);
-      return { text: `Likely ${windows.join(' or ')}`, badge: 'provisional' };
-    }
-    return { text: `Likely ${MONTHS[date.getMonth()]} ${date.getFullYear()}`, badge: 'provisional' };
+    // "Likely" is a prediction about something that hasn't happened yet —
+    // nonsensical for an event that's already over. For a past event with
+    // only an approximate date on record, just state the window plainly
+    // (e.g. "2020" or "Dec 2020"), no "Likely" prefix.
+    const endDate = event.endDate ? toDate(event.endDate) : date;
+    const isPast = endDate.getTime() < Date.now();
+    const windowText =
+      event.dateOptions && event.dateOptions.length > 0
+        ? event.dateOptions.map(formatRoughOption).join(' or ')
+        : `${MONTHS[date.getMonth()]} ${date.getFullYear()}`;
+    return { text: isPast ? windowText : `Likely ${windowText}`, badge: 'provisional' };
   }
 
   const endDate = event.endDate ? toDate(event.endDate) : undefined;

@@ -1,7 +1,8 @@
 title: "C.O.D.E. Bowl VII"
 disciplines:
   - "call-of-duty"
-scale: "inter-service-international"
+scale: "international-military"
+team: "baes"
 presenceType: "competitive"
 date: 2026-06-24
 dateStatus: "confirmed"

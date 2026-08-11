@@ -37,14 +37,28 @@ const events = defineCollection({
     // some fixtures (broad festivals with no fixed game list) have none.
     disciplines: z.array(reference('disciplines')).optional(),
     corps: reference('corps').optional(),
+    // The real taxonomy of British Army esports fixtures: how big/what kind
+    // of competition it is. engagement: outreach/festival presence, not a
+    // formal competitive bracket. single-service: within the Army only
+    // (Corps-vs-Corps, unit-level, Army-wide). military: UK tri-service,
+    // not specifically national or international. uk-national: national
+    // level, e.g. representing all four home nations. international-military:
+    // military competition against other countries. european: civilian
+    // European-level competition (e.g. FACEIT ESEA), not military-specific.
     scale: z.enum([
-      'unit-garrison',
-      'corps',
-      'inter-corps',
-      'army',
-      'inter-service-international',
-      'mixed-community',
+      'engagement',
+      'single-service',
+      'military',
+      'uk-national',
+      'international-military',
+      'european',
     ]),
+    // Who actually fielded the team, distinct from scale. corps: a specific
+    // Corps team (see the `corps` field above for which one). baes: the
+    // central British Army Esports team. ukaf: a UK Armed Forces
+    // (tri-service) team, not Army/BAES-exclusive. Optional: many
+    // engagement-type presences don't have a clean team qualifier.
+    team: z.enum(['corps', 'baes', 'ukaf']).optional(),
     presenceType: z.enum(['competitive', 'community-outreach', 'mixed']),
     date: z.coerce.date(),
     endDate: z.coerce.date().optional(),
