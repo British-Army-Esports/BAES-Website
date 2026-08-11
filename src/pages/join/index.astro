@@ -1,0 +1,57 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Join Us" description="How to get involved with British Army Esports.">
+  <section class="section container">
+    <p class="section__eyebrow label">Get Involved</p>
+    <h1 class="section__heading">Join Us</h1>
+
+    <div class="prose">
+      <p>
+        Serving and want to get involved? Start with your unit's PES/welfare staff or your Corps'
+        esports lead — they'll know what's running locally and how to link in with the wider
+        programme.
+      </p>
+      <p>
+        Want to follow along or ask a question first? Join the community
+        <a href="https://discord.gg/D5SrQ6xAdw" target="_blank" rel="noopener noreferrer">Discord</a>.
+      </p>
+      <p>
+        Running or know of a gaming hub not listed here? Use the <a href="/feedback">Feedback</a>
+        page to let us know.
+      </p>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .section {
+    padding-top: clamp(2.5rem, 6vw, 4rem);
+    padding-bottom: clamp(3rem, 8vw, 5rem);
+    max-width: 640px;
+  }
+
+  .section__eyebrow {
+    color: var(--crimson-bright);
+    margin-bottom: 0.75rem;
+  }
+
+  .section__heading {
+    font-size: clamp(1.75rem, 4vw, 3rem);
+    margin-bottom: 1.5rem;
+  }
+
+  .prose {
+    color: var(--text-secondary-alt);
+    line-height: 1.7;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .prose a {
+    color: var(--crimson-bright);
+    font-weight: 600;
+  }
+</style>

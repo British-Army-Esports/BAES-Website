@@ -1,0 +1,64 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Card from '../../components/Card.astro';
+
+const corps = (await getCollection('corps', ({ data }) => data.active)).sort((a, b) =>
+  a.data.name.localeCompare(b.data.name),
+);
+---
+
+<BaseLayout title="Corps" active="Corps" description="British Army Corps taking part in esports.">
+  <section class="section container">
+    <p class="section__eyebrow label">Represent</p>
+    <h1 class="section__heading">Corps</h1>
+    <p class="section__intro">
+      Esports sits alongside every Corps' own identity — this directory doesn't replace what
+      individual Corps publish themselves, it aggregates and connects it.
+    </p>
+
+    <div class="grid">
+      {
+        corps.map((c) => (
+          <Card
+            category={c.data.abbreviation}
+            title={c.data.name}
+            meta={c.data.summary}
+            href={`/corps/${c.id}`}
+            image={c.data.crest}
+          />
+        ))
+      }
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .section {
+    padding-top: clamp(2.5rem, 6vw, 4rem);
+    padding-bottom: clamp(3rem, 8vw, 5rem);
+  }
+
+  .section__eyebrow {
+    color: var(--crimson-bright);
+    margin-bottom: 0.75rem;
+  }
+
+  .section__heading {
+    font-size: clamp(1.75rem, 4vw, 3rem);
+    margin-bottom: 0.75rem;
+  }
+
+  .section__intro {
+    color: var(--text-secondary-alt);
+    max-width: 640px;
+    line-height: 1.6;
+    margin: 0 0 2rem;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
+  }
+</style>

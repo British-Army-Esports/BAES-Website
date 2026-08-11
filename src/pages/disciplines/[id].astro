@@ -1,0 +1,133 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { formatEventDate } from '../../lib/eventDate';
+
+export async function getStaticPaths() {
+  const disciplines = await getCollection('disciplines');
+  return disciplines.map((discipline) => ({
+    params: { id: discipline.id },
+    props: { discipline },
+  }));
+}
+
+const { discipline } = Astro.props;
+const { Content } = await render(discipline);
+
+const relatedEvents = (await getCollection('events'))
+  .filter((e) => e.data.discipline?.id === discipline.id)
+  .sort((a, b) => a.data.date.getTime() - b.data.date.getTime());
+---
+
+<BaseLayout title={discipline.data.name} active="Disciplines" description={discipline.data.tagline}>
+  <section class="section container">
+    <p class="section__eyebrow label">Discipline</p>
+    <h1 class="section__heading">{discipline.data.name}</h1>
+    {discipline.data.tagline && <p class="section__tagline">{discipline.data.tagline}</p>}
+
+    <div class="prose">
+      <Content />
+    </div>
+
+    <h2 class="section__subheading">Fixtures</h2>
+    {
+      relatedEvents.length > 0 ? (
+        <ul class="event-list">
+          {relatedEvents.map((event) => (
+            <li class="event-list__item">
+              <span class="event-list__date">{formatEventDate(event.data).text}</span>
+              <span class="event-list__title">{event.data.title}</span>
+              <span class="event-list__meta">{event.data.location?.name ?? 'Online / TBC'}</span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p class="empty">No fixtures published yet for this discipline.</p>
+      )
+    }
+  </section>
+</BaseLayout>
+
+<style>
+  .section {
+    padding-top: clamp(2.5rem, 6vw, 4rem);
+    padding-bottom: clamp(3rem, 8vw, 5rem);
+    max-width: 720px;
+  }
+
+  .section__eyebrow {
+    color: var(--crimson-bright);
+    margin-bottom: 0.75rem;
+  }
+
+  .section__heading {
+    font-size: clamp(1.75rem, 4vw, 3rem);
+    margin-bottom: 0.5rem;
+  }
+
+  .section__tagline {
+    color: var(--text-secondary-alt);
+    margin: 0 0 1.5rem;
+  }
+
+  .prose {
+    color: var(--text-secondary-alt);
+    line-height: 1.7;
+  }
+
+  .section__subheading {
+    font-size: 1.3rem;
+    margin: 2.5rem 0 1rem;
+  }
+
+  .event-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .event-list__item {
+    display: grid;
+    grid-template-columns: 140px 1fr auto;
+    gap: 1rem;
+    align-items: center;
+    padding: 0.9rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.9rem;
+  }
+
+  .event-list__item:last-child {
+    border-bottom: none;
+  }
+
+  .event-list__date {
+    color: var(--crimson-bright);
+    font-weight: 600;
+  }
+
+  .event-list__title {
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+
+  .event-list__meta {
+    color: var(--text-secondary);
+    text-align: right;
+  }
+
+  .empty {
+    color: var(--text-secondary);
+  }
+
+  @media (max-width: 560px) {
+    .event-list__item {
+      grid-template-columns: 1fr;
+      gap: 0.25rem;
+    }
+    .event-list__meta {
+      text-align: left;
+    }
+  }
+</style>

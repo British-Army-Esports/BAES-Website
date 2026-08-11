@@ -1,0 +1,44 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Content Creators"
+  active="Creators"
+  description="British Army personnel who stream and create content — in their own capacity."
+>
+  <section class="section container">
+    <p class="section__eyebrow label">Content Creators</p>
+    <h1 class="section__heading">Coming Soon</h1>
+    <p class="section__intro">
+      This page will list players who also stream or create content on Twitch, YouTube, and
+      elsewhere — in their own right, not as official Army channels. Content and views shown here
+      will always be the individual's own.
+    </p>
+  </section>
+</BaseLayout>
+
+<style>
+  .section {
+    padding-top: clamp(3rem, 8vw, 5rem);
+    padding-bottom: clamp(4rem, 10vw, 6rem);
+    text-align: center;
+  }
+
+  .section__eyebrow {
+    color: var(--crimson-bright);
+    margin-bottom: 0.75rem;
+  }
+
+  .section__heading {
+    font-size: clamp(1.75rem, 4vw, 3rem);
+    margin-bottom: 1rem;
+  }
+
+  .section__intro {
+    color: var(--text-secondary-alt);
+    max-width: 520px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+</style>

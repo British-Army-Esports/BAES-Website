@@ -1,0 +1,46 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import MapView from '../../components/MapView.astro';
+---
+
+<BaseLayout title="Locations" active="Locations" description="Permanent gaming hubs and events, on one map.">
+  <section class="section container">
+    <p class="section__eyebrow label">Locations</p>
+    <h1 class="section__heading">Locations &amp; Events</h1>
+    <p class="section__intro">
+      Permanent gaming hubs across garrisons, plus upcoming events. Switch layers to see one or
+      both, or view as a list.
+    </p>
+  </section>
+  <section class="container">
+    <MapView />
+  </section>
+</BaseLayout>
+
+<style>
+  .section {
+    padding-top: clamp(2.5rem, 6vw, 4rem);
+    padding-bottom: 1.5rem;
+  }
+
+  .section__eyebrow {
+    color: var(--crimson-bright);
+    margin-bottom: 0.75rem;
+  }
+
+  .section__heading {
+    font-size: clamp(1.75rem, 4vw, 3rem);
+    margin-bottom: 0.75rem;
+  }
+
+  .section__intro {
+    color: var(--text-secondary-alt);
+    max-width: 640px;
+    line-height: 1.6;
+    margin: 0 0 1rem;
+  }
+
+  .container {
+    padding-bottom: clamp(3rem, 8vw, 5rem);
+  }
+</style>

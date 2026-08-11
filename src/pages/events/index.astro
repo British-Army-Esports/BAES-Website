@@ -1,0 +1,142 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { formatEventDate } from '../../lib/eventDate';
+
+const events = (await getCollection('events')).sort(
+  (a, b) => a.data.date.getTime() - b.data.date.getTime(),
+);
+
+const scaleLabels: Record<string, string> = {
+  'unit-garrison': 'Unit / Garrison',
+  corps: 'Corps',
+  'inter-corps': 'Inter-Corps',
+  army: 'Army (National)',
+  'inter-service-international': 'Inter-Service / International',
+  'mixed-community': 'Mixed / Community',
+};
+---
+
+<BaseLayout title="Events" active="Events" description="Upcoming and past British Army Esports fixtures.">
+  <section class="section container">
+    <p class="section__eyebrow label">Compete</p>
+    <h1 class="section__heading">Events &amp; Competitions</h1>
+    <p class="section__intro">
+      The fixtures programme — from Corps-level matches to national and international
+      competitions. Dates marked "Likely" or "TBC" aren't confirmed yet.
+    </p>
+
+    <ul class="event-list">
+      {
+        events.map((event) => {
+          const { text, badge } = formatEventDate(event.data);
+          return (
+            <li class="event-list__item">
+              <span class:list={['event-list__date', `event-list__date--${badge}`]}>{text}</span>
+              <div class="event-list__body">
+                <span class="event-list__title">{event.data.title}</span>
+                <span class="event-list__scale label">{scaleLabels[event.data.scale]}</span>
+              </div>
+              <span class="event-list__meta">{event.data.location?.name ?? 'Online / TBC'}</span>
+            </li>
+          );
+        })
+      }
+      {events.length === 0 && <li class="empty">No fixtures published yet.</li>}
+    </ul>
+  </section>
+</BaseLayout>
+
+<style>
+  .section {
+    padding-top: clamp(2.5rem, 6vw, 4rem);
+    padding-bottom: clamp(3rem, 8vw, 5rem);
+  }
+
+  .section__eyebrow {
+    color: var(--crimson-bright);
+    margin-bottom: 0.75rem;
+  }
+
+  .section__heading {
+    font-size: clamp(1.75rem, 4vw, 3rem);
+    margin-bottom: 0.75rem;
+  }
+
+  .section__intro {
+    color: var(--text-secondary-alt);
+    max-width: 640px;
+    line-height: 1.6;
+    margin: 0 0 2rem;
+  }
+
+  .event-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .event-list__item {
+    display: grid;
+    grid-template-columns: 200px 1fr auto;
+    gap: 1.25rem;
+    align-items: center;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .event-list__item:last-child {
+    border-bottom: none;
+  }
+
+  .event-list__date {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+  }
+
+  .event-list__date--provisional,
+  .event-list__date--tbc {
+    color: var(--text-secondary);
+    font-style: italic;
+  }
+
+  .event-list__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .event-list__title {
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .event-list__scale {
+    color: var(--text-secondary);
+  }
+
+  .event-list__meta {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    text-align: right;
+  }
+
+  .empty {
+    padding: 2rem 1.25rem;
+    color: var(--text-secondary);
+    text-align: center;
+  }
+
+  @media (max-width: 640px) {
+    .event-list__item {
+      grid-template-columns: 1fr;
+      gap: 0.4rem;
+    }
+    .event-list__meta {
+      text-align: left;
+    }
+  }
+</style>

@@ -1,0 +1,68 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Card from '../../components/Card.astro';
+
+const disciplines = (await getCollection('disciplines', ({ data }) => data.active)).sort(
+  (a, b) => (a.data.order ?? 99) - (b.data.order ?? 99),
+);
+---
+
+<BaseLayout title="Disciplines" active="Disciplines" description="Esports disciplines the British Army competes in.">
+  <section class="section container">
+    <p class="section__eyebrow label">Compete</p>
+    <h1 class="section__heading">Disciplines</h1>
+    <p class="section__intro">
+      The games and formats British Army Esports competes in, from Corps-level fixtures to
+      national and international competition.
+    </p>
+
+    <div class="grid">
+      {
+        disciplines.map((d) => (
+          <Card
+            category="Discipline"
+            title={d.data.name}
+            meta={d.data.tagline}
+            href={`/disciplines/${d.id}`}
+          />
+        ))
+      }
+      {disciplines.length === 0 && <p class="empty">No disciplines published yet.</p>}
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .section {
+    padding-top: clamp(2.5rem, 6vw, 4rem);
+    padding-bottom: clamp(3rem, 8vw, 5rem);
+  }
+
+  .section__eyebrow {
+    color: var(--crimson-bright);
+    margin-bottom: 0.75rem;
+  }
+
+  .section__heading {
+    font-size: clamp(1.75rem, 4vw, 3rem);
+    margin-bottom: 0.75rem;
+  }
+
+  .section__intro {
+    color: var(--text-secondary-alt);
+    max-width: 640px;
+    line-height: 1.6;
+    margin: 0 0 2rem;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
+  }
+
+  .empty {
+    color: var(--text-secondary);
+  }
+</style>

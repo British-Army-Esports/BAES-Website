@@ -1,0 +1,173 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { formatEventDate } from '../../lib/eventDate';
+
+export async function getStaticPaths() {
+  const corps = await getCollection('corps');
+  return corps.map((c) => ({
+    params: { id: c.id },
+    props: { corps: c },
+  }));
+}
+
+const { corps } = Astro.props;
+
+const relatedLocations = (await getCollection('locations', ({ data }) => data.active)).filter(
+  (loc) => loc.data.corps?.some((ref) => ref.id === corps.id),
+);
+
+const relatedEvents = (await getCollection('events'))
+  .filter((e) => e.data.corps?.id === corps.id)
+  .sort((a, b) => a.data.date.getTime() - b.data.date.getTime());
+---
+
+<BaseLayout title={corps.data.name} active="Corps" description={corps.data.summary}>
+  <section class="section container">
+    <p class="section__eyebrow label">Corps</p>
+    <div class="header">
+      {corps.data.crest && <img class="crest" src={corps.data.crest} alt="" />}
+      <div>
+        <h1 class="section__heading">{corps.data.name}</h1>
+        {corps.data.summary && <p class="section__summary">{corps.data.summary}</p>}
+        <div class="links">
+          {
+            corps.data.website && (
+              <a href={corps.data.website} target="_blank" rel="noopener noreferrer">
+                Official Corps page ↗
+              </a>
+            )
+          }
+          {
+            corps.data.twitch && (
+              <a href={corps.data.twitch} target="_blank" rel="noopener noreferrer">
+                Watch on Twitch ↗
+              </a>
+            )
+          }
+        </div>
+      </div>
+    </div>
+
+    <h2 class="section__subheading">Gaming Hubs</h2>
+    {
+      relatedLocations.length > 0 ? (
+        <ul class="plain-list">
+          {relatedLocations.map((loc) => (
+            <li>
+              <a href={`/locations/${loc.id}/request`}>{loc.data.name}</a>
+              <span class="plain-list__meta">{loc.data.address}</span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p class="empty">No gaming hubs linked to this Corps yet.</p>
+      )
+    }
+
+    <h2 class="section__subheading">Fixtures</h2>
+    {
+      relatedEvents.length > 0 ? (
+        <ul class="plain-list">
+          {relatedEvents.map((event) => (
+            <li>
+              <span>{event.data.title}</span>
+              <span class="plain-list__meta">{formatEventDate(event.data).text}</span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p class="empty">No fixtures logged for this Corps yet.</p>
+      )
+    }
+  </section>
+</BaseLayout>
+
+<style>
+  .section {
+    padding-top: clamp(2.5rem, 6vw, 4rem);
+    padding-bottom: clamp(3rem, 8vw, 5rem);
+    max-width: 720px;
+  }
+
+  .section__eyebrow {
+    color: var(--crimson-bright);
+    margin-bottom: 0.75rem;
+  }
+
+  .header {
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+  }
+
+  .crest {
+    height: 88px;
+    width: auto;
+    flex-shrink: 0;
+  }
+
+  .section__heading {
+    font-size: clamp(1.5rem, 3.5vw, 2.5rem);
+    margin-bottom: 0.5rem;
+  }
+
+  .section__summary {
+    color: var(--text-secondary-alt);
+    line-height: 1.6;
+    margin: 0 0 0.75rem;
+  }
+
+  .links {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .links a {
+    color: var(--crimson-bright);
+    font-weight: 600;
+    font-size: 0.85rem;
+  }
+
+  .section__subheading {
+    font-size: 1.2rem;
+    margin: 2.5rem 0 1rem;
+  }
+
+  .plain-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .plain-list li {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.85rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.9rem;
+  }
+
+  .plain-list li:last-child {
+    border-bottom: none;
+  }
+
+  .plain-list a {
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+
+  .plain-list__meta {
+    color: var(--text-secondary);
+    text-align: right;
+  }
+
+  .empty {
+    color: var(--text-secondary);
+  }
+</style>
