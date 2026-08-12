@@ -1,6 +1,7 @@
 ---
 name: "Sim Racing"
 tagline: "Formula 1 and endurance/oval racing: F1 25 and iRacing"
+ticker: "SIM"
 externalLink: "https://www.ea.com/games/f1/f1-25/buy"
 icon: "/logos/disciplines/f1-25-iracing.png"
 color: "#e10600"

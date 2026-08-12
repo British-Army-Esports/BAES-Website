@@ -105,7 +105,7 @@ const overallRows = [...overallPoints.entries()]
       {
         disciplines.map((d) => (
           <Card
-            category="Discipline"
+            category={d.data.ticker ?? 'Discipline'}
             title={d.data.name}
             meta={d.data.tagline}
             href={`/disciplines/${d.id}`}

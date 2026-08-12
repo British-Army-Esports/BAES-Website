@@ -1,6 +1,7 @@
 ---
 name: "Rocket League"
 tagline: "Car football: fast, team-based, easy to pick up"
+ticker: "RL"
 externalLink: "https://www.rocketleague.com/download"
 icon: "/logos/disciplines/rocket-league.jpg"
 color: "#1f8ecd"

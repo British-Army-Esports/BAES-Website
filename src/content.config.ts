@@ -6,6 +6,9 @@ const disciplines = defineCollection({
   schema: z.object({
     name: z.string(),
     tagline: z.string().optional(),
+    // Short stock-ticker-style code shown on the Disciplines cards, e.g.
+    // "COD", "CS2" — same pattern as Corps' `abbreviation` field.
+    ticker: z.string().optional(),
     icon: z.string().optional(),
     color: z.string().optional(),
     order: z.number().optional(),

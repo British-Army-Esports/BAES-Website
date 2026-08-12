@@ -1,6 +1,7 @@
 ---
 name: "EA Sports FC (FIFA)"
 tagline: "Football, still widely known by its old name: FIFA"
+ticker: "FIFA"
 externalLink: "https://www.ea.com/en/games/ea-sports-fc/fc-26/buy"
 icon: "/logos/disciplines/ea-sports-fc.webp"
 color: "#00ff85"
