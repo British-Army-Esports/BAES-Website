@@ -6,6 +6,7 @@ disciplines:
 scale: "international-military"
 team: "ukaf"
 presenceType: "competitive"
+tier: "major"
 date: 2026-10-09
 endDate: 2026-10-11
 dateStatus: "confirmed"

@@ -4,6 +4,7 @@ disciplines:
 scale: "european"
 team: "baes"
 presenceType: "competitive"
+tier: "major"
 date: 2026-06-01
 dateStatus: "tbc"
 description: "British Army Esports competing in FACEIT ESEA League, Season 58."

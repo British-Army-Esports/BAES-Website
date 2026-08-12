@@ -3,6 +3,7 @@ disciplines:
   - "f1-25-iracing"
 scale: "single-service"
 presenceType: "competitive"
+tier: "minor"
 date: 2026-09-07
 endDate: 2027-02-01
 dateStatus: "confirmed"

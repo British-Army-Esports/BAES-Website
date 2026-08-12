@@ -60,6 +60,13 @@ const events = defineCollection({
     // engagement-type presences don't have a clean team qualifier.
     team: z.enum(['corps', 'baes', 'ukaf']).optional(),
     presenceType: z.enum(['competitive', 'community-outreach', 'mixed']),
+    // Editorial prominence, not derived from scale — a small-scale-but-huge-
+    // audience LAN presence (EPIC, Enclave) is "major" for display purposes
+    // even though `scale` calls it "engagement", while an Army-only fixture
+    // stays "minor" even at a real competitive scale. Deliberately a
+    // separate field rather than inferred, because there's no formula that
+    // gets both of those right at once.
+    tier: z.enum(['major', 'minor']).default('minor'),
     date: z.coerce.date(),
     endDate: z.coerce.date().optional(),
     // confirmed: render `date`/`endDate` as-is.

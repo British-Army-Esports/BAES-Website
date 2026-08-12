@@ -3,6 +3,7 @@ disciplines:
   - "call-of-duty"
 scale: "single-service"
 presenceType: "competitive"
+tier: "minor"
 date: 2026-10-15
 dateStatus: "provisional"
 dateOptions: ["2026-10"]

@@ -4,6 +4,7 @@ disciplines:
 scale: "single-service"
 team: "baes"
 presenceType: "competitive"
+tier: "minor"
 date: 2026-06-01
 dateStatus: "tbc"
 description: "Army-wide iRacing championship."

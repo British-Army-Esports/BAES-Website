@@ -84,6 +84,15 @@ collections:
           - { label: "Community outreach (festival stand, no formal result)", value: "community-outreach" }
           - { label: "Mixed", value: "mixed" }
 
+      - label: "Row on the Events page"
+        name: "tier"
+        widget: "select"
+        default: "minor"
+        hint: "Major = Army Lions/UKAF-level fixtures and large public LAN events (EPIC, Enclave, FACEIT...). Minor = Army-internal competitions (BAEL and similar) and smaller engagement presences (Aldershot, Sunderland...)."
+        options:
+          - { label: "Major (top row)", value: "major" }
+          - { label: "Minor (bottom row)", value: "minor" }
+
       - label: "Start Date"
         name: "date"
         widget: "datetime"
