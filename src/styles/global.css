@@ -1,9 +1,63 @@
-@import '@fontsource/rajdhani/500.css';
-@import '@fontsource/rajdhani/600.css';
-@import '@fontsource/rajdhani/700.css';
-@import '@fontsource/inter/400.css';
-@import '@fontsource/inter/500.css';
-@import '@fontsource/inter/600.css';
+/* Self-hosted from public/fonts/ (copied from @fontsource, latin subset
+   only — this is an English-only site, no need for the devanagari/latin-ext
+   variants @fontsource's package CSS also declares). Self-hosted rather than
+   `@import '@fontsource/...'` so these files sit at a fixed, known /fonts/
+   URL that <link rel="preload"> in BaseLayout's <head> can target directly —
+   an `@import`'d package's build output gets a content-hashed filename that
+   preload can't reliably reference. Preloading is what actually shortens the
+   visible "wrong font" flash; font-display: swap (kept, same as
+   @fontsource's default) still governs what shows before the real font is
+   ready. The fallback stacks below are also chosen to be closer in
+   shape/width to Rajdhani/Inter than a bare `sans-serif`, so on the rare
+   case the flash is still visible, it's a smaller jump. */
+@font-face {
+  font-family: 'Rajdhani';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url('/fonts/rajdhani-latin-500-normal.woff2') format('woff2'),
+    url('/fonts/rajdhani-latin-500-normal.woff') format('woff');
+}
+@font-face {
+  font-family: 'Rajdhani';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url('/fonts/rajdhani-latin-600-normal.woff2') format('woff2'),
+    url('/fonts/rajdhani-latin-600-normal.woff') format('woff');
+}
+@font-face {
+  font-family: 'Rajdhani';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url('/fonts/rajdhani-latin-700-normal.woff2') format('woff2'),
+    url('/fonts/rajdhani-latin-700-normal.woff') format('woff');
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url('/fonts/inter-latin-400-normal.woff2') format('woff2'),
+    url('/fonts/inter-latin-400-normal.woff') format('woff');
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url('/fonts/inter-latin-500-normal.woff2') format('woff2'),
+    url('/fonts/inter-latin-500-normal.woff') format('woff');
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url('/fonts/inter-latin-600-normal.woff2') format('woff2'),
+    url('/fonts/inter-latin-600-normal.woff') format('woff');
+}
 
 :root {
   /* Colour */
@@ -20,8 +74,9 @@
   --border: #262626;
 
   /* Type */
-  --font-display: 'Rajdhani', sans-serif;
-  --font-body: 'Inter', sans-serif;
+  --font-display: 'Rajdhani', 'Arial Narrow', 'Helvetica Neue', Arial, sans-serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial,
+    sans-serif;
 
   /* Shape */
   --clip-corner: 14px;

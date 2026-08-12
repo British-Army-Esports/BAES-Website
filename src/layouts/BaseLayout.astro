@@ -27,6 +27,17 @@ const isHome = Astro.url.pathname === '/';
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="description" content={description} />
     <title>{title} — British Army Esports</title>
+    <!--
+      Preload the two weights used above the fold on every page (Rajdhani
+      700 for headings/nav, Inter 400 for body copy) so the browser starts
+      fetching the real font files immediately rather than only discovering
+      them after it's fetched and parsed the stylesheet. Shortens the
+      fallback-font flash; doesn't eliminate it on a cold cache, nothing
+      short of `font-display: block` fully does that, and that trades the
+      flash for a worse invisible-text delay instead.
+    -->
+    <link rel="preload" href="/fonts/rajdhani-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/inter-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin />
   </head>
   <body>
     <Nav active={active} />
