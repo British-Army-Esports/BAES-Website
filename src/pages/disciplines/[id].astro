@@ -32,7 +32,7 @@ const relatedEvents = (await getCollection('events'))
       now <= end;
     return {
       title: event.data.title,
-      locationName: event.data.location?.name ?? 'Online / TBC',
+      locationName: event.data.location?.name ?? (isPast ? 'Not recorded' : 'Online / TBC'),
       sortDate: start,
       isPast,
       isLive,

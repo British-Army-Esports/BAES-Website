@@ -41,7 +41,10 @@ const events = (await getCollection('events'))
       disciplineIds,
       disciplineNames,
       accentColor,
-      locationName: event.data.location?.name ?? 'Online / TBC',
+      // "TBC" is a claim about an unresolved future — never honest for
+      // something that's already happened, so a past event with no
+      // recorded venue just says so plainly instead.
+      locationName: event.data.location?.name ?? (isPast ? 'Not recorded' : 'Online / TBC'),
       externalLink: event.data.externalLink,
       resultsSummary: event.data.resultsSummary,
       sortDate: start,
