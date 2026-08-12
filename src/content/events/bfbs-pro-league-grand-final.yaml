@@ -6,8 +6,7 @@ disciplines:
 scale: "military"
 team: "baes"
 presenceType: "competitive"
-date: 2026-09-15
-dateStatus: "provisional"
-dateOptions: ["2026-09"]
-description: "2025 final was held 28 Sep; the exact 2026 date isn't yet public. 2026 season expanded to Rocket League, F1 25 and League of Legends, plus the new BFBS Open Series for beginners."
+date: 2026-09-27
+dateStatus: "confirmed"
+description: "2026 season expanded to Rocket League, F1 25 and League of Legends, plus the new BFBS Open Series for beginners."
 externalLink: "https://bfbsesports.com/"

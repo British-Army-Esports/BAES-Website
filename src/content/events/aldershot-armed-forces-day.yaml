@@ -2,8 +2,9 @@ title: "Aldershot Armed Forces Day"
 scale: "engagement"
 team: "baes"
 presenceType: "community-outreach"
-date: 2025-06-15
-dateStatus: "tbc"
+date: 2026-06-27
+endDate: 2026-06-28
+dateStatus: "confirmed"
 location:
   name: "Aldershot, Hampshire"
   lat: 51.2733047

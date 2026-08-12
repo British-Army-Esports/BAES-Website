@@ -35,7 +35,6 @@ const year = new Date().getFullYear();
       <a href="https://www.twitch.tv/britisharmyesports" target="_blank" rel="noopener noreferrer">Twitch</a>
       <a href="https://www.youtube.com/c/BritishArmyEsports" target="_blank" rel="noopener noreferrer">YouTube</a>
       <a href="https://x.com/BritArmyesports" target="_blank" rel="noopener noreferrer">X (Twitter)</a>
-      <a href="/feedback">Feedback</a>
     </nav>
 
     <nav class="footer__links" aria-label="Wider esports ecosystem">
@@ -64,6 +63,7 @@ const year = new Date().getFullYear();
 
   <div class="container footer__bottom">
     <p>&copy; {year} British Army Esports. Esports sits under Army Sport / ASCB governance.</p>
+    <a href="/feedback" class="footer__feedback-link">Feedback</a>
   </div>
 </footer>
 
@@ -201,12 +201,29 @@ const year = new Date().getFullYear();
     padding-top: 1.5rem;
     padding-bottom: 1.5rem;
     border-top: 1px solid var(--border);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 1.5rem;
   }
 
   .footer__bottom p {
     margin: 0;
     color: var(--text-secondary);
     font-size: 0.8rem;
+  }
+
+  .footer__feedback-link {
+    color: var(--text-secondary-alt);
+    font-weight: 600;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+    transition: color 0.2s var(--ease-out);
+  }
+
+  .footer__feedback-link:hover {
+    color: var(--crimson-bright);
   }
 
   @media (max-width: 700px) {
