@@ -3,7 +3,7 @@ name: "Bulford Garrison Gaming Hub"
 type: "limited-setup"
 corps:
   - "rs"
-address: "Bulford Camp, Bulford, Wiltshire, SP4"
+address: "Bulford Camp, Bulford, Wiltshire, SP4 9HZ"
 location:
   lat: 51.1927372
   long: -1.7318701
