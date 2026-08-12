@@ -94,3 +94,21 @@ export function compareEventDates(
   if (aTbc && bTbc) return a.title.localeCompare(b.title);
   return a.sortDate - b.sortDate;
 }
+
+// Most-recent-first variant, for lists (like a Corps' fixture history) that
+// mix past and future together rather than splitting them into their own
+// sections. Simply reversing compareEventDates' result would also flip TBC
+// events to the front, which is wrong for the same reason it's wrong the
+// other way round — a TBC event isn't "the most recent", it has no real
+// date at all — so TBC still always sorts last here, only the dated events'
+// order flips to newest-first.
+export function compareEventDatesDesc(
+  a: { sortDate: number; badge: DateStatus; title: string },
+  b: { sortDate: number; badge: DateStatus; title: string },
+): number {
+  const aTbc = a.badge === 'tbc';
+  const bTbc = b.badge === 'tbc';
+  if (aTbc !== bTbc) return aTbc ? 1 : -1;
+  if (aTbc && bTbc) return a.title.localeCompare(b.title);
+  return b.sortDate - a.sortDate;
+}

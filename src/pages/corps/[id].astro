@@ -1,7 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { formatEventDate } from '../../lib/eventDate';
+import { formatEventDate, compareEventDatesDesc } from '../../lib/eventDate';
 
 export async function getStaticPaths() {
   const corps = await getCollection('corps');
@@ -17,9 +17,20 @@ const relatedLocations = (await getCollection('locations', ({ data }) => data.ac
   (loc) => loc.data.corps?.some((ref) => ref.id === corps.id),
 );
 
+// Most recent first — this list mixes past and future together, so "most
+// recent" means newest date wins regardless of past/future, with any TBC
+// fixture (no real date) still pushed to the end rather than jumping to
+// the front just because it lacks a date to compare.
 const relatedEvents = (await getCollection('events'))
   .filter((e) => e.data.corps?.id === corps.id)
-  .sort((a, b) => a.data.date.getTime() - b.data.date.getTime());
+  .map((event) => ({
+    event,
+    sortDate: event.data.date.getTime(),
+    badge: formatEventDate(event.data).badge,
+    title: event.data.title,
+  }))
+  .sort(compareEventDatesDesc)
+  .map((e) => e.event);
 ---
 
 <BaseLayout title={corps.data.name} active="Corps" description={corps.data.summary}>
