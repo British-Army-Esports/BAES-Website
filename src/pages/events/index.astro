@@ -2,7 +2,7 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import EventCard from '../../components/EventCard.astro';
-import { formatEventDate } from '../../lib/eventDate';
+import { formatEventDate, compareEventDates } from '../../lib/eventDate';
 
 const allDisciplines = await getCollection('disciplines', ({ data }) => data.active);
 const disciplineInfo = new Map(
@@ -53,7 +53,7 @@ const events = (await getCollection('events'))
       ...formatEventDate(event.data),
     };
   })
-  .sort((a, b) => a.sortDate - b.sortDate);
+  .sort(compareEventDates);
 
 const inProgress = events.filter((e) => e.isLive);
 const upcoming = events.filter((e) => !e.isPast && !e.isLive);

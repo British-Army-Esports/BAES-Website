@@ -75,3 +75,22 @@ export function formatEventDate(event: EventDateInfo): FormattedEventDate {
   const endDate = event.endDate ? toDate(event.endDate) : undefined;
   return { text: formatRange(date, endDate), badge: 'confirmed' };
 }
+
+// Sort helper for lists mixing confirmed/provisional/TBC events. A TBC
+// event's `date` is only an internal placeholder, not a real estimate — several
+// unrelated TBC fixtures can share the same placeholder date, which would
+// otherwise put them ahead of events we actually have a real (even rough)
+// date for. TBC events sort after everything else, by title so their
+// relative order is at least stable rather than depending on placeholder
+// dates; confirmed/provisional events sort by their real/estimated date as
+// normal.
+export function compareEventDates(
+  a: { sortDate: number; badge: DateStatus; title: string },
+  b: { sortDate: number; badge: DateStatus; title: string },
+): number {
+  const aTbc = a.badge === 'tbc';
+  const bTbc = b.badge === 'tbc';
+  if (aTbc !== bTbc) return aTbc ? 1 : -1;
+  if (aTbc && bTbc) return a.title.localeCompare(b.title);
+  return a.sortDate - b.sortDate;
+}

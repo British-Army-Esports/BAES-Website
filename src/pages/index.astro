@@ -6,7 +6,7 @@ import Card from '../components/Card.astro';
 import Table from '../components/Table.astro';
 import MapView from '../components/MapView.astro';
 import EventCard from '../components/EventCard.astro';
-import { formatEventDate } from '../lib/eventDate';
+import { formatEventDate, compareEventDates } from '../lib/eventDate';
 
 const disciplines = await getCollection('disciplines');
 
@@ -54,7 +54,7 @@ const keyEvents = (await getCollection('events'))
     };
   })
   .filter((e) => !e.isPast)
-  .sort((a, b) => a.sortDate - b.sortDate)
+  .sort(compareEventDates)
   .slice(0, 3);
 
 const keyEventScaleLabels: Record<string, string> = {
