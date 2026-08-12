@@ -60,7 +60,7 @@ collections:
         hint: "How big/what kind of competition this is — see the label for what each means."
         options:
           - { label: "Engagement — outreach/festival presence, not a formal bracket", value: "engagement" }
-          - { label: "Single Service — within the Army only (Corps-vs-Corps, unit, Army-wide)", value: "single-service" }
+          - { label: "Army-Wide — within the Army only (Corps-vs-Corps, unit-level)", value: "single-service" }
           - { label: "Military — UK tri-service, not national/international", value: "military" }
           - { label: "UK National — representing all four home nations", value: "uk-national" }
           - { label: "International Military — against other countries' militaries", value: "international-military" }

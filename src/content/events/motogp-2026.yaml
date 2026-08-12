@@ -3,8 +3,7 @@ scale: "engagement"
 team: "baes"
 presenceType: "competitive"
 tier: "minor"
-date: 2026-09-10
-endDate: 2026-09-11
-dateStatus: "provisional"
-dateOptions: ["2026-09"]
+date: 2026-08-01
+endDate: 2026-08-02
+dateStatus: "confirmed"
 description: "British Army Esports competing in MotoGP."

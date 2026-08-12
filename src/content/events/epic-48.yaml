@@ -1,4 +1,6 @@
 title: "EPIC 48"
+disciplines:
+  - "counter-strike-2"
 scale: "engagement"
 team: "baes"
 presenceType: "community-outreach"
@@ -10,5 +12,5 @@ location:
   name: "Kettering Leisure Village, Kettering"
   lat: 52.3875664
   long: -0.7355546
-description: "EPIC LAN gaming festival. Army gaming presence, no competitive Army result logged here."
+description: "EPIC LAN gaming festival. Tournament games include CS2, StarCraft 2, VALORANT, osu! and others (only CS2 is a recognised British Army Esports discipline). Army gaming presence, no competitive Army result logged here."
 externalLink: "https://www.epiclan.co.uk/epic48"

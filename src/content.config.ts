@@ -40,11 +40,14 @@ const events = defineCollection({
     // The real taxonomy of British Army esports fixtures: how big/what kind
     // of competition it is. engagement: outreach/festival presence, not a
     // formal competitive bracket. single-service: within the Army only
-    // (Corps-vs-Corps, unit-level, Army-wide). military: UK tri-service,
-    // not specifically national or international. uk-national: national
-    // level, e.g. representing all four home nations. international-military:
-    // military competition against other countries. european: civilian
-    // European-level competition (e.g. FACEIT ESEA), not military-specific.
+    // (Corps-vs-Corps, unit-level) — displayed as "Army-Wide", not "Single
+    // Service": that label read ambiguously as "one particular unit is
+    // entering" rather than its intended meaning of "Army-only, not
+    // tri-service". military: UK tri-service, not specifically national or
+    // international. uk-national: national level, e.g. representing all
+    // four home nations. international-military: military competition
+    // against other countries. european: civilian European-level
+    // competition (e.g. FACEIT ESEA), not military-specific.
     scale: z.enum([
       'engagement',
       'single-service',

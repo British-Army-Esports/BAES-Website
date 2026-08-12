@@ -1,4 +1,6 @@
 title: "4-Nations Winter Split 2026"
+disciplines:
+  - "league-of-legends"
 scale: "uk-national"
 team: "baes"
 presenceType: "competitive"

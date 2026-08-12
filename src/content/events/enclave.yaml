@@ -1,7 +1,13 @@
-title: "Enclave"
+title: "Enclave 3"
+disciplines:
+  - "call-of-duty"
+  - "rocket-league"
+  - "league-of-legends"
 scale: "engagement"
 presenceType: "competitive"
 tier: "major"
-date: 2026-06-01
-dateStatus: "tbc"
-description: "Could not verify publicly. Likely engagement or single-service; not clear which from what's available. Source date and details directly from the programme office rather than guessing."
+date: 2026-08-27
+endDate: 2026-08-31
+dateStatus: "confirmed"
+description: "Enclave 3 LAN festival. Tournament categories include Call of Duty, Rocket League, League of Legends and Overwatch (Overwatch isn't a recognised British Army Esports discipline)."
+externalLink: "https://www.enclavelan.com/enclave3-tournaments"
