@@ -4,10 +4,12 @@ import MapView from '../../components/MapView.astro';
 
 const venueKey = [
   { label: 'Arena', body: 'Competition venue plus a good audience viewing setup.' },
-  { label: 'Comp Venue', body: '2x5 PCs and a streaming setup.' },
-  { label: 'Training Venue', body: '1x 5 PCs.' },
-  { label: 'Limited Setup', body: 'Not enough PCs for a full team, e.g. 4 rigs or console-only.' },
-  { label: 'Gaming Room', body: "Equipment on hand hasn't been confirmed yet." },
+  { label: 'Competition Venue', body: '2x5 PCs and (usually) a streaming setup.' },
+  { label: 'Training Venue', body: '1x5 PCs.' },
+  {
+    label: 'Gaming Room',
+    body: 'Not enough PCs for a full team, e.g. 4 rigs or console-only, or available equipment is unconfirmed.',
+  },
 ];
 ---
 
@@ -94,7 +96,7 @@ const venueKey = [
 
   .key__row {
     display: grid;
-    grid-template-columns: 130px 1fr;
+    grid-template-columns: 150px 1fr;
     gap: 0.75rem;
     font-size: 0.85rem;
   }

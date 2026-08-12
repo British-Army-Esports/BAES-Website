@@ -24,10 +24,20 @@ const allEvents = showEvents
   ? (await getCollection('events')).filter((event) => event.data.location)
   : [];
 
+// "limited-setup" (not enough PCs for a full team) and "unspecified" (setup
+// not yet confirmed) read as the same thing to a visitor — both just mean
+// "don't expect a proper venue here" — so they're grouped under one
+// display type, "Gaming Room", rather than shown as two near-identical
+// categories. The underlying distinction is still kept in the content
+// files in case it's useful later.
+function displayType(type: string): string {
+  return type === 'limited-setup' || type === 'unspecified' ? 'gaming-room' : type;
+}
+
 const locationPoints = allLocations.map((loc) => ({
   id: loc.id,
   name: loc.data.name,
-  type: loc.data.type,
+  type: displayType(loc.data.type),
   address: loc.data.address,
   equipment: loc.data.equipment ?? [],
   lat: loc.data.location.lat,
@@ -82,8 +92,7 @@ const typeLabels: Record<string, string> = {
   'arena-venue': 'Arena Venue',
   'competition-venue': 'Competition Venue',
   'training-venue': 'Training Venue',
-  'limited-setup': 'Limited Setup',
-  unspecified: 'Gaming Room',
+  'gaming-room': 'Gaming Room',
 };
 
 // Only offer a filter for venue types that actually have at least one
