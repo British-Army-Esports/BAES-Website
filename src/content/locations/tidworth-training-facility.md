@@ -7,6 +7,6 @@ address: "Tidworth Garrison, Wiltshire"
 location:
   lat: 51.2390608
   long: -1.6657101
-status: "Unconfirmed — flagged internally as needing verification before this is treated as a real, active hub."
-active: false
+status: "Confirmed to exist. Equipment and exact setup not yet confirmed."
+active: true
 ---
