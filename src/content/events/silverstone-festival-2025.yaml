@@ -1,0 +1,15 @@
+title: "British Army Esports at Silverstone Festival"
+scale: "engagement"
+team: "baes"
+presenceType: "community-outreach"
+date: 2025-08-22
+endDate: 2025-08-24
+dateStatus: "confirmed"
+location:
+  name: "Silverstone Circuit, Northamptonshire"
+  lat: 52.073273
+  long: -1.014818
+description: "A British Army Esports engagement presence at the Silverstone Festival (formerly the Silverstone Classic), the classic motorsport and car show event held annually at Silverstone Circuit."
+externalLink: "https://www.silverstone.co.uk/events/silverstone-festival"
+photos:
+  - "/photos/events/silverstone-festival-2025/tent.jpg"
