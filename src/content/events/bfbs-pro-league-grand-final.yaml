@@ -1,13 +1,17 @@
-title: "BFBS Pro League Grand Final"
+title: BFBS Pro League Grand Final
 disciplines:
-  - "rocket-league"
-  - "f1-25-iracing"
-  - "league-of-legends"
-scale: "military"
-team: "baes"
-presenceType: "competitive"
-tier: "major"
+  - rocket-league
+scale: military
+team: baes
+presenceType: competitive
+tier: major
 date: 2026-09-27
-dateStatus: "confirmed"
-description: "2026 season expanded to Rocket League, F1 25 and League of Legends, plus the new BFBS Open Series for beginners."
-externalLink: "https://bfbsesports.com/"
+dateStatus: confirmed
+location:
+  name: RAF Museum
+description: >-
+  2026 season expanded to Rocket League, F1 25 and League of Legends, plus the
+  new BFBS Open Series for beginners.
+
+  This LAN Final sees 8 teams duke it out on Rocket League. Other game finals will be online.
+externalLink: https://bfbsesports.com/news/bfbs-finals
