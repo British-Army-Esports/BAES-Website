@@ -167,10 +167,11 @@ const filterPresenceTypes = presenceOrder.filter((p) => usedPresenceTypes.has(p)
           <h2 class="section__subheading section__subheading--live">
             <span class="live-dot" /> In Progress
           </h2>
-          <div class="event-grid">
+          <div class="event-grid" data-events-container>
             {inProgress.map((event) => (
               <EventCard event={event} scaleLabels={scaleLabels} teamLabels={teamLabels} live />
             ))}
+            <p class="empty filter-empty" hidden>No in-progress fixtures match these filters.</p>
           </div>
         </>
       )
@@ -180,22 +181,28 @@ const filterPresenceTypes = presenceOrder.filter((p) => usedPresenceTypes.has(p)
 
     <p class="row-label label">Major Fixtures — Army Lions, UKAF &amp; large public LAN events</p>
     <div class="event-scroll clip-tl-sm">
-      <div class="event-row">
+      <div class="event-row" data-events-container>
         {upcomingMajor.map((event) => <EventCard event={event} scaleLabels={scaleLabels} teamLabels={teamLabels} />)}
         {upcomingMajor.length === 0 && <p class="empty">No major fixtures confirmed yet.</p>}
+        {upcomingMajor.length > 0 && (
+          <p class="empty filter-empty" hidden>No major fixtures match these filters — check back later, or try a wider filter.</p>
+        )}
       </div>
     </div>
 
     <p class="row-label label">Army &amp; Local Fixtures — BAEL, internal and smaller engagements</p>
     <div class="event-scroll clip-tl-sm">
-      <div class="event-row">
+      <div class="event-row" data-events-container>
         {upcomingMinor.map((event) => <EventCard event={event} scaleLabels={scaleLabels} teamLabels={teamLabels} />)}
         {upcomingMinor.length === 0 && <p class="empty">No Army/local fixtures confirmed yet.</p>}
+        {upcomingMinor.length > 0 && (
+          <p class="empty filter-empty" hidden>No Army/local fixtures match these filters — check back later, or try a wider filter.</p>
+        )}
       </div>
     </div>
 
     <h2 class="section__subheading section__subheading--muted">Past &amp; History</h2>
-    <ul class="past-list">
+    <ul class="past-list" data-events-container>
       {
         past.map((event) => (
           <li data-disciplines={event.disciplineIds.join(',')} data-scale={event.scale} data-presence={event.presenceType}>
@@ -211,6 +218,9 @@ const filterPresenceTypes = presenceOrder.filter((p) => usedPresenceTypes.has(p)
         ))
       }
       {past.length === 0 && <li class="empty">No past fixtures logged yet.</li>}
+      {past.length > 0 && (
+        <li class="empty filter-empty" hidden>No past fixtures match these filters.</li>
+      )}
     </ul>
   </section>
 </BaseLayout>
@@ -220,6 +230,7 @@ const filterPresenceTypes = presenceOrder.filter((p) => usedPresenceTypes.has(p)
   const scaleSelect = document.getElementById('filter-scale');
   const presenceChecks = document.querySelectorAll('.filter-presence-check');
   const items = document.querySelectorAll('[data-disciplines]');
+  const containers = document.querySelectorAll('[data-events-container]');
 
   function applyFilters() {
     const discipline = disciplineSelect?.value ?? 'all';
@@ -238,6 +249,17 @@ const filterPresenceTypes = presenceOrder.filter((p) => usedPresenceTypes.has(p)
       const presenceMatch = checkedPresence.length === 0 || checkedPresence.includes(itemPresence);
 
       item.hidden = !(disciplineMatch && scaleMatch && presenceMatch);
+    });
+
+    // Per-row "nothing matches" filler: only for rows that had real fixtures
+    // to begin with (an already-genuinely-empty row keeps its own build-time
+    // message instead, so the two never both show at once).
+    containers.forEach((container) => {
+      const rowItems = container.querySelectorAll('[data-disciplines]');
+      const filler = container.querySelector('.filter-empty');
+      if (!filler || rowItems.length === 0) return;
+      const allHidden = Array.from(rowItems).every((item) => item.hidden);
+      filler.hidden = !allHidden;
     });
   }
 
@@ -426,6 +448,7 @@ const filterPresenceTypes = presenceOrder.filter((p) => usedPresenceTypes.has(p)
     background: var(--surface);
     border: 1px solid var(--border);
     grid-column: 1 / -1;
+    width: 100%;
   }
 
   .past-list {
