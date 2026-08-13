@@ -11,8 +11,8 @@ const {
   kicker = 'Adaptability. Excellence. Together.',
   headlineLines = ['Sharper Minds.'],
   crimsonWord = 'Stronger Teams.',
-  ctaText = 'Explore Disciplines',
-  ctaHref = '/disciplines',
+  ctaText = 'Get Involved',
+  ctaHref = '/join',
 } = Astro.props;
 ---
 
@@ -46,7 +46,14 @@ const {
 <style>
   .hero {
     position: relative;
-    overflow: hidden;
+    /* Not overflow:hidden: at large OS text-size settings the headline and
+       CTA can genuinely need more width than the section's own box. The
+       decorative grid/gradients below don't need clipping to stay
+       contained (they're sized via inset:0/background, not free-floating),
+       so there was nothing this was protecting other than accidentally
+       hiding real content with no way to reach it, unlike ordinary
+       horizontal overflow elsewhere on the page which at least stays
+       reachable by scrolling. */
     min-height: 78vh;
     display: flex;
     align-items: flex-end;
