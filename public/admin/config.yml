@@ -142,7 +142,8 @@ collections:
           - label: "Venue Name"
             name: "name"
             widget: "string"
-            hint: "A real physical place only, e.g. \"Blandford Camp, Dorset\" — never a Discord server, URL, or platform name."
+            required: false
+            hint: "A real physical place only, e.g. \"Blandford Camp, Dorset\" — never a Discord server, URL, or platform name. Leave blank along with Latitude/Longitude if there's no physical venue."
           - label: "Latitude"
             name: "lat"
             widget: "number"
@@ -171,6 +172,15 @@ collections:
         widget: "string"
         required: false
         hint: "The event's own official page, if it has one. Leave blank to show a \"more info coming soon\" placeholder instead."
+
+      - label: "Registration Deadline"
+        name: "registrationDeadline"
+        widget: "datetime"
+        format: "YYYY-MM-DD"
+        date_format: true
+        time_format: false
+        required: false
+        hint: "Only if players need to sign up ahead of time. Leave blank if there's no separate registration step."
 
   # Reference-only collections so the relation fields above can look up real
   # disciplines/Corps. Hidden from the editor's main nav — not meant to be

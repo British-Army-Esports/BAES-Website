@@ -105,17 +105,29 @@ const events = defineCollection({
     // a lay editor filling this in via the CMS often knows the venue name
     // but not its exact coordinates, and that's still worth recording (shows
     // as text everywhere) even though it can't be plotted on the map without
-    // real coordinates.
+    // real coordinates. `name` is also left blankable in Decap (a lay
+    // editor needs to be able to leave the entire section untouched for an
+    // online event) — but a location with no name is meaningless, not a
+    // real partial location, so if it comes back empty the whole object is
+    // dropped rather than persisting `{ name: "" }` and having pages render
+    // an empty "📍 " with nothing after it.
     location: z
-      .object({
-        name: z.string(),
-        lat: blankable(z.number()),
-        long: blankable(z.number()),
-      })
+      .preprocess(
+        (val) => (val && typeof val === 'object' && !('name' in val && val.name) ? undefined : val),
+        z.object({
+          name: z.string(),
+          lat: blankable(z.number()),
+          long: blankable(z.number()),
+        }),
+      )
       .optional(),
     description: z.string().optional(),
     resultsSummary: z.string().optional(),
     externalLink: blankable(z.string().url()),
+    // When players need to sign up ahead of the event itself, distinct from
+    // the event's own date. Optional: most fixtures (outreach presences,
+    // things with no open sign-up) don't have one.
+    registrationDeadline: blankable(z.coerce.date()),
   }),
 });
 

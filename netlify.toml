@@ -11,3 +11,15 @@
     X-Frame-Options = "DENY"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
+
+# The CMS panel and its config must never be served stale — an editor
+# working from a cached copy can hit exactly the kind of "different
+# experience to everyone else" bug this is fixing, or worse, save data
+# against rules that were already fixed. Static files otherwise have no
+# explicit cache policy here, so without this a browser's normal caching
+# heuristics are free to hold onto an old admin/index.html or config.yml
+# for a while after a new deploy.
+[[headers]]
+  for = "/admin/*"
+  [headers.values]
+    Cache-Control = "no-cache, must-revalidate"
