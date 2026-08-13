@@ -18,10 +18,14 @@ const allLocations = await getCollection('locations', ({ data }) => data.active)
 // with yet (see the "active: false" note on their content files) — shown as
 // grey "planned" markers, distinct from confirmed active hubs.
 const plannedLocations = await getCollection('locations', ({ data }) => !data.active);
-// Only fixtures with a fixed physical venue can be plotted here — online
-// qualifiers and not-yet-located internal fixtures aren't shown on this map.
+// Only fixtures with a real, plottable venue can be plotted here — online
+// qualifiers, not-yet-located internal fixtures, and fixtures where someone
+// recorded a venue name but not its coordinates aren't shown on this map
+// (they still show the venue name as text everywhere else on the site).
 const allEvents = showEvents
-  ? (await getCollection('events')).filter((event) => event.data.location)
+  ? (await getCollection('events')).filter(
+      (event) => event.data.location?.lat != null && event.data.location?.long != null,
+    )
   : [];
 
 // "limited-setup" (not enough PCs for a full team) and "unspecified" (setup
@@ -356,6 +360,14 @@ const usedTypes = Object.keys(typeLabels).filter((t) => locationPoints.some((loc
   .mapview {
     border: 1px solid var(--border);
     background: var(--surface);
+    /* Leaflet's own internal z-indices (tile pane, markers, popups, zoom
+       controls) run from ~400 up to 1000+ — far higher than the site's own
+       scale (the sticky Nav sits at 50). Without isolating a new stacking
+       context here, those internal values compete in the page's global
+       stacking order instead of staying contained to the map, and can
+       render above the Nav once you scroll past it. */
+    position: relative;
+    isolation: isolate;
   }
 
   .mapview__controls {

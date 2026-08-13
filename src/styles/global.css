@@ -94,6 +94,15 @@
 
 html {
   color-scheme: dark;
+  /* Opts out of the browser's own automatic text-boosting heuristic (a
+     legacy behaviour for old non-responsive sites, which this isn't) —
+     without this, it can fight with a real OS-level text-size/accessibility
+     setting and produce a mismatched double-render: thin ghosted slivers of
+     text/borders peeking out at a slight offset from the real content. The
+     OS accessibility setting itself still works fine; this only disables
+     the browser's own separate, additional auto-boost on top of it. */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
