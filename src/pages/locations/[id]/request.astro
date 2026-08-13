@@ -34,11 +34,42 @@ const formName = `hub-request-${location.id}`;
     }
 
     {
-      location.data.photos && location.data.photos.length > 0 && (
-        <div class="photo-grid">
-          {location.data.photos.map((src: string) => (
-            <img class="photo-grid__img clip-tl-sm" src={src} alt="" loading="lazy" />
-          ))}
+      ((location.data.photos && location.data.photos.length > 0) ||
+        (location.data.enhancedPhotos && location.data.enhancedPhotos.length > 0)) && (
+        <div class="photo-section">
+          <div class="photo-header">
+            <p class="photo-banner" data-photo-banner hidden>
+              🪄 AI-stylised vision — what we think this space <em>could</em> look like, not how it
+              looks today.
+            </p>
+            {
+              location.data.enhancedPhotos && location.data.enhancedPhotos.length > 0 && (
+                <button type="button" class="photo-toggle" data-photo-toggle>
+                  ✨ Enhance!
+                </button>
+              )
+            }
+          </div>
+
+          {
+            location.data.photos && location.data.photos.length > 0 && (
+              <div class="photo-grid" data-photo-grid="real">
+                {location.data.photos.map((src: string) => (
+                  <img class="photo-grid__img clip-tl-sm" src={src} alt="" loading="lazy" />
+                ))}
+              </div>
+            )
+          }
+
+          {
+            location.data.enhancedPhotos && location.data.enhancedPhotos.length > 0 && (
+              <div class="photo-grid" data-photo-grid="enhanced" hidden>
+                {location.data.enhancedPhotos.map((src: string) => (
+                  <img class="photo-grid__img clip-tl-sm" src={src} alt="" loading="lazy" />
+                ))}
+              </div>
+            )
+          }
         </div>
       )
     }
@@ -93,6 +124,24 @@ const formName = `hub-request-${location.id}`;
   </section>
 </BaseLayout>
 
+<script>
+  const toggle = document.querySelector('[data-photo-toggle]');
+  const banner = document.querySelector('[data-photo-banner]');
+  const realGrid = document.querySelector('[data-photo-grid="real"]');
+  const enhancedGrid = document.querySelector('[data-photo-grid="enhanced"]');
+
+  toggle?.addEventListener('click', () => {
+    // Currently showing enhanced if its grid is visible (not hidden) —
+    // toggle flips both grids and the banner together, and relabels the
+    // button so it always describes what clicking it will do next.
+    const showingEnhanced = enhancedGrid && !enhancedGrid.hidden;
+    if (enhancedGrid) enhancedGrid.hidden = showingEnhanced;
+    if (realGrid) realGrid.hidden = !showingEnhanced;
+    if (banner) banner.hidden = showingEnhanced;
+    toggle.textContent = showingEnhanced ? '✨ Enhance!' : '← Show Real Photos';
+  });
+</script>
+
 <style>
   .section {
     padding-top: clamp(2.5rem, 6vw, 4rem);
@@ -138,11 +187,63 @@ const formName = `hub-request-${location.id}`;
     padding: 0.35rem 0.75rem;
   }
 
+  .photo-section {
+    margin: 0 0 1.5rem;
+  }
+
+  .photo-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .photo-banner {
+    margin: 0;
+    color: var(--crimson-bright);
+    font-size: 0.8rem;
+    font-weight: 600;
+    line-height: 1.5;
+  }
+
+  .photo-banner[hidden] {
+    display: none;
+  }
+
+  .photo-banner em {
+    font-style: italic;
+  }
+
+  .photo-toggle {
+    flex-shrink: 0;
+    margin-left: auto;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-secondary-alt);
+    font-family: var(--font-body);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 0.7rem;
+    padding: 0.4rem 0.8rem;
+    cursor: pointer;
+    transition: color 0.2s var(--ease-out), border-color 0.2s var(--ease-out);
+  }
+
+  .photo-toggle:hover {
+    color: var(--crimson-bright);
+    border-color: var(--crimson);
+  }
+
   .photo-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
     gap: 0.6rem;
-    margin: 0 0 1.5rem;
+  }
+
+  .photo-grid[hidden] {
+    display: none;
   }
 
   .photo-grid__img {

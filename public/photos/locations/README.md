@@ -35,3 +35,26 @@ This folder (and any photos in it) becomes part of the public repo and
 public site, same PERSEC rule as everywhere else on this site: equipment
 and facilities are fine to show, people's faces/names are not — crop or
 choose photos accordingly.
+
+## AI-stylised "vision" photos
+
+If you've got an AI-enhanced/stylised version of a room (nicer lighting,
+added atmosphere, etc.), that's a **separate field**, `enhancedPhotos`,
+never the `photos` field above. The real photos always show by default;
+an enhanced photo only appears if a visitor clicks an "✨ Enhance!" button,
+which shows it behind a clear "this is a vision, not what it looks like
+today" banner. The two are never mixed together or shown as if both are
+real.
+
+```yaml
+photos:
+  - "/photos/locations/kinloss-barracks/gaming-room.jpg"
+enhancedPhotos:
+  - "/photos/locations/kinloss-barracks/gaming-room-enhanced.jpg"
+```
+
+A location can have `photos` with no `enhancedPhotos` (most will, at
+least at first) — the Enhance button just doesn't appear if there's
+nothing to enhance to. Don't add an `enhancedPhotos` entry without a
+matching real `photos` entry of the same space; the vision only makes
+sense next to the reality it's a vision of.

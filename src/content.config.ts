@@ -159,6 +159,12 @@ const locations = defineCollection({
     pocName: z.string().optional(),
     pocRole: z.string().optional(),
     photos: z.array(z.string()).optional(),
+    // AI-stylised "vision" shots — deliberately a separate field from
+    // `photos`, never shown by default, never mixed into the real gallery.
+    // The page only offers these behind an explicit "Enhance!" toggle,
+    // clearly labelled as an aspirational vision rather than what the space
+    // actually looks like today.
+    enhancedPhotos: z.array(z.string()).optional(),
     active: z.boolean().default(true),
   }),
 });
