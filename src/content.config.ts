@@ -128,6 +128,11 @@ const events = defineCollection({
     // the event's own date. Optional: most fixtures (outreach presences,
     // things with no open sign-up) don't have one.
     registrationDeadline: blankable(z.coerce.date()),
+    // Real photos from the event itself — team shots, LAN floor, action
+    // shots. See public/photos/events/README.md for the folder convention
+    // and the PERSEC note on faces/names in this category vs. location
+    // photos.
+    photos: z.array(z.string()).optional(),
   }),
 });
 

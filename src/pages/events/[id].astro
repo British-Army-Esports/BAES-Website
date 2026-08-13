@@ -1,6 +1,7 @@
 ---
 import { getCollection, getEntry } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import PhotoGallery from '../../components/PhotoGallery.astro';
 import { formatEventDate } from '../../lib/eventDate';
 
 export async function getStaticPaths() {
@@ -97,6 +98,8 @@ const registrationDeadlineText = registrationDeadline
     }
 
     {event.data.description && <p class="description">{event.data.description}</p>}
+
+    <PhotoGallery photos={event.data.photos} />
 
     {
       event.data.externalLink ? (

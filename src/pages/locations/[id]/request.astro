@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
+import PhotoGallery from '../../../components/PhotoGallery.astro';
 
 export async function getStaticPaths() {
   const locations = await getCollection('locations', ({ data }) => data.active);
@@ -33,55 +34,7 @@ const formName = `hub-request-${location.id}`;
       )
     }
 
-    {
-      ((location.data.photos && location.data.photos.length > 0) ||
-        (location.data.enhancedPhotos && location.data.enhancedPhotos.length > 0)) && (
-        <div class="photo-section">
-          <div class="photo-header">
-            <p class="photo-banner" data-photo-banner hidden>
-              🪄 AI-stylised vision — what we think this space <em>could</em> look like, not how it
-              looks today.
-            </p>
-            {
-              location.data.enhancedPhotos && location.data.enhancedPhotos.length > 0 && (
-                <button type="button" class="photo-toggle" data-photo-toggle>
-                  ✨ Enhance!
-                </button>
-              )
-            }
-          </div>
-
-          {
-            location.data.photos && location.data.photos.length > 0 && (
-              <div class="photo-grid" data-photo-grid="real">
-                {location.data.photos.map((src: string) => (
-                  <button type="button" class="photo-grid__btn" data-photo-open={src}>
-                    <img class="photo-grid__img clip-tl-sm" src={src} alt="" loading="lazy" />
-                  </button>
-                ))}
-              </div>
-            )
-          }
-
-          {
-            location.data.enhancedPhotos && location.data.enhancedPhotos.length > 0 && (
-              <div class="photo-grid" data-photo-grid="enhanced" hidden>
-                {location.data.enhancedPhotos.map((src: string) => (
-                  <button type="button" class="photo-grid__btn" data-photo-open={src}>
-                    <img class="photo-grid__img clip-tl-sm" src={src} alt="" loading="lazy" />
-                  </button>
-                ))}
-              </div>
-            )
-          }
-        </div>
-      )
-    }
-
-    <div class="lightbox" data-lightbox hidden>
-      <button type="button" class="lightbox__close" data-lightbox-close aria-label="Close">✕</button>
-      <img class="lightbox__img" data-lightbox-img src="" alt="" />
-    </div>
+    <PhotoGallery photos={location.data.photos} enhancedPhotos={location.data.enhancedPhotos} />
 
     <p class="section__intro">
       Fill in the form below to request access, ask a question, or arrange a visit. Your message
@@ -132,54 +85,6 @@ const formName = `hub-request-${location.id}`;
   </section>
 </BaseLayout>
 
-<script>
-  const toggle = document.querySelector('[data-photo-toggle]');
-  const banner = document.querySelector('[data-photo-banner]');
-  const realGrid = document.querySelector('[data-photo-grid="real"]');
-  const enhancedGrid = document.querySelector('[data-photo-grid="enhanced"]');
-
-  toggle?.addEventListener('click', () => {
-    // Currently showing enhanced if its grid is visible (not hidden) —
-    // toggle flips both grids and the banner together, and relabels the
-    // button so it always describes what clicking it will do next.
-    const showingEnhanced = enhancedGrid && !enhancedGrid.hidden;
-    if (enhancedGrid) enhancedGrid.hidden = showingEnhanced;
-    if (realGrid) realGrid.hidden = !showingEnhanced;
-    if (banner) banner.hidden = showingEnhanced;
-    toggle.textContent = showingEnhanced ? '✨ Enhance!' : '← Show Real Photos';
-  });
-
-  // Click-to-zoom: any photo (real or enhanced) opens full-size in a
-  // lightbox overlay, closed via the ✕ button, clicking the backdrop, or
-  // Escape.
-  const lightbox = document.querySelector('[data-lightbox]');
-  const lightboxImg = document.querySelector('[data-lightbox-img]');
-  const lightboxClose = document.querySelector('[data-lightbox-close]');
-
-  function openLightbox(src) {
-    if (!lightbox || !lightboxImg) return;
-    lightboxImg.src = src;
-    lightbox.hidden = false;
-  }
-
-  function closeLightbox() {
-    if (!lightbox || !lightboxImg) return;
-    lightbox.hidden = true;
-    lightboxImg.src = '';
-  }
-
-  document.querySelectorAll('[data-photo-open]').forEach((btn) => {
-    btn.addEventListener('click', () => openLightbox(btn.getAttribute('data-photo-open')));
-  });
-  lightboxClose?.addEventListener('click', closeLightbox);
-  lightbox?.addEventListener('click', (e) => {
-    if (e.target === lightbox) closeLightbox();
-  });
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeLightbox();
-  });
-</script>
-
 <style>
   .section {
     padding-top: clamp(2.5rem, 6vw, 4rem);
@@ -223,133 +128,6 @@ const formName = `hub-request-${location.id}`;
     color: var(--text-secondary-alt);
     font-size: 0.8rem;
     padding: 0.35rem 0.75rem;
-  }
-
-  .photo-section {
-    margin: 0 0 1.5rem;
-  }
-
-  .photo-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-bottom: 0.6rem;
-  }
-
-  .photo-banner {
-    margin: 0;
-    color: var(--crimson-bright);
-    font-size: 0.8rem;
-    font-weight: 600;
-    line-height: 1.5;
-  }
-
-  .photo-banner[hidden] {
-    display: none;
-  }
-
-  .photo-banner em {
-    font-style: italic;
-  }
-
-  .photo-toggle {
-    flex-shrink: 0;
-    margin-left: auto;
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--text-secondary-alt);
-    font-family: var(--font-body);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    font-size: 0.7rem;
-    padding: 0.4rem 0.8rem;
-    cursor: pointer;
-    transition: color 0.2s var(--ease-out), border-color 0.2s var(--ease-out);
-  }
-
-  .photo-toggle:hover {
-    color: var(--crimson-bright);
-    border-color: var(--crimson);
-  }
-
-  .photo-grid {
-    display: grid;
-    /* auto-fit, not auto-fill: with only one or two photos (the common
-       case), auto-fit collapses the empty tracks a fixed-count grid would
-       otherwise leave, letting the real photos grow to fill the row
-       instead of sitting at minimum size like thumbnails. */
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 0.6rem;
-  }
-
-  .photo-grid[hidden] {
-    display: none;
-  }
-
-  .photo-grid__btn {
-    display: block;
-    width: 100%;
-    padding: 0;
-    border: none;
-    background: none;
-    cursor: zoom-in;
-  }
-
-  .photo-grid__img {
-    width: 100%;
-    aspect-ratio: 4 / 3;
-    object-fit: cover;
-    border: 1px solid var(--border);
-    background: var(--surface);
-    transition: opacity 0.2s var(--ease-out);
-  }
-
-  .photo-grid__btn:hover .photo-grid__img {
-    opacity: 0.85;
-  }
-
-  .lightbox {
-    position: fixed;
-    inset: 0;
-    z-index: 200;
-    background: rgba(5, 5, 5, 0.92);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: clamp(1.5rem, 5vw, 4rem);
-  }
-
-  .lightbox[hidden] {
-    display: none;
-  }
-
-  .lightbox__img {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-    border: 1px solid var(--border);
-  }
-
-  .lightbox__close {
-    position: absolute;
-    top: clamp(1rem, 3vw, 2rem);
-    right: clamp(1rem, 3vw, 2rem);
-    background: var(--surface);
-    border: 1px solid var(--border);
-    color: var(--text-primary);
-    font-size: 1.1rem;
-    line-height: 1;
-    width: 2.5rem;
-    height: 2.5rem;
-    cursor: pointer;
-    transition: color 0.2s var(--ease-out), border-color 0.2s var(--ease-out);
-  }
-
-  .lightbox__close:hover {
-    color: var(--crimson-bright);
-    border-color: var(--crimson);
   }
 
   .section__intro {
