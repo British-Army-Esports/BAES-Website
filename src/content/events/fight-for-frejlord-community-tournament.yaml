@@ -5,14 +5,8 @@ scale: military
 presenceType: community-outreach
 tier: minor
 date: 2026-10-01
-endDate: ""
 dateStatus: confirmed
-dateOptions:
-  - Oct-Nov2026
-location:
-  name: BAES LoL Hub
-  lat: ""
-  long: ""
+format: online
 description: >-
   The BAES Community Tournament is back, where Summoners from across all corps
   will battle it out in the frosty chaos of the Howling Abyss in ARAM mode.

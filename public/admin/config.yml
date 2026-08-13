@@ -124,13 +124,25 @@ collections:
         required: false
         hint: "Only used when Date Status is Provisional, e.g. \"2026-09\". Leave blank otherwise."
 
-      - label: "Location"
+      - label: "Format"
+        name: "format"
+        widget: "select"
+        required: false
+        hint: "This doesn't change what's saved elsewhere, it's just here to make the next section unambiguous: pick Online and skip Location entirely — do NOT put a Discord server, streaming link, or platform name in Venue Name below. That kind of detail belongs in the Description field further down instead. Venue Name is only ever for a real physical place."
+        options:
+          - { label: "Online", value: "online" }
+          - { label: "In-Person", value: "in-person" }
+
+      - label: "Location — physical venue only, see Format above"
         name: "location"
         widget: "object"
         required: false
-        hint: "Leave the whole thing blank for online-only or not-yet-fixed fixtures."
+        hint: "Leave the whole thing blank if Format above is Online, or if the venue isn't fixed/known yet."
         fields:
-          - { label: "Venue Name", name: "name", widget: "string" }
+          - label: "Venue Name"
+            name: "name"
+            widget: "string"
+            hint: "A real physical place only, e.g. \"Blandford Camp, Dorset\" — never a Discord server, URL, or platform name."
           - label: "Latitude"
             name: "lat"
             widget: "number"

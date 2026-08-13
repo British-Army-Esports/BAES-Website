@@ -92,6 +92,14 @@ const events = defineCollection({
     // never shown as a real date.
     dateStatus: z.enum(['confirmed', 'provisional', 'tbc']).default('confirmed'),
     dateOptions: z.array(z.string()).optional(),
+    // Editorial-only signal, not read anywhere in the rendering code (the
+    // pages already infer online-vs-physical from whether `location` is
+    // set). Exists purely so the Decap form can put a clear "Online or
+    // In-Person" choice right before the Location section, since a lay
+    // editor was putting a Discord server name into Venue Name — Decap has
+    // no native conditional-field support to actually hide Location when
+    // Online is picked, so this is a strong steer via copy instead.
+    format: blankable(z.enum(['online', 'in-person'])),
     // Optional: online-only fixtures and unconfirmed internal fixtures have
     // no fixed physical venue. lat/long are themselves optional within it —
     // a lay editor filling this in via the CMS often knows the venue name
