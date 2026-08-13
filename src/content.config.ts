@@ -82,12 +82,16 @@ const events = defineCollection({
     dateStatus: z.enum(['confirmed', 'provisional', 'tbc']).default('confirmed'),
     dateOptions: z.array(z.string()).optional(),
     // Optional: online-only fixtures and unconfirmed internal fixtures have
-    // no fixed physical venue.
+    // no fixed physical venue. lat/long are themselves optional within it —
+    // a lay editor filling this in via the CMS often knows the venue name
+    // but not its exact coordinates, and that's still worth recording (shows
+    // as text everywhere) even though it can't be plotted on the map without
+    // real coordinates.
     location: z
       .object({
         name: z.string(),
-        lat: z.number(),
-        long: z.number(),
+        lat: z.number().optional(),
+        long: z.number().optional(),
       })
       .optional(),
     description: z.string().optional(),

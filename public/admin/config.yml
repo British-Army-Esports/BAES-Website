@@ -131,8 +131,17 @@ collections:
         hint: "Leave the whole thing blank for online-only or not-yet-fixed fixtures."
         fields:
           - { label: "Venue Name", name: "name", widget: "string" }
-          - { label: "Latitude", name: "lat", widget: "number", value_type: "float" }
-          - { label: "Longitude", name: "long", widget: "number", value_type: "float" }
+          - label: "Latitude"
+            name: "lat"
+            widget: "number"
+            value_type: "float"
+            required: false
+            hint: "Optional — if you don't know the exact coordinates, leave both Latitude and Longitude blank. The venue name still shows everywhere on the site; it just won't get a pin on the map without real coordinates."
+          - label: "Longitude"
+            name: "long"
+            widget: "number"
+            value_type: "float"
+            required: false
 
       - label: "Description"
         name: "description"
