@@ -10,6 +10,42 @@ export interface EventDateInfo {
   dateOptions?: string[];
 }
 
+export interface LiveStatus {
+  // Genuinely happening right now, worth the pulsing "LIVE" treatment — a
+  // LAN weekend, a finals day. Capped to short-span events on purpose.
+  isLive: boolean;
+  // Also currently within its date range, but spans too long (a multi-week
+  // season/qualifier window) to honestly claim "live now, watch this
+  // moment" for its entire duration — a calmer "streaming now" treatment
+  // instead of the urgent pulsing one.
+  isOngoingBroadcast: boolean;
+}
+
+// A live window longer than this reads as a season/qualifier run, not a
+// single occasion — e.g. BFBS Pro League Qualifiers spans ~2 months, CS2
+// EMEA spans several weeks. Both are real and worth surfacing, just not
+// with the same "drop everything, it's on right now" urgency as a 3-day
+// LAN final.
+const SHORT_SPAN_DAYS = 5;
+
+export function getLiveStatus(
+  event: { presenceType: string; dateStatus?: DateStatus; date: Date | string; endDate?: Date | string },
+  now: number,
+): LiveStatus {
+  const start = toDate(event.date).getTime();
+  const end = event.endDate ? toDate(event.endDate).getTime() : start + 24 * 60 * 60 * 1000;
+  const eligible =
+    event.presenceType !== 'community-outreach' &&
+    (event.dateStatus ?? 'confirmed') === 'confirmed' &&
+    now >= start &&
+    now <= end;
+  const spanDays = (end - start) / (1000 * 60 * 60 * 24);
+  return {
+    isLive: eligible && spanDays <= SHORT_SPAN_DAYS,
+    isOngoingBroadcast: eligible && spanDays > SHORT_SPAN_DAYS,
+  };
+}
+
 export interface FormattedEventDate {
   text: string;
   badge: DateStatus;

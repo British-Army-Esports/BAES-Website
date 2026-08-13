@@ -45,6 +45,13 @@ const presenceLabels: Record<string, string> = {
 };
 
 const accent = accentColor || '#c8102e';
+
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const registrationDeadline = event.data.registrationDeadline;
+const registrationClosed = registrationDeadline ? registrationDeadline.getTime() < Date.now() : false;
+const registrationDeadlineText = registrationDeadline
+  ? `${registrationDeadline.getDate()} ${MONTHS[registrationDeadline.getMonth()]} ${registrationDeadline.getFullYear()}`
+  : undefined;
 ---
 
 <BaseLayout
@@ -62,6 +69,15 @@ const accent = accentColor || '#c8102e';
       {event.data.team && <span class="meta-pill meta-pill--outline">{teamLabels[event.data.team]}</span>}
       {corpsEntry && <span class="meta-pill meta-pill--outline">{corpsEntry.data.name}</span>}
     </div>
+
+    {
+      registrationDeadlineText && (
+        <p class:list={['registration', { 'registration--closed': registrationClosed }]}>
+          {registrationClosed ? 'Registration closed ' : 'Register by '}
+          <strong>{registrationDeadlineText}</strong>
+        </p>
+      )
+    }
 
     {
       disciplineNames.length > 0 && (
@@ -151,6 +167,32 @@ const accent = accentColor || '#c8102e';
   .meta-pill--confirmed {
     border-color: var(--accent);
     color: var(--accent);
+  }
+
+  .registration {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--crimson-bright);
+    font-size: 0.85rem;
+    background: rgba(200, 16, 46, 0.08);
+    border-left: 2px solid var(--crimson);
+    padding: 0.5rem 0.75rem;
+    margin: 0 0 1rem;
+  }
+
+  .registration strong {
+    color: var(--text-primary);
+  }
+
+  .registration--closed {
+    color: var(--text-secondary);
+    background: var(--surface);
+    border-left-color: var(--border);
+  }
+
+  .registration--closed strong {
+    color: var(--text-secondary-alt);
   }
 
   .disciplines {

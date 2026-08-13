@@ -2,7 +2,7 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import EventCard from '../../components/EventCard.astro';
-import { formatEventDate, compareEventDates } from '../../lib/eventDate';
+import { formatEventDate, compareEventDates, getLiveStatus } from '../../lib/eventDate';
 
 const allDisciplines = await getCollection('disciplines', ({ data }) => data.active);
 const disciplineInfo = new Map(
@@ -23,13 +23,7 @@ const events = (await getCollection('events'))
     // never honestly be classified as "past" — it always sits in Upcoming
     // until someone confirms a real date.
     const isPast = event.data.dateStatus !== 'tbc' && end < now;
-    // "In progress" mirrors the Ticker/MapView live rule: only a confirmed,
-    // genuinely competitive/mixed presence counts, never TBC/provisional.
-    const isLive =
-      event.data.presenceType !== 'community-outreach' &&
-      (event.data.dateStatus ?? 'confirmed') === 'confirmed' &&
-      now >= start &&
-      now <= end;
+    const { isLive, isOngoingBroadcast } = getLiveStatus(event.data, now);
 
     return {
       id: event.id,
@@ -50,12 +44,19 @@ const events = (await getCollection('events'))
       sortDate: start,
       isPast,
       isLive,
+      isOngoingBroadcast,
       ...formatEventDate(event.data),
     };
   })
   .sort(compareEventDates);
 
 const inProgress = events.filter((e) => e.isLive);
+// Ongoing broadcasts (long-span "live" events like a multi-week qualifier
+// season) stay in their normal Upcoming row, sorted by date as usual — they
+// just get a calmer badge on the card instead of moving up here. Moving
+// them into the pulsing hero section for their entire multi-week run would
+// cheapen what "In Progress" means for the genuinely single-occasion events
+// it's meant for.
 const upcoming = events.filter((e) => !e.isPast && !e.isLive);
 // Major: British Army Lions/UKAF-level fixtures and large public LAN
 // engagement presences (EPIC, Enclave). Minor: Army-internal competitions
@@ -182,7 +183,7 @@ const filterPresenceTypes = presenceOrder.filter((p) => usedPresenceTypes.has(p)
     <p class="row-label label">Major Fixtures — Army Lions, UKAF &amp; large public LAN events</p>
     <div class="event-scroll clip-tl-sm">
       <div class="event-row" data-events-container>
-        {upcomingMajor.map((event) => <EventCard event={event} scaleLabels={scaleLabels} teamLabels={teamLabels} />)}
+        {upcomingMajor.map((event) => <EventCard event={event} scaleLabels={scaleLabels} teamLabels={teamLabels} ongoing={event.isOngoingBroadcast} />)}
         {upcomingMajor.length === 0 && <p class="empty">No major fixtures confirmed yet.</p>}
         {upcomingMajor.length > 0 && (
           <p class="empty filter-empty" hidden>No major fixtures match these filters — check back later, or try a wider filter.</p>
@@ -193,7 +194,7 @@ const filterPresenceTypes = presenceOrder.filter((p) => usedPresenceTypes.has(p)
     <p class="row-label label">Army &amp; Local Fixtures — BAEL, internal and smaller engagements</p>
     <div class="event-scroll clip-tl-sm">
       <div class="event-row" data-events-container>
-        {upcomingMinor.map((event) => <EventCard event={event} scaleLabels={scaleLabels} teamLabels={teamLabels} />)}
+        {upcomingMinor.map((event) => <EventCard event={event} scaleLabels={scaleLabels} teamLabels={teamLabels} ongoing={event.isOngoingBroadcast} />)}
         {upcomingMinor.length === 0 && <p class="empty">No Army/local fixtures confirmed yet.</p>}
         {upcomingMinor.length > 0 && (
           <p class="empty filter-empty" hidden>No Army/local fixtures match these filters — check back later, or try a wider filter.</p>

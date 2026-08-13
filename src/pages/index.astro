@@ -6,7 +6,7 @@ import Card from '../components/Card.astro';
 import Table from '../components/Table.astro';
 import MapView from '../components/MapView.astro';
 import EventCard from '../components/EventCard.astro';
-import { formatEventDate, compareEventDates } from '../lib/eventDate';
+import { formatEventDate, compareEventDates, getLiveStatus } from '../lib/eventDate';
 
 const disciplines = await getCollection('disciplines');
 
@@ -30,11 +30,7 @@ const keyEvents = (await getCollection('events'))
     const start = event.data.date.getTime();
     const end = (event.data.endDate ?? event.data.date).getTime();
     const isPast = event.data.dateStatus !== 'tbc' && end < now;
-    const isLive =
-      event.data.presenceType !== 'community-outreach' &&
-      (event.data.dateStatus ?? 'confirmed') === 'confirmed' &&
-      now >= start &&
-      now <= end;
+    const { isLive, isOngoingBroadcast } = getLiveStatus(event.data, now);
     return {
       id: event.id,
       title: event.data.title,
@@ -50,6 +46,7 @@ const keyEvents = (await getCollection('events'))
       sortDate: start,
       isPast,
       isLive,
+      isOngoingBroadcast,
       ...formatEventDate(event.data),
     };
   })
@@ -125,7 +122,13 @@ const overallRows = [...overallPoints.entries()]
       keyEvents.length > 0 ? (
         <div class="grid">
           {keyEvents.map((event) => (
-            <EventCard event={event} scaleLabels={keyEventScaleLabels} teamLabels={keyEventTeamLabels} />
+            <EventCard
+              event={event}
+              scaleLabels={keyEventScaleLabels}
+              teamLabels={keyEventTeamLabels}
+              live={event.isLive}
+              ongoing={event.isOngoingBroadcast}
+            />
           ))}
         </div>
       ) : (

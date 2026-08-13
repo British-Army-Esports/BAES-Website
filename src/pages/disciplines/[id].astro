@@ -2,7 +2,7 @@
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Table from '../../components/Table.astro';
-import { formatEventDate, compareEventDates } from '../../lib/eventDate';
+import { formatEventDate, compareEventDates, getLiveStatus } from '../../lib/eventDate';
 
 export async function getStaticPaths() {
   const disciplines = await getCollection('disciplines');
@@ -23,13 +23,11 @@ const relatedEvents = (await getCollection('events'))
     const start = event.data.date.getTime();
     const end = (event.data.endDate ?? event.data.date).getTime();
     // Mirrors the Events page rules: a TBC date can never honestly be
-    // "past", and "live" only counts a confirmed, non-outreach fixture.
+    // "past", and "live" only counts a confirmed, non-outreach, short-span
+    // fixture — a multi-week ongoing broadcast stays in Upcoming rather
+    // than the Live section (see getLiveStatus).
     const isPast = event.data.dateStatus !== 'tbc' && end < now;
-    const isLive =
-      event.data.presenceType !== 'community-outreach' &&
-      (event.data.dateStatus ?? 'confirmed') === 'confirmed' &&
-      now >= start &&
-      now <= end;
+    const { isLive } = getLiveStatus(event.data, now);
     return {
       title: event.data.title,
       locationName: event.data.location?.name ?? (isPast ? 'Not recorded' : 'Online / TBC'),

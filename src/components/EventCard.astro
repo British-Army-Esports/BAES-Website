@@ -20,14 +20,19 @@ export interface Props {
   scaleLabels: Record<string, string>;
   teamLabels: Record<string, string>;
   live?: boolean;
+  // Currently within its date range like `live`, but spans too long (a
+  // season/qualifier run) to honestly badge as "happening right now" — a
+  // calmer, non-pulsing indicator instead. Mutually exclusive with `live`
+  // in practice (a card is one or the other, never both).
+  ongoing?: boolean;
 }
 
-const { event, scaleLabels, teamLabels, live = false } = Astro.props;
+const { event, scaleLabels, teamLabels, live = false, ongoing = false } = Astro.props;
 const accent = event.accentColor || '#c8102e';
 ---
 
 <div
-  class:list={['event-card', 'clip-tl', { 'event-card--live': live }]}
+  class:list={['event-card', 'clip-tl', { 'event-card--live': live, 'event-card--ongoing': ongoing }]}
   data-disciplines={event.disciplineIds.join(',')}
   data-scale={event.scale}
   data-presence={event.presenceType}
@@ -39,6 +44,7 @@ const accent = event.accentColor || '#c8102e';
     <div class="event-card__top">
       <span class:list={['event-card__date', `event-card__date--${event.badge}`]}>{event.text}</span>
       {live && <span class="event-card__live">● LIVE</span>}
+      {ongoing && <span class="event-card__ongoing">📺 Streaming Now</span>}
     </div>
     <h3 class="event-card__title">
       {
@@ -148,6 +154,19 @@ const accent = event.accentColor || '#c8102e';
     font-size: 0.7rem;
     letter-spacing: 0.05em;
     flex-shrink: 0;
+  }
+
+  .event-card__ongoing {
+    color: var(--text-secondary-alt);
+    font-weight: 600;
+    font-size: 0.7rem;
+    letter-spacing: 0.03em;
+    flex-shrink: 0;
+  }
+
+  .event-card--ongoing {
+    border-image: none;
+    border-color: var(--accent);
   }
 
   .event-card__title {
