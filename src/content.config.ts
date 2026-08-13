@@ -1,6 +1,17 @@
 import { defineCollection, reference, z } from 'astro:content';
 import { glob } from 'astro/loaders';
 
+// Decap CMS serialises a left-blank optional field as an empty string "",
+// not as an omitted key — but zod's `.optional()` only accepts `undefined`,
+// not `""`. Without this, a lay editor leaving an optional date/number/URL
+// field untouched produces a file that fails schema validation and takes
+// the whole site's build down for everyone, not just that one entry. Wrap
+// any optional field a CMS form can leave blank in `blankable()` so an
+// empty string is treated the same as not having provided it at all.
+function blankable<T extends z.ZodTypeAny>(schema: T) {
+  return z.preprocess((val) => (val === '' ? undefined : val), schema.optional());
+}
+
 const disciplines = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/disciplines' }),
   schema: z.object({
@@ -64,7 +75,7 @@ const events = defineCollection({
     // central British Army Esports team. ukaf: a UK Armed Forces
     // (tri-service) team, not Army/BAES-exclusive. Optional: many
     // engagement-type presences don't have a clean team qualifier.
-    team: z.enum(['corps', 'baes', 'ukaf']).optional(),
+    team: blankable(z.enum(['corps', 'baes', 'ukaf'])),
     presenceType: z.enum(['competitive', 'community-outreach', 'mixed']),
     // Editorial prominence, not derived from scale — a small-scale-but-huge-
     // audience LAN presence (EPIC, Enclave) is "major" for display purposes
@@ -74,7 +85,7 @@ const events = defineCollection({
     // gets both of those right at once.
     tier: z.enum(['major', 'minor']).default('minor'),
     date: z.coerce.date(),
-    endDate: z.coerce.date().optional(),
+    endDate: blankable(z.coerce.date()),
     // confirmed: render `date`/`endDate` as-is.
     // provisional: render a "likely [window]" chip, using dateOptions if present.
     // tbc: render a "Date TBC" badge; `date` is an internal sort anchor only,
@@ -90,13 +101,13 @@ const events = defineCollection({
     location: z
       .object({
         name: z.string(),
-        lat: z.number().optional(),
-        long: z.number().optional(),
+        lat: blankable(z.number()),
+        long: blankable(z.number()),
       })
       .optional(),
     description: z.string().optional(),
     resultsSummary: z.string().optional(),
-    externalLink: z.string().url().optional(),
+    externalLink: blankable(z.string().url()),
   }),
 });
 
