@@ -1,0 +1,13 @@
+title: "C.O.D.E. Bowl V"
+disciplines:
+  - "call-of-duty"
+scale: "international-military"
+team: "baes"
+presenceType: "competitive"
+date: 2024-06-01
+dateStatus: "provisional"
+dateOptions: ["2024"]
+location:
+  name: "Washington, D.C., USA"
+  lat: 38.9072
+  long: -77.0369

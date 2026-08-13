@@ -1,0 +1,15 @@
+title: "C.O.D.E. Bowl IV"
+disciplines:
+  - "call-of-duty"
+scale: "international-military"
+team: "baes"
+presenceType: "competitive"
+date: 2023-06-01
+dateStatus: "provisional"
+dateOptions: ["2023"]
+location:
+  name: "Los Angeles, California, USA"
+  lat: 34.0522
+  long: -118.2437
+photos:
+  - "/photos/events/code-bowl-iv/team.jpg"
