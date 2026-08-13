@@ -10,5 +10,9 @@ location:
 equipment:
   - "10× PCs"
   - "2× sim racing rigs"
+photos:
+  - "/photos/locations/kinloss-barracks/gaming-room.jpg"
+enhancedPhotos:
+  - "/photos/locations/kinloss-barracks/gaming-room-enhanced.jpg"
 active: true
 ---

@@ -10,5 +10,9 @@ location:
 equipment:
   - "35+ PCs"
 status: "No good peripherals at present — uplift bid needed."
+photos:
+  - "/photos/locations/ctf-gibraltar-barracks/hall.jpg"
+enhancedPhotos:
+  - "/photos/locations/ctf-gibraltar-barracks/hall-enhanced.jpg"
 active: true
 ---
