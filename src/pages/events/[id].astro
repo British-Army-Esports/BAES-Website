@@ -20,7 +20,11 @@ const disciplineEntries = event.data.disciplines
 const disciplineNames = disciplineEntries.filter(Boolean).map((d) => d!.data.name);
 const accentColor = disciplineEntries.find(Boolean)?.data.color;
 
-const corpsEntry = event.data.corps ? await getEntry(event.data.corps) : undefined;
+// Corps badge intentionally not rendered for now: every corps-tagged event
+// currently on record is RE, so surfacing it here would read as "this is an
+// RE site" rather than an Army-wide one. `event.data.corps` itself is left
+// alone — once fixtures from other Corps are added, reinstate the badge
+// below `{corpsEntry && <span class="meta-pill meta-pill--outline">{corpsEntry.data.name}</span>}`.
 
 const { text: dateText, badge } = formatEventDate(event.data);
 
@@ -68,7 +72,6 @@ const registrationDeadlineText = registrationDeadline
       <span class:list={['meta-pill', `meta-pill--${badge}`]}>{dateText}</span>
       <span class="meta-pill meta-pill--outline">{scaleLabels[event.data.scale]}</span>
       {event.data.team && <span class="meta-pill meta-pill--outline">{teamLabels[event.data.team]}</span>}
-      {corpsEntry && <span class="meta-pill meta-pill--outline">{corpsEntry.data.name}</span>}
     </div>
 
     {
