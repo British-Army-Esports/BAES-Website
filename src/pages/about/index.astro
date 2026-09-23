@@ -27,6 +27,43 @@ const whyPoints = [
     body: 'Esports is formally recognised at governmental and Olympic-adjacent levels, through bodies like the Global Esports Federation and the Commonwealth Esports Championships. The Army is taking part in a competitive discipline that already has that standing, not one it has to build from scratch.',
   },
 ];
+
+// `logo` is optional per item and left unset until a real logo file is
+// sourced — see public/logos/orgs/README.md for where to drop one in.
+// Items without a logo just render as a plain text link, so this list
+// doesn't need to wait on having every logo before it can be accurate.
+const govGroups = [
+  {
+    label: 'Reports To',
+    items: [
+      { name: 'UK Armed Forces Sport' },
+      { name: 'Army Sport', href: 'https://britisharmysport.com/' },
+    ],
+  },
+  {
+    label: 'Sister Services',
+    items: [
+      { name: 'RAF Esports', href: 'https://x.com/RAF_Esports' },
+      {
+        name: 'RN Esports',
+        href: 'https://www.royalnavy.mod.uk/navy-sport/all-sports/esports',
+        logo: '/logos/orgs/rn-esports.jpg',
+      },
+    ],
+  },
+  {
+    label: 'National Governing Body',
+    items: [{ name: 'British Esports', href: 'https://britishesports.org/' }],
+  },
+  {
+    label: 'Wider Recognition',
+    items: [
+      { name: 'International Defence Esports Games', href: 'http://ideg.gg/' },
+      { name: 'BFBS Esports', href: 'https://bfbsesports.com/' },
+      { name: 'UK Veterans Gaming', href: 'https://ukveterans.gg/' },
+    ],
+  },
+];
 ---
 
 <BaseLayout title="About" active="About" description="What British Army Esports is, why it exists, and how it's governed.">
@@ -74,48 +111,31 @@ const whyPoints = [
     </p>
 
     <div class="gov-groups">
-      <div class="gov-group">
-        <p class="gov-group__label label">Reports To</p>
-        <ul class="gov-list">
-          <li>UK Armed Forces Sport</li>
-          <li>
-            <a href="https://britisharmysport.com/" target="_blank" rel="noopener noreferrer">Army Sport</a>
-          </li>
-        </ul>
-      </div>
-      <div class="gov-group">
-        <p class="gov-group__label label">Sister Services</p>
-        <ul class="gov-list">
-          <li>
-            <a href="https://x.com/RAF_Esports" target="_blank" rel="noopener noreferrer">RAF Esports</a>
-          </li>
-          <li>
-            <a href="https://www.royalnavy.mod.uk/navy-sport/all-sports/esports" target="_blank" rel="noopener noreferrer">RN Esports</a>
-          </li>
-        </ul>
-      </div>
-      <div class="gov-group">
-        <p class="gov-group__label label">National Governing Body</p>
-        <ul class="gov-list">
-          <li>
-            <a href="https://britishesports.org/" target="_blank" rel="noopener noreferrer">British Esports</a>
-          </li>
-        </ul>
-      </div>
-      <div class="gov-group">
-        <p class="gov-group__label label">Wider Recognition</p>
-        <ul class="gov-list">
-          <li>
-            <a href="http://ideg.gg/" target="_blank" rel="noopener noreferrer">International Defence Esports Games</a>
-          </li>
-          <li>
-            <a href="https://bfbsesports.com/" target="_blank" rel="noopener noreferrer">BFBS Esports</a>
-          </li>
-          <li>
-            <a href="https://ukveterans.gg/" target="_blank" rel="noopener noreferrer">UK Veterans Gaming</a>
-          </li>
-        </ul>
-      </div>
+      {
+        govGroups.map((group) => (
+          <div class="gov-group">
+            <p class="gov-group__label label">{group.label}</p>
+            <ul class="gov-list">
+              {group.items.map((item) => (
+                <li>
+                  {item.logo && (
+                    <span class="gov-list__logo">
+                      <img src={item.logo} alt="" loading="lazy" />
+                    </span>
+                  )}
+                  {item.href ? (
+                    <a href={item.href} target="_blank" rel="noopener noreferrer">
+                      {item.name}
+                    </a>
+                  ) : (
+                    <span>{item.name}</span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
     </div>
 
     <p class="corps-note">
@@ -239,8 +259,31 @@ const whyPoints = [
   }
 
   .gov-list li {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
     color: var(--text-primary-dim);
     font-size: 0.9rem;
+  }
+
+  /* Light backing chip: logos here vary wildly in their own background
+     (some dark, some transparent) so a fixed light chip guarantees
+     legibility the same way the footer's sponsor-chip treatment does. */
+  .gov-list__logo {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    background: #f2f2f2;
+    padding: 0.2rem;
+  }
+
+  .gov-list__logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
   }
 
   .gov-list a {
