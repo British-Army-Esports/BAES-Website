@@ -13,6 +13,15 @@ export interface EventCardData {
   resultsSummary?: string;
   text: string;
   badge: 'confirmed' | 'provisional' | 'tbc';
+  // Raw (not pre-formatted) date fields, carried through so a client script
+  // can recompute past/live/ongoing status against the real clock at view
+  // time rather than the moment this page was last built — see the
+  // reclassification script in events/index.astro. Optional because pages
+  // using EventCard without that script (homepage, disciplines) have no
+  // need to set them.
+  rawDate?: string;
+  rawEndDate?: string;
+  dateStatus?: 'confirmed' | 'provisional' | 'tbc';
 }
 
 export interface Props {
@@ -36,6 +45,9 @@ const accent = event.accentColor || '#c8102e';
   data-disciplines={event.disciplineIds.join(',')}
   data-scale={event.scale}
   data-presence={event.presenceType}
+  data-event-date={event.rawDate}
+  data-event-end-date={event.rawEndDate}
+  data-event-date-status={event.dateStatus}
   style={`--accent: ${accent}`}
 >
   <div class="event-card__bar"></div>

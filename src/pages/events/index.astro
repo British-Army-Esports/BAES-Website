@@ -45,6 +45,13 @@ const events = (await getCollection('events'))
       isPast,
       isLive,
       isOngoingBroadcast,
+      // Raw fields for the client-side reclassification script — see the
+      // <script> below. Everything else on this object is pre-computed at
+      // build time using `now`, which goes stale the moment real time moves
+      // past it without a rebuild.
+      rawDate: event.data.date.toISOString(),
+      rawEndDate: event.data.endDate?.toISOString(),
+      dateStatus: event.data.dateStatus ?? 'confirmed',
       ...formatEventDate(event.data),
     };
   })
@@ -162,48 +169,40 @@ const filterPresenceTypes = presenceOrder.filter((p) => usedPresenceTypes.has(p)
       }
     </div>
 
-    {
-      inProgress.length > 0 && (
-        <>
-          <h2 class="section__subheading section__subheading--live">
-            <span class="live-dot" /> In Progress
-          </h2>
-          <div class="event-grid" data-events-container>
-            {inProgress.map((event) => (
-              <EventCard event={event} scaleLabels={scaleLabels} teamLabels={teamLabels} live />
-            ))}
-            <p class="empty filter-empty" hidden>No in-progress fixtures match these filters.</p>
-          </div>
-        </>
-      )
-    }
+    <div data-role="in-progress-wrap" hidden={inProgress.length === 0}>
+      <h2 class="section__subheading section__subheading--live">
+        <span class="live-dot" /> In Progress
+      </h2>
+      <div class="event-grid" data-events-container data-role="in-progress">
+        {inProgress.map((event) => (
+          <EventCard event={event} scaleLabels={scaleLabels} teamLabels={teamLabels} live />
+        ))}
+        <p class="empty filter-empty" hidden>No in-progress fixtures match these filters.</p>
+      </div>
+    </div>
 
     <h2 class="section__subheading">Upcoming</h2>
 
     <p class="row-label label">Major Fixtures — Army Lions, UKAF &amp; large public LAN events</p>
     <div class="event-scroll clip-tl-sm">
-      <div class="event-row" data-events-container>
+      <div class="event-row" data-events-container data-role="upcoming-major">
         {upcomingMajor.map((event) => <EventCard event={event} scaleLabels={scaleLabels} teamLabels={teamLabels} ongoing={event.isOngoingBroadcast} />)}
-        {upcomingMajor.length === 0 && <p class="empty">No major fixtures confirmed yet.</p>}
-        {upcomingMajor.length > 0 && (
-          <p class="empty filter-empty" hidden>No major fixtures match these filters — check back later, or try a wider filter.</p>
-        )}
+        <p class="empty" data-row-empty hidden={upcomingMajor.length > 0}>No major fixtures confirmed yet.</p>
+        <p class="empty filter-empty" hidden>No major fixtures match these filters — check back later, or try a wider filter.</p>
       </div>
     </div>
 
     <p class="row-label label">Army &amp; Local Fixtures — BAEL, internal and smaller engagements</p>
     <div class="event-scroll clip-tl-sm">
-      <div class="event-row" data-events-container>
+      <div class="event-row" data-events-container data-role="upcoming-minor">
         {upcomingMinor.map((event) => <EventCard event={event} scaleLabels={scaleLabels} teamLabels={teamLabels} ongoing={event.isOngoingBroadcast} />)}
-        {upcomingMinor.length === 0 && <p class="empty">No Army/local fixtures confirmed yet.</p>}
-        {upcomingMinor.length > 0 && (
-          <p class="empty filter-empty" hidden>No Army/local fixtures match these filters — check back later, or try a wider filter.</p>
-        )}
+        <p class="empty" data-row-empty hidden={upcomingMinor.length > 0}>No Army/local fixtures confirmed yet.</p>
+        <p class="empty filter-empty" hidden>No Army/local fixtures match these filters — check back later, or try a wider filter.</p>
       </div>
     </div>
 
     <h2 class="section__subheading section__subheading--muted">Past &amp; History</h2>
-    <ul class="past-list" data-events-container>
+    <ul class="past-list" data-events-container data-role="past-list">
       {
         past.map((event) => (
           <li data-disciplines={event.disciplineIds.join(',')} data-scale={event.scale} data-presence={event.presenceType}>
@@ -218,15 +217,105 @@ const filterPresenceTypes = presenceOrder.filter((p) => usedPresenceTypes.has(p)
           </li>
         ))
       }
-      {past.length === 0 && <li class="empty">No past fixtures logged yet.</li>}
-      {past.length > 0 && (
-        <li class="empty filter-empty" hidden>No past fixtures match these filters.</li>
-      )}
+      <li class="empty" data-row-empty hidden={past.length > 0}>No past fixtures logged yet.</li>
+      <li class="empty filter-empty" hidden>No past fixtures match these filters.</li>
     </ul>
   </section>
 </BaseLayout>
 
 <script>
+  import { getLiveStatus, formatEventDate } from '../../lib/eventDate';
+
+  // Astro bakes "now" in at build time — a static site has no per-request
+  // render, so without this, an event only moves from Upcoming to Past (or
+  // starts/stops showing a LIVE badge) the next time the site is rebuilt,
+  // which could be days after it actually happened. This runs the same
+  // classification the server did, but against the real clock in the
+  // visitor's browser, and moves cards to wherever they now actually
+  // belong. Time only moves forward, so the only transitions possible here
+  // are Upcoming/In Progress → Past, and not-live → live — never backwards.
+  function reclassifyEvents() {
+    const now = Date.now();
+    const inProgressWrap = document.querySelector('[data-role="in-progress-wrap"]');
+    const inProgressContainer = document.querySelector('[data-role="in-progress"]');
+    const pastList = document.querySelector('[data-role="past-list"]');
+
+    document.querySelectorAll('[data-event-date]').forEach((card) => {
+      const rawDate = card.getAttribute('data-event-date');
+      if (!rawDate) return;
+      const rawEndDate = card.getAttribute('data-event-end-date') || undefined;
+      const dateStatus = card.getAttribute('data-event-date-status') || 'confirmed';
+      const presenceType = card.getAttribute('data-presence') || '';
+      const eventInfo = { date: rawDate, endDate: rawEndDate, dateStatus, presenceType };
+
+      const end = new Date(rawEndDate || rawDate).getTime();
+      const isPast = dateStatus !== 'tbc' && end < now;
+
+      // Refresh the visible date text/badge regardless of bucket — a
+      // provisional "Likely Aug 2026" needs to drop the "Likely" the moment
+      // it's past, same as the server-side logic already does.
+      const { text, badge } = formatEventDate(eventInfo);
+      const dateEl = card.querySelector('.event-card__date');
+      if (dateEl) {
+        dateEl.textContent = text;
+        dateEl.className = `event-card__date event-card__date--${badge}`;
+      }
+
+      if (isPast) {
+        if (pastList) {
+          const titleLink = card.querySelector('.event-card__title a');
+          const location = card.querySelector('.event-card__location')?.textContent ?? '';
+          const result = card.querySelector('.event-card__result-text')?.textContent;
+          const li = document.createElement('li');
+          li.setAttribute('data-disciplines', card.getAttribute('data-disciplines') || '');
+          li.setAttribute('data-scale', card.getAttribute('data-scale') || '');
+          li.setAttribute('data-presence', presenceType);
+          const a = document.createElement('a');
+          a.href = titleLink?.getAttribute('href') || '#';
+          if (titleLink?.getAttribute('target')) {
+            a.target = titleLink.getAttribute('target');
+            a.rel = 'noopener noreferrer';
+          }
+          a.textContent = (titleLink?.textContent || '').replace(/\s*↗$/, '');
+          const meta = document.createElement('span');
+          meta.className = 'past-list__meta';
+          meta.textContent = [text, location, result].filter(Boolean).join(' · ');
+          li.append(a, meta);
+          pastList.insertBefore(li, pastList.firstChild);
+        }
+        card.remove();
+        return;
+      }
+
+      const { isLive } = getLiveStatus(eventInfo, now);
+      if (isLive && inProgressContainer && card.parentElement !== inProgressContainer) {
+        card.classList.add('event-card--live');
+        if (!card.querySelector('.event-card__live')) {
+          const liveBadge = document.createElement('span');
+          liveBadge.className = 'event-card__live';
+          liveBadge.textContent = '● LIVE';
+          card.querySelector('.event-card__top')?.appendChild(liveBadge);
+        }
+        inProgressContainer.appendChild(card);
+      }
+    });
+
+    if (inProgressWrap && inProgressContainer) {
+      inProgressWrap.hidden = inProgressContainer.querySelector('.event-card') === null;
+    }
+
+    // A row that lost every card to the Past list above needs its
+    // build-time "no fixtures confirmed yet" message revealed, same message
+    // a genuinely-empty row already showed at build time.
+    document.querySelectorAll('[data-events-container]').forEach((container) => {
+      const rowEmpty = container.querySelector('[data-row-empty]');
+      if (!rowEmpty) return;
+      rowEmpty.hidden = container.querySelector('.event-card, li:not(.empty)') !== null;
+    });
+  }
+
+  reclassifyEvents();
+
   const disciplineSelect = document.getElementById('filter-discipline');
   const scaleSelect = document.getElementById('filter-scale');
   const presenceChecks = document.querySelectorAll('.filter-presence-check');
