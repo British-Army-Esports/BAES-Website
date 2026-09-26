@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /feedback/thanks
+
+Sitemap: https://britisharmyesports.org.uk/sitemap-index.xml

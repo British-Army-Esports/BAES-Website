@@ -57,12 +57,46 @@ const registrationClosed = registrationDeadline ? registrationDeadline.getTime()
 const registrationDeadlineText = registrationDeadline
   ? `${registrationDeadline.getDate()} ${MONTHS[registrationDeadline.getMonth()]} ${registrationDeadline.getFullYear()}`
   : undefined;
+
+const toIsoDay = (d: Date) => d.toISOString().slice(0, 10);
+const loc = event.data.location;
+// A TBC event's `date` is an internal sort placeholder, not a real date —
+// never publish it to search engines as if it were.
+const eventJsonLd =
+  (event.data.dateStatus ?? 'confirmed') === 'tbc'
+    ? undefined
+    : {
+        '@context': 'https://schema.org',
+        '@type': 'SportsEvent',
+        name: event.data.title,
+        description: event.data.description,
+        startDate: toIsoDay(event.data.date),
+        endDate: toIsoDay(event.data.endDate ?? event.data.date),
+        eventStatus: 'https://schema.org/EventScheduled',
+        eventAttendanceMode: loc
+          ? 'https://schema.org/OfflineEventAttendanceMode'
+          : 'https://schema.org/OnlineEventAttendanceMode',
+        location: loc
+          ? {
+              '@type': 'Place',
+              name: loc.name,
+              address: loc.name,
+              ...(loc.lat !== undefined && loc.long !== undefined
+                ? { geo: { '@type': 'GeoCoordinates', latitude: loc.lat, longitude: loc.long } }
+                : {}),
+            }
+          : { '@type': 'VirtualLocation', url: event.data.externalLink ?? new URL(Astro.url.pathname, Astro.site).href },
+        organizer: { '@type': 'SportsOrganization', name: 'British Army Esports', url: 'https://britisharmyesports.org.uk/' },
+        image: event.data.photos?.map((p) => new URL(p, Astro.site).href) ?? ['https://britisharmyesports.org.uk/social/og-image.png'],
+        ...(event.data.externalLink ? { url: event.data.externalLink } : {}),
+      };
 ---
 
 <BaseLayout
   title={event.data.title}
   active="Events"
   description={event.data.description ?? `${event.data.title} — British Army Esports fixture.`}
+  jsonLd={eventJsonLd}
 >
   <section class="section container" style={`--accent: ${accent}`}>
     <p class="section__eyebrow label">{presenceLabels[event.data.presenceType]}</p>

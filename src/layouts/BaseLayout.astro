@@ -8,16 +8,26 @@ export interface Props {
   title: string;
   description?: string;
   active?: string;
+  // Schema.org JSON-LD object(s) for this page — what lets search engines
+  // show rich results (event dates/venues) instead of a plain link.
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
+  noindex?: boolean;
 }
 
 const {
   title,
   description = 'The official directory of British Army esports: disciplines, Corps, events and results.',
   active,
+  jsonLd,
+  noindex = false,
 } = Astro.props;
 
 const isHome = Astro.url.pathname === '/';
-const pageTitle = `${title} — British Army Esports`;
+// "Home — British Army Esports" wastes the most important title on the
+// site on the word "Home"; lead with the brand and what it is instead.
+const pageTitle = isHome
+  ? "British Army Esports — The Army's Competitive Gaming Programme"
+  : `${title} — British Army Esports`;
 const ogImageUrl = new URL('/social/og-image.png', Astro.site);
 const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
 ---
@@ -51,6 +61,9 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
     <meta name="twitter:title" content={pageTitle} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImageUrl} />
+    <link rel="canonical" href={canonicalUrl} />
+    {noindex && <meta name="robots" content="noindex" />}
+    {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd).replace(/</g, '\\u003c')} />}
     <!--
       Preload the two weights used above the fold on every page (Rajdhani
       700 for headings/nav, Inter 400 for body copy) so the browser starts

@@ -91,9 +91,24 @@ const overallRows = [...overallPoints.entries()]
     pts,
   }))
   .sort((a, b) => b.pts - a.pts);
+
+const orgJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'SportsOrganization',
+  name: 'British Army Esports',
+  url: 'https://britisharmyesports.org.uk/',
+  logo: 'https://britisharmyesports.org.uk/logos/brand/baes-crest.png',
+  sport: 'Esports',
+  parentOrganization: { '@type': 'SportsOrganization', name: 'Army Sport', url: 'https://britisharmysport.com/' },
+  sameAs: [
+    'https://x.com/BritArmyesports',
+    'https://www.twitch.tv/britisharmyesports',
+    'https://www.youtube.com/c/BritishArmyEsports',
+  ],
+};
 ---
 
-<BaseLayout title="Home" active="Home">
+<BaseLayout title="Home" active="Home" jsonLd={orgJsonLd}>
   <Hero />
 
   <section class="section container">
@@ -174,6 +189,8 @@ const overallRows = [...overallPoints.entries()]
 
   .section__note a {
     color: var(--crimson-bright);
+    text-decoration: underline;
+    text-underline-offset: 3px;
   }
 
   .empty {
