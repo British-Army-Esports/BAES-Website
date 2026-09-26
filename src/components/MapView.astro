@@ -1,5 +1,8 @@
 ---
 import 'leaflet/dist/leaflet.css';
+// Base cluster animation CSS only — the bubble look is styled below, not
+// the plugin's default green/yellow/orange theme.
+import 'leaflet.markercluster/dist/MarkerCluster.css';
 import { getCollection } from 'astro:content';
 import { formatEventDate } from '../lib/eventDate';
 
@@ -109,19 +112,19 @@ const usedTypes = Object.keys(typeLabels).filter((t) => locationPoints.some((loc
   <div class="mapview__controls">
     <div class="mapview__group" role="group" aria-label="Map layers">
       <button type="button" class="mapview__pill is-active" data-layer="locations">
-        Our Locations
+        <span class="mapview__glyph mapview__glyph--location" aria-hidden="true"></span>Our Locations
       </button>
       {
         plannedPoints.length > 0 && (
           <button type="button" class="mapview__pill is-active" data-layer="planned">
-            Planned
+            <span class="mapview__glyph mapview__glyph--planned" aria-hidden="true"></span>Planned
           </button>
         )
       }
       {
         showEvents && (
           <button type="button" class="mapview__pill is-active" data-layer="events">
-            Events
+            <svg class="mapview__glyph mapview__glyph--event" viewBox="0 0 16 15" aria-hidden="true"><path d="M8 1.5 14.8 13.5H1.2Z" /></svg>Events
           </button>
         )
       }
@@ -202,6 +205,11 @@ const usedTypes = Object.keys(typeLabels).filter((t) => locationPoints.some((loc
 <script>
   import L from 'leaflet';
 
+  // leaflet.markercluster is a UMD plugin that attaches itself to a global
+  // `L`, so the global has to exist before the plugin is loaded.
+  (window as any).L = L;
+  await import('leaflet.markercluster');
+
   const dataEl = document.getElementById('baes-map-data');
   const { locationPoints, plannedPoints, eventPoints, typeLabels } = JSON.parse(dataEl.textContent);
 
@@ -229,53 +237,90 @@ const usedTypes = Object.keys(typeLabels).filter((t) => locationPoints.some((loc
     // usage terms.
     map.attributionControl.setPrefix(false);
 
-    // Locations (permanent) are solid crimson pins. Events are hollow
-    // white-ring pins so the two are visually distinct at a glance — only a
-    // genuinely *live* event gets the pulsing ring, never just "upcoming".
-    const makeIcon = (variant, pulsing, opacity = 1) =>
+    // Pin shapes borrow controller-button symbology so type reads by shape,
+    // not only colour: ○ permanent hub, △ event, □ planned hub (✕ spare).
+    // Only a genuinely *live* event gets the filled, pulsing triangle.
+    // Each pin sits centred in a 28px hit area — the visible mark stays
+    // small, but it's comfortably tappable (WCAG target size is 24px).
+    const TRIANGLE_SVG =
+      '<svg viewBox="0 0 16 15" width="16" height="15" aria-hidden="true"><path d="M8 1.5 14.8 13.5H1.2Z" /></svg>';
+    const makeIcon = (variant: string, pulsing: boolean, opacity = 1) =>
       L.divIcon({
-        className: '',
-        html: `<span class="map-pin map-pin--${variant}${pulsing ? ' map-pin--pulse' : ''}" style="opacity:${opacity}"></span>`,
-        iconSize: [16, 16],
-        iconAnchor: [8, 8],
+        className: 'map-pin-hit',
+        html: `<span class="map-pin map-pin--${variant}${pulsing ? ' map-pin--pulse' : ''}" style="opacity:${opacity}">${variant === 'event' ? TRIANGLE_SVG : ''}</span>`,
+        iconSize: [28, 28],
+        iconAnchor: [14, 14],
+        popupAnchor: [0, -8],
       });
+
+    // Nearby pins (e.g. the Salisbury Plain / Aldershot hubs at UK zoom)
+    // merge into a numbered bubble that splits apart as you zoom in.
+    const cluster = L.markerClusterGroup({
+      maxClusterRadius: 40,
+      showCoverageOnHover: false,
+      spiderfyOnMaxZoom: true,
+      iconCreateFunction: (c) =>
+        L.divIcon({
+          className: 'map-cluster-hit',
+          html: `<span class="map-cluster">${c.getChildCount()}</span>`,
+          iconSize: [36, 36],
+          iconAnchor: [18, 18],
+        }),
+    });
 
     // Popup content is HTML; names/addresses come from CMS-editable content.
     const esc = (s: string) =>
       String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
 
-    // Kept as individual marker+type pairs, not a flat layerGroup, so the
-    // venue-type filter pills can add/remove single pins rather than only
-    // being able to toggle the whole "Our Locations" layer at once.
+    // Kept as marker+type pairs so the venue-type filter pills can show/hide
+    // single pins rather than only the whole "Our Locations" layer at once.
     const locationMarkers = locationPoints.map((loc) => ({
       type: loc.type,
       marker: L.marker([loc.lat, loc.long], { icon: makeIcon('location', false), title: loc.name }).bindPopup(
         `<strong>${esc(loc.name)}</strong><br>${esc(typeLabels[loc.type] ?? loc.type)}<br>${esc(loc.address)}<br><a href="/locations/${loc.id}/request">Request Access →</a>`,
       ),
     }));
-    const locationsLayer = L.layerGroup(locationMarkers.map((entry) => entry.marker));
-
-    // Planned hubs: known about, not yet confirmed/active. Grey pins, no
+    // Planned hubs: known about, not yet confirmed/active. Grey squares, no
     // request link since no such page exists for them yet.
-    const plannedLayer = L.layerGroup(
-      plannedPoints.map((loc) =>
-        L.marker([loc.lat, loc.long], { icon: makeIcon('planned', false), title: `${loc.name} (planned)` }).bindPopup(
-          `<strong>${esc(loc.name)}</strong><br>Planned (unconfirmed)<br>${esc(loc.address)}`,
-        ),
+    const plannedMarkers = plannedPoints.map((loc) =>
+      L.marker([loc.lat, loc.long], { icon: makeIcon('planned', false), title: `${loc.name} (planned)` }).bindPopup(
+        `<strong>${esc(loc.name)}</strong><br>Planned (unconfirmed)<br>${esc(loc.address)}`,
       ),
     );
 
-    const eventsLayer = L.layerGroup(
-      eventPoints.map((event) =>
-        L.marker([event.lat, event.long], { icon: makeIcon('event', event.live, event.opacity), title: event.name }).bindPopup(
-          `<strong>${esc(event.name)}</strong>${event.live ? ' <span class="popup-live">● LIVE NOW</span>' : ''}<br>${esc(event.locationName)}<br>${esc(event.dateLabel)}`,
-        ),
+    const eventMarkers = eventPoints.map((event) =>
+      L.marker([event.lat, event.long], { icon: makeIcon('event', event.live, event.opacity), title: event.name }).bindPopup(
+        `<strong>${esc(event.name)}</strong>${event.live ? ' <span class="popup-live">● LIVE NOW</span>' : ''}<br>${esc(event.locationName)}<br>${esc(event.dateLabel)}`,
       ),
     );
 
-    locationsLayer.addTo(map);
-    plannedLayer.addTo(map);
-    eventsLayer.addTo(map);
+    // Every marker lives in the one cluster group (so pins of different
+    // types still merge when they overlap). Layer pills and venue-type pills
+    // just decide which markers are currently in it.
+    const activeLayers = new Set(
+      Array.from(document.querySelectorAll<HTMLElement>('[data-layer]')).map((btn) => btn.dataset.layer),
+    );
+    const typeFilterBtns = document.querySelectorAll<HTMLElement>('[data-type-filter]');
+    const activeTypes = new Set(Array.from(typeFilterBtns).map((btn) => btn.dataset.typeFilter));
+    const listTypeItems = document.querySelectorAll<HTMLElement>('.mapview__list-item[data-type]');
+
+    function refreshMarkers() {
+      const visible = [
+        ...(activeLayers.has('locations')
+          ? locationMarkers
+              .filter(({ type }) => typeFilterBtns.length === 0 || activeTypes.has(type))
+              .map(({ marker }) => marker)
+          : []),
+        ...(activeLayers.has('planned') ? plannedMarkers : []),
+        ...(activeLayers.has('events') ? eventMarkers : []),
+      ];
+      cluster.clearLayers();
+      cluster.addLayers(visible);
+      listTypeItems.forEach((item) => {
+        item.hidden = typeFilterBtns.length > 0 && !activeTypes.has(item.dataset.type);
+      });
+    }
+
 
     // Frame the initial view on permanent locations only, not events. Events
     // can be anywhere in the world (C.O.D.E Bowl VII is in San Diego), and
@@ -298,50 +343,27 @@ const usedTypes = Object.keys(typeLabels).filter((t) => locationPoints.some((loc
       map.setView([54.5, -3], 6);
     }
 
-    const layersByName = { locations: locationsLayer, planned: plannedLayer, events: eventsLayer };
-    document.querySelectorAll('[data-layer]').forEach((btn) => {
+    // Added only after the map has a centre/zoom — the cluster layer needs
+    // one to work out which pins to draw.
+    refreshMarkers();
+    cluster.addTo(map);
+
+    document.querySelectorAll<HTMLElement>('[data-layer]').forEach((btn) => {
       btn.addEventListener('click', () => {
         btn.classList.toggle('is-active');
-        const layer = layersByName[btn.dataset.layer];
-        if (btn.classList.contains('is-active')) {
-          layer.addTo(map);
-        } else {
-          map.removeLayer(layer);
-        }
+        if (btn.classList.contains('is-active')) activeLayers.add(btn.dataset.layer);
+        else activeLayers.delete(btn.dataset.layer);
+        refreshMarkers();
       });
     });
-
-    // Venue-type filter: select/deselect individual types rather than only
-    // being able to hide "Our Locations" as a whole. Drives both the map
-    // pins (add/remove single markers from locationsLayer) and the list
-    // view (hide/show matching <li> rows) from the same active-types set.
-    const typeFilterBtns = document.querySelectorAll('[data-type-filter]');
-    const activeTypes = new Set(Array.from(typeFilterBtns).map((btn) => btn.dataset.typeFilter));
-    const listTypeItems = document.querySelectorAll('.mapview__list-item[data-type]');
-
-    function applyTypeFilter() {
-      locationMarkers.forEach(({ type, marker }) => {
-        if (activeTypes.has(type)) {
-          locationsLayer.addLayer(marker);
-        } else {
-          locationsLayer.removeLayer(marker);
-        }
-      });
-      listTypeItems.forEach((item) => {
-        item.hidden = !activeTypes.has(item.dataset.type);
-      });
-    }
 
     typeFilterBtns.forEach((btn) => {
       btn.addEventListener('click', () => {
         btn.classList.toggle('is-active');
         const type = btn.dataset.typeFilter;
-        if (btn.classList.contains('is-active')) {
-          activeTypes.add(type);
-        } else {
-          activeTypes.delete(type);
-        }
-        applyTypeFilter();
+        if (btn.classList.contains('is-active')) activeTypes.add(type);
+        else activeTypes.delete(type);
+        refreshMarkers();
       });
     });
 
@@ -405,6 +427,51 @@ const usedTypes = Object.keys(typeLabels).filter((t) => locationPoints.some((loc
   .mapview__pill.is-active {
     color: var(--crimson-text);
     border-color: var(--crimson);
+  }
+
+  /* Pin-shape glyphs on the layer pills double as the map legend. */
+  .mapview__pill:has(.mapview__glyph) {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+  }
+
+  .mapview__glyph {
+    display: inline-block;
+    flex-shrink: 0;
+    width: 10px;
+    height: 10px;
+  }
+
+  .mapview__glyph--location {
+    border-radius: 50%;
+    background: var(--crimson-bright);
+    border: 1.5px solid #fff;
+  }
+
+  .mapview__glyph--planned {
+    width: 9px;
+    height: 9px;
+    background: #6b6b6b;
+    border: 1.5px solid #3a3a3a;
+  }
+
+  .mapview__glyph--event {
+    width: 11px;
+    height: 10px;
+    overflow: visible;
+  }
+
+  .mapview__glyph--event path {
+    fill: transparent;
+    stroke: #fff;
+    stroke-width: 2;
+    stroke-linejoin: round;
+  }
+
+  /* Pill switched off: glyph dims with the label */
+  .mapview__pill:not(.is-active) .mapview__glyph {
+    opacity: 0.4;
   }
 
   .mapview__map {
@@ -517,41 +584,63 @@ const usedTypes = Object.keys(typeLabels).filter((t) => locationPoints.some((loc
     }
   }
 
+  /* 28px invisible hit area around every pin; the visible mark is centred
+     inside it and stays small. */
+  :global(.map-pin-hit),
+  :global(.map-cluster-hit) {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+  }
+
   :global(.map-pin) {
     display: block;
     width: 14px;
     height: 14px;
-    border-radius: 50%;
   }
 
-  /* Locations (permanent): solid crimson fill */
+  /* ○ Locations (permanent hubs): solid crimson circle */
   :global(.map-pin--location) {
+    border-radius: 50%;
     background: var(--crimson-bright);
     border: 2px solid #fff;
     box-shadow: 0 0 0 2px rgba(200, 16, 46, 0.4);
   }
 
-  /* Planned (unconfirmed) hubs: dim grey, deliberately understated */
+  /* □ Planned (unconfirmed) hubs: small grey square, deliberately understated */
   :global(.map-pin--planned) {
-    width: 10px;
-    height: 10px;
+    width: 11px;
+    height: 11px;
     background: #6b6b6b;
     border: 2px solid #3a3a3a;
   }
 
-  /* Events (temporary): hollow white ring — visually distinct from a
-     permanent location at a glance */
+  /* △ Events: hollow white triangle, reads as "temporary" next to the
+     solid hub circles. SVG so the outline stays crisp at any zoom. */
   :global(.map-pin--event) {
-    background: transparent;
-    border: 2px solid #fff;
-    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.25);
+    width: 16px;
+    height: 15px;
   }
 
-  /* A live event's ring turns crimson and pulses; a non-live one stays a
-     plain white outline, whether it's upcoming or past */
-  :global(.map-pin--event.map-pin--pulse) {
-    border-color: var(--crimson-bright);
-    background: var(--crimson-bright);
+  :global(.map-pin--event svg) {
+    display: block;
+    overflow: visible;
+  }
+
+  :global(.map-pin--event path) {
+    fill: rgba(10, 10, 10, 0.55);
+    stroke: #fff;
+    stroke-width: 2;
+    stroke-linejoin: round;
+  }
+
+  /* A live event's triangle fills crimson and pulses; upcoming and past
+     events stay a plain white outline */
+  :global(.map-pin--event.map-pin--pulse path) {
+    fill: var(--crimson-bright);
+    stroke: #fff;
   }
 
   :global(.map-pin--pulse) {
@@ -565,7 +654,27 @@ const usedTypes = Object.keys(typeLabels).filter((t) => locationPoints.some((loc
     border-radius: 50%;
     background: var(--crimson-bright);
     opacity: 0.6;
+    z-index: -1;
     animation: map-pulse 1.8s var(--ease-out) infinite;
+  }
+
+  /* Cluster bubble: dark disc, crimson ring, white count — on-brand rather
+     than the plugin's default traffic-light colours. */
+  :global(.map-cluster) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--bg-base);
+    border: 2px solid var(--crimson-bright);
+    box-shadow: 0 0 0 4px rgba(200, 16, 46, 0.25);
+    color: #fff;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 0.9rem;
+    line-height: 1;
   }
 
   :global(.leaflet-popup-content-wrapper),
