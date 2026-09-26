@@ -13,6 +13,7 @@ export async function getStaticPaths() {
 
 const { location } = Astro.props;
 const formName = `hub-request-${location.id}`;
+const serviceLabels: Record<string, string> = { army: 'British Army', navy: 'Royal Navy', raf: 'Royal Air Force' };
 ---
 
 <BaseLayout
@@ -20,7 +21,9 @@ const formName = `hub-request-${location.id}`;
   description={`Request access or ask a question about ${location.data.name}.`}
 >
   <section class="section container">
-    <p class="section__eyebrow label">Request Access</p>
+    <p class="section__eyebrow label">
+      Request Access{location.data.service !== 'army' && ` · ${serviceLabels[location.data.service]} hub`}
+    </p>
     <h1 class="section__heading">{location.data.name}</h1>
     <p class="section__address">{location.data.address}</p>
     {location.data.status && <p class="section__status">{location.data.status}</p>}
@@ -37,8 +40,12 @@ const formName = `hub-request-${location.id}`;
     <PhotoGallery photos={location.data.photos} enhancedPhotos={location.data.enhancedPhotos} />
 
     <p class="section__intro">
-      Fill in the form below to request access, ask a question, or arrange a visit. Your message
-      goes directly to this hub's point of contact.
+      Fill in the form below to request access, ask a question, or arrange a visit.
+      {
+        location.data.contactPending
+          ? " We don't have a point of contact for this hub yet — your message comes to British Army Esports and we'll pass it on."
+          : " Your message goes directly to this hub's point of contact."
+      }
     </p>
 
     <form

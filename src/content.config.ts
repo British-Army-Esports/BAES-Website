@@ -152,6 +152,9 @@ const locations = defineCollection({
       'limited-setup',
       'unspecified',
     ]),
+    // Royal Navy and RAF hubs are listed alongside Army ones and labelled
+    // with their service; `corps` only applies to Army hubs.
+    service: z.enum(['army', 'navy', 'raf']).default('army'),
     corps: z.array(reference('corps')).optional(),
     address: z.string(),
     location: z.object({
@@ -163,6 +166,10 @@ const locations = defineCollection({
     status: z.string().optional(),
     pocName: z.string().optional(),
     pocRole: z.string().optional(),
+    // True when there's no point of contact for this hub yet — the request
+    // page then says honestly that messages come to BAES to pass on, rather
+    // than claiming they go straight to the hub.
+    contactPending: z.boolean().default(false),
     photos: z.array(z.string()).optional(),
     // AI-stylised "vision" shots — deliberately a separate field from
     // `photos`, never shown by default, never mixed into the real gallery.

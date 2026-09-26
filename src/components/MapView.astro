@@ -45,6 +45,7 @@ const locationPoints = allLocations.map((loc) => ({
   id: loc.id,
   name: loc.data.name,
   type: displayType(loc.data.type),
+  service: loc.data.service,
   address: loc.data.address,
   equipment: loc.data.equipment ?? [],
   lat: loc.data.location.lat,
@@ -203,6 +204,7 @@ const usedTypes = Object.keys(typeLabels).filter((t) => locationPoints.some((loc
 
   const dataEl = document.getElementById('baes-map-data');
   const { locationPoints, plannedPoints, eventPoints, typeLabels } = JSON.parse(dataEl.textContent);
+  const serviceLabels = { navy: 'Royal Navy', raf: 'RAF' };
 
   {
     const map = L.map('baes-map', {
@@ -270,7 +272,7 @@ const usedTypes = Object.keys(typeLabels).filter((t) => locationPoints.some((loc
     const locationMarkers = locationPoints.map((loc) => ({
       type: loc.type,
       marker: L.marker([loc.lat, loc.long], { icon: makeIcon('location', false), title: loc.name }).bindPopup(
-        `<strong>${esc(loc.name)}</strong><br>${esc(typeLabels[loc.type] ?? loc.type)}<br>${esc(loc.address)}<br><a href="/locations/${loc.id}/request">Request Access →</a>`,
+        `<strong>${esc(loc.name)}</strong><br>${loc.service in serviceLabels ? `${serviceLabels[loc.service]} · ` : ''}${esc(typeLabels[loc.type] ?? loc.type)}<br>${esc(loc.address)}<br><a href="/locations/${loc.id}/request">Request Access →</a>`,
       ),
     }));
     // Planned hubs: known about, not yet confirmed/active. Grey squares, no
