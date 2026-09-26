@@ -67,6 +67,10 @@
   --surface-alt: #1a1a1a;
   --crimson: #c8102e;
   --crimson-bright: #dc1430;
+  /* Crimson for small text only: the brand crimsons fall below the WCAG
+     4.5:1 contrast minimum on the dark backgrounds at body/label sizes.
+     Backgrounds, borders, buttons and large headings keep brand crimson. */
+  --crimson-text: #f03a52;
   --text-primary: #ffffff;
   --text-primary-dim: #f2f2f2;
   --text-secondary: #8a8a8a;
