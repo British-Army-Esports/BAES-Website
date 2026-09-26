@@ -197,7 +197,7 @@ const usedTypes = Object.keys(typeLabels).filter((t) => locationPoints.some((loc
   </ul>
 </section>
 
-<script type="application/json" id="baes-map-data" set:html={JSON.stringify({ locationPoints, plannedPoints, eventPoints, typeLabels })}></script>
+<script type="application/json" id="baes-map-data" set:html={JSON.stringify({ locationPoints, plannedPoints, eventPoints, typeLabels }).replace(/</g, '\\u003c')}></script>
 
 <script>
   import L from 'leaflet';
@@ -240,13 +240,17 @@ const usedTypes = Object.keys(typeLabels).filter((t) => locationPoints.some((loc
         iconAnchor: [8, 8],
       });
 
+    // Popup content is HTML; names/addresses come from CMS-editable content.
+    const esc = (s: string) =>
+      String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
+
     // Kept as individual marker+type pairs, not a flat layerGroup, so the
     // venue-type filter pills can add/remove single pins rather than only
     // being able to toggle the whole "Our Locations" layer at once.
     const locationMarkers = locationPoints.map((loc) => ({
       type: loc.type,
-      marker: L.marker([loc.lat, loc.long], { icon: makeIcon('location', false) }).bindPopup(
-        `<strong>${loc.name}</strong><br>${typeLabels[loc.type] ?? loc.type}<br>${loc.address}<br><a href="/locations/${loc.id}/request">Request Access →</a>`,
+      marker: L.marker([loc.lat, loc.long], { icon: makeIcon('location', false), title: loc.name }).bindPopup(
+        `<strong>${esc(loc.name)}</strong><br>${esc(typeLabels[loc.type] ?? loc.type)}<br>${esc(loc.address)}<br><a href="/locations/${loc.id}/request">Request Access →</a>`,
       ),
     }));
     const locationsLayer = L.layerGroup(locationMarkers.map((entry) => entry.marker));
@@ -255,16 +259,16 @@ const usedTypes = Object.keys(typeLabels).filter((t) => locationPoints.some((loc
     // request link since no such page exists for them yet.
     const plannedLayer = L.layerGroup(
       plannedPoints.map((loc) =>
-        L.marker([loc.lat, loc.long], { icon: makeIcon('planned', false) }).bindPopup(
-          `<strong>${loc.name}</strong><br>Planned (unconfirmed)<br>${loc.address}`,
+        L.marker([loc.lat, loc.long], { icon: makeIcon('planned', false), title: `${loc.name} (planned)` }).bindPopup(
+          `<strong>${esc(loc.name)}</strong><br>Planned (unconfirmed)<br>${esc(loc.address)}`,
         ),
       ),
     );
 
     const eventsLayer = L.layerGroup(
       eventPoints.map((event) =>
-        L.marker([event.lat, event.long], { icon: makeIcon('event', event.live, event.opacity) }).bindPopup(
-          `<strong>${event.name}</strong>${event.live ? ' <span class="popup-live">● LIVE NOW</span>' : ''}<br>${event.locationName}<br>${event.dateLabel}`,
+        L.marker([event.lat, event.long], { icon: makeIcon('event', event.live, event.opacity), title: event.name }).bindPopup(
+          `<strong>${esc(event.name)}</strong>${event.live ? ' <span class="popup-live">● LIVE NOW</span>' : ''}<br>${esc(event.locationName)}<br>${esc(event.dateLabel)}`,
         ),
       ),
     );

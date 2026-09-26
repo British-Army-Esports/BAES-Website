@@ -18,7 +18,7 @@ const links = [
 <header class="nav">
   <div class="nav__inner container">
     <a class="nav__brand" href="/">
-      <img class="nav__crest" src="/logos/brand/baes-crest.png" alt="" width="1164" height="1460" />
+      <img class="nav__crest" src="/logos/brand/baes-crest-sm.webp" alt="" width="115" height="144" />
       <span class="nav__wordmark">
         <span class="nav__wordmark-line">
           <span class="nav__wordmark-white">BRITISH ARMY</span>
@@ -27,8 +27,8 @@ const links = [
       </span>
     </a>
 
-    <input type="checkbox" id="nav-toggle" class="nav__toggle-input" />
-    <label for="nav-toggle" class="nav__toggle" aria-label="Toggle menu">
+    <input type="checkbox" id="nav-toggle" class="nav__toggle-input" aria-label="Toggle menu" />
+    <label for="nav-toggle" class="nav__toggle" aria-hidden="true">
       <span></span><span></span><span></span>
     </label>
 
@@ -212,6 +212,22 @@ const links = [
       order: 2;
     }
 
+    /* Visually hidden rather than display:none on mobile, so the menu
+       toggle is reachable by keyboard and screen reader, not only by tap. */
+    .nav__toggle-input {
+      display: block;
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .nav__toggle-input:focus-visible + .nav__toggle {
+      outline: 2px solid var(--crimson-bright);
+      outline-offset: 2px;
+    }
+
     .nav__actions {
       display: none;
     }
@@ -243,11 +259,17 @@ const links = [
          genuinely need more than the old fixed 480px, which silently cut
          the last few links off with no way to reach them. */
       overflow-y: auto;
-      transition: max-height 0.25s var(--ease-out);
+      /* Hidden (not just 0-height) while closed so keyboard focus can't
+         wander into invisible links; delayed on close so the collapse
+         animation still plays. */
+      visibility: hidden;
+      transition: max-height 0.25s var(--ease-out), visibility 0s linear 0.25s;
     }
 
     .nav__toggle-input:checked ~ .nav__links {
       max-height: calc(100vh - 72px);
+      visibility: visible;
+      transition: max-height 0.25s var(--ease-out), visibility 0s;
     }
 
     .nav__link {
