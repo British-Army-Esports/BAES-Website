@@ -98,6 +98,7 @@ const typeLabels: Record<string, string> = {
 // location, in the same fixed order as typeLabels rather than whatever
 // order they happen to appear in the content files.
 const usedTypes = Object.keys(typeLabels).filter((t) => locationPoints.some((loc) => loc.type === t));
+const hasSisterHubs = locationPoints.some((loc) => loc.service !== 'army');
 ---
 
 <section class="mapview">
@@ -106,6 +107,13 @@ const usedTypes = Object.keys(typeLabels).filter((t) => locationPoints.some((loc
       <button type="button" class="mapview__pill is-active" data-layer="locations">
         <span class="mapview__glyph mapview__glyph--location" aria-hidden="true"></span>Our Locations
       </button>
+      {
+        hasSisterHubs && (
+          <button type="button" class="mapview__pill is-active" data-layer="sister">
+            <span class="mapview__glyph mapview__glyph--sister" aria-hidden="true"></span>Sister Services
+          </button>
+        )
+      }
       {
         plannedPoints.length > 0 && (
           <button type="button" class="mapview__pill is-active" data-layer="planned">
@@ -237,31 +245,35 @@ const usedTypes = Object.keys(typeLabels).filter((t) => locationPoints.some((loc
     // small, but it's comfortably tappable (WCAG target size is 24px).
     const TRIANGLE_SVG =
       '<svg viewBox="0 0 16 15" width="16" height="15" aria-hidden="true"><path d="M8 1.5 14.8 13.5H1.2Z" /></svg>';
-    const makeIcon = (variant: string, pulsing: boolean) =>
+    // Hub colour shows the service: Army crimson, Royal Navy navy, RAF blue.
+    const makeIcon = (variant: string, pulsing: boolean, service = 'army') =>
       L.divIcon({
         className: 'map-pin-hit',
-        html: `<span class="map-pin map-pin--${variant}${pulsing ? ' map-pin--pulse' : ''}">${variant === 'event' ? TRIANGLE_SVG : ''}</span>`,
+        html: `<span class="map-pin map-pin--${variant}${service !== 'army' ? ` map-pin--svc-${service}` : ''}${pulsing ? ' map-pin--pulse' : ''}">${variant === 'event' ? TRIANGLE_SVG : ''}</span>`,
         iconSize: [28, 28],
         iconAnchor: [14, 14],
         popupAnchor: [0, -8],
       });
 
     // Nearby hub pins (e.g. the Salisbury Plain / Aldershot hubs at UK zoom)
-    // merge into a numbered bubble that splits apart as you zoom in. Hubs
-    // only — events are few enough at any one time to show individually,
-    // and mixing them in made the bubble counts mean nothing in particular.
-    const cluster = L.markerClusterGroup({
-      maxClusterRadius: 40,
-      showCoverageOnHover: false,
-      spiderfyOnMaxZoom: true,
-      iconCreateFunction: (c) =>
-        L.divIcon({
-          className: 'map-cluster-hit',
-          html: `<span class="map-cluster">${c.getChildCount()}</span>`,
-          iconSize: [36, 36],
-          iconAnchor: [18, 18],
-        }),
-    });
+    // merge into a numbered bubble that splits apart as you zoom in. Army and
+    // sister-service hubs cluster separately so a bubble's count always means
+    // one thing; events aren't clustered at all (only a handful at a time).
+    const makeCluster = (kind: 'army' | 'sister') =>
+      L.markerClusterGroup({
+        maxClusterRadius: 40,
+        showCoverageOnHover: false,
+        spiderfyOnMaxZoom: true,
+        iconCreateFunction: (c) =>
+          L.divIcon({
+            className: 'map-cluster-hit',
+            html: `<span class="map-cluster map-cluster--${kind}">${c.getChildCount()}</span>`,
+            iconSize: [36, 36],
+            iconAnchor: [18, 18],
+          }),
+      });
+    const cluster = makeCluster('army');
+    const sisterCluster = makeCluster('sister');
 
     // Popup content is HTML; names/addresses come from CMS-editable content.
     const esc = (s: string) =>
@@ -271,7 +283,8 @@ const usedTypes = Object.keys(typeLabels).filter((t) => locationPoints.some((loc
     // single pins rather than only the whole "Our Locations" layer at once.
     const locationMarkers = locationPoints.map((loc) => ({
       type: loc.type,
-      marker: L.marker([loc.lat, loc.long], { icon: makeIcon('location', false), title: loc.name }).bindPopup(
+      sister: loc.service !== 'army',
+      marker: L.marker([loc.lat, loc.long], { icon: makeIcon('location', false, loc.service), title: loc.name }).bindPopup(
         `<strong>${esc(loc.name)}</strong><br>${loc.service in serviceLabels ? `${serviceLabels[loc.service]} · ` : ''}${esc(typeLabels[loc.type] ?? loc.type)}<br>${esc(loc.address)}<br><a href="/locations/${loc.id}/request">Request Access →</a>`,
       ),
     }));
@@ -316,9 +329,9 @@ const usedTypes = Object.keys(typeLabels).filter((t) => locationPoints.some((loc
       if (dot) dot.hidden = !isLiveEvent(e);
     });
 
-    // All hub markers share one cluster group; the layer and venue-type
-    // pills just decide which are currently in it. Events sit in their own
-    // plain layer, toggled by the Events pill.
+    // The layer and venue-type pills decide which hub markers are in each
+    // cluster group. Events sit in their own plain layer, toggled by the
+    // Events pill.
     const activeLayers = new Set(
       Array.from(document.querySelectorAll<HTMLElement>('[data-layer]')).map((btn) => btn.dataset.layer),
     );
@@ -327,16 +340,20 @@ const usedTypes = Object.keys(typeLabels).filter((t) => locationPoints.some((loc
     const listTypeItems = document.querySelectorAll<HTMLElement>('.mapview__list-item[data-type]');
 
     function refreshMarkers() {
-      const visible = [
+      const typeOk = ({ type }) => typeFilterBtns.length === 0 || activeTypes.has(type);
+      const army = [
         ...(activeLayers.has('locations')
-          ? locationMarkers
-              .filter(({ type }) => typeFilterBtns.length === 0 || activeTypes.has(type))
-              .map(({ marker }) => marker)
+          ? locationMarkers.filter((m) => !m.sister && typeOk(m)).map(({ marker }) => marker)
           : []),
         ...(activeLayers.has('planned') ? plannedMarkers : []),
       ];
+      const sister = activeLayers.has('sister')
+        ? locationMarkers.filter((m) => m.sister && typeOk(m)).map(({ marker }) => marker)
+        : [];
       cluster.clearLayers();
-      cluster.addLayers(visible);
+      cluster.addLayers(army);
+      sisterCluster.clearLayers();
+      sisterCluster.addLayers(sister);
       if (activeLayers.has('events')) eventsLayer.addTo(map);
       else map.removeLayer(eventsLayer);
       listTypeItems.forEach((item) => {
@@ -369,6 +386,7 @@ const usedTypes = Object.keys(typeLabels).filter((t) => locationPoints.some((loc
     // one to work out which pins to draw.
     refreshMarkers();
     cluster.addTo(map);
+    sisterCluster.addTo(map);
 
     document.querySelectorAll<HTMLElement>('[data-layer]').forEach((btn) => {
       btn.addEventListener('click', () => {
@@ -468,6 +486,12 @@ const usedTypes = Object.keys(typeLabels).filter((t) => locationPoints.some((loc
   .mapview__glyph--location {
     border-radius: 50%;
     background: var(--crimson-bright);
+    border: 1.5px solid #fff;
+  }
+
+  .mapview__glyph--sister {
+    border-radius: 50%;
+    background: linear-gradient(90deg, #2f5bb7 50%, #5fa8e8 50%);
     border: 1.5px solid #fff;
   }
 
@@ -632,6 +656,18 @@ const usedTypes = Object.keys(typeLabels).filter((t) => locationPoints.some((loc
     box-shadow: 0 0 0 2px rgba(200, 16, 46, 0.4);
   }
 
+  /* Sister-service hubs: same circle, service colour. Navy is lifted a
+     little from true navy so it still reads on the dark basemap. */
+  :global(.map-pin--location.map-pin--svc-navy) {
+    background: #2f5bb7;
+    box-shadow: 0 0 0 2px rgba(47, 91, 183, 0.45);
+  }
+
+  :global(.map-pin--location.map-pin--svc-raf) {
+    background: #5fa8e8;
+    box-shadow: 0 0 0 2px rgba(95, 168, 232, 0.45);
+  }
+
   /* □ Planned (unconfirmed) hubs: small grey square, deliberately understated */
   :global(.map-pin--planned) {
     width: 11px;
@@ -698,6 +734,15 @@ const usedTypes = Object.keys(typeLabels).filter((t) => locationPoints.some((loc
     font-weight: 700;
     font-size: 0.9rem;
     line-height: 1;
+  }
+
+  /* Sister-service bubbles (Navy + RAF mixed): split navy/RAF-blue ring */
+  :global(.map-cluster--sister) {
+    border-color: transparent;
+    background:
+      linear-gradient(var(--bg-base), var(--bg-base)) padding-box,
+      linear-gradient(90deg, #2f5bb7 50%, #5fa8e8 50%) border-box;
+    box-shadow: 0 0 0 4px rgba(95, 168, 232, 0.22);
   }
 
   :global(.leaflet-popup-content-wrapper),
