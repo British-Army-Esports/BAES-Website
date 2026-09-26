@@ -4,7 +4,7 @@ import 'leaflet/dist/leaflet.css';
 // the plugin's default green/yellow/orange theme.
 import 'leaflet.markercluster/dist/MarkerCluster.css';
 import { getCollection } from 'astro:content';
-import { formatEventDate } from '../lib/eventDate';
+import { formatEventDate, eventEndMs } from '../lib/eventDate';
 
 export interface Props {
   // Locations (permanent sites) always show. Events are optional — the
@@ -60,40 +60,31 @@ const plannedPoints = plannedLocations.map((loc) => ({
   long: loc.data.location.long,
 }));
 
-const now = Date.now();
-const eventPoints = allEvents.map((event) => {
-  const start = event.data.date.getTime();
-  const end = event.data.endDate?.getTime() ?? start + 24 * 60 * 60 * 1000;
-  // "Live now" means genuinely in progress right now — not just upcoming.
-  // A provisional/TBC date can't honestly be shown as live (same rule as
-  // the Ticker), and community-outreach presences don't have a "live"
-  // competitive result to show either.
-  const isLive =
-    event.data.presenceType !== 'community-outreach' &&
-    (event.data.dateStatus ?? 'confirmed') === 'confirmed' &&
-    now >= start &&
-    now <= end;
-  // Past events fade out the further back they happened, so the map reads
-  // at a glance as "what's current" rather than an even mix of everything
-  // that's ever happened. A TBC date has no real "past" to measure, so it
-  // never fades. Floors at 0.2 opacity rather than disappearing entirely —
-  // still findable on hover/click, just visually out of the way.
-  const isPast = event.data.dateStatus !== 'tbc' && end < now;
-  const daysSinceEnd = isPast ? (now - end) / (1000 * 60 * 60 * 24) : 0;
-  const opacity = isPast ? Math.max(0.2, 1 - daysSinceEnd / 240) : 1;
-  return {
-    id: event.id,
-    name: event.data.title,
-    scale: event.data.scale,
-    presenceType: event.data.presenceType,
-    dateLabel: formatEventDate(event.data).text,
-    locationName: event.data.location!.name,
-    lat: event.data.location!.lat,
-    long: event.data.location!.long,
-    live: isLive,
-    opacity,
-  };
-});
+// The map only shows current and upcoming events — past ones live in the
+// Events page's history list instead. "Past" is checked here at build time
+// AND again in the browser (see isPastEvent in the script below), since a
+// static site's build-time clock goes stale: an event that ends between
+// deploys must still drop off the map without waiting for a rebuild.
+// A TBC date isn't a real point in time, so it's never treated as past.
+const buildTime = Date.now();
+const eventPoints = allEvents
+  .map((event) => {
+    const start = event.data.date.getTime();
+    return {
+      id: event.id,
+      name: event.data.title,
+      scale: event.data.scale,
+      presenceType: event.data.presenceType,
+      dateStatus: event.data.dateStatus ?? 'confirmed',
+      start,
+      end: eventEndMs(event.data),
+      dateLabel: formatEventDate(event.data).text,
+      locationName: event.data.location!.name,
+      lat: event.data.location!.lat,
+      long: event.data.location!.long,
+    };
+  })
+  .filter((e) => e.dateStatus === 'tbc' || e.end >= buildTime);
 
 const typeLabels: Record<string, string> = {
   'arena-venue': 'Arena Venue',
@@ -180,9 +171,9 @@ const usedTypes = Object.keys(typeLabels).filter((t) => locationPoints.some((loc
     }
     {
       eventPoints.map((event) => (
-        <li class="mapview__list-item">
+        <li class="mapview__list-item" data-event-id={event.id}>
           <span class="mapview__list-tag label mapview__list-tag--event">
-            {event.live && <span class="mapview__live-dot" aria-label="Live now" />}
+            <span class="mapview__live-dot" aria-label="Live now" hidden />
             {event.scale.replace(/-/g, ' ')}
           </span>
           <span class="mapview__list-name">{event.name}</span>
@@ -244,17 +235,19 @@ const usedTypes = Object.keys(typeLabels).filter((t) => locationPoints.some((loc
     // small, but it's comfortably tappable (WCAG target size is 24px).
     const TRIANGLE_SVG =
       '<svg viewBox="0 0 16 15" width="16" height="15" aria-hidden="true"><path d="M8 1.5 14.8 13.5H1.2Z" /></svg>';
-    const makeIcon = (variant: string, pulsing: boolean, opacity = 1) =>
+    const makeIcon = (variant: string, pulsing: boolean) =>
       L.divIcon({
         className: 'map-pin-hit',
-        html: `<span class="map-pin map-pin--${variant}${pulsing ? ' map-pin--pulse' : ''}" style="opacity:${opacity}">${variant === 'event' ? TRIANGLE_SVG : ''}</span>`,
+        html: `<span class="map-pin map-pin--${variant}${pulsing ? ' map-pin--pulse' : ''}">${variant === 'event' ? TRIANGLE_SVG : ''}</span>`,
         iconSize: [28, 28],
         iconAnchor: [14, 14],
         popupAnchor: [0, -8],
       });
 
-    // Nearby pins (e.g. the Salisbury Plain / Aldershot hubs at UK zoom)
-    // merge into a numbered bubble that splits apart as you zoom in.
+    // Nearby hub pins (e.g. the Salisbury Plain / Aldershot hubs at UK zoom)
+    // merge into a numbered bubble that splits apart as you zoom in. Hubs
+    // only — events are few enough at any one time to show individually,
+    // and mixing them in made the bubble counts mean nothing in particular.
     const cluster = L.markerClusterGroup({
       maxClusterRadius: 40,
       showCoverageOnHover: false,
@@ -288,15 +281,42 @@ const usedTypes = Object.keys(typeLabels).filter((t) => locationPoints.some((loc
       ),
     );
 
-    const eventMarkers = eventPoints.map((event) =>
-      L.marker([event.lat, event.long], { icon: makeIcon('event', event.live, event.opacity), title: event.name }).bindPopup(
-        `<strong>${esc(event.name)}</strong>${event.live ? ' <span class="popup-live">● LIVE NOW</span>' : ''}<br>${esc(event.locationName)}<br>${esc(event.dateLabel)}`,
-      ),
-    );
+    // Past/live are decided here against the visitor's clock, not the build
+    // clock baked into the page — see the note on eventPoints above.
+    // "Live" means genuinely in progress: a provisional/TBC date can't
+    // honestly be live, and outreach presences have no live result to show.
+    const now = Date.now();
+    const isPastEvent = (e) => e.dateStatus !== 'tbc' && e.end < now;
+    const isLiveEvent = (e) =>
+      e.presenceType !== 'community-outreach' && e.dateStatus === 'confirmed' && now >= e.start && now <= e.end;
 
-    // Every marker lives in the one cluster group (so pins of different
-    // types still merge when they overlap). Layer pills and venue-type pills
-    // just decide which markers are currently in it.
+    const currentEvents = eventPoints.filter((e) => !isPastEvent(e));
+    const eventMarkers = currentEvents.map((event) => {
+      const live = isLiveEvent(event);
+      return L.marker([event.lat, event.long], {
+        icon: makeIcon('event', live),
+        title: event.name,
+        // Drawn above hub pins and cluster bubbles so a triangle is never
+        // hidden underneath one.
+        zIndexOffset: 1000,
+      }).bindPopup(
+        `<strong>${esc(event.name)}</strong>${live ? ' <span class="popup-live">● LIVE NOW</span>' : ''}<br>${esc(event.locationName)}<br>${esc(event.dateLabel)}`,
+      );
+    });
+    const eventsLayer = L.layerGroup(eventMarkers);
+
+    // Same check for the list view's event rows.
+    eventPoints.forEach((e) => {
+      const row = document.querySelector<HTMLElement>(`.mapview__list-item[data-event-id="${CSS.escape(e.id)}"]`);
+      if (!row) return;
+      row.hidden = isPastEvent(e);
+      const dot = row.querySelector<HTMLElement>('.mapview__live-dot');
+      if (dot) dot.hidden = !isLiveEvent(e);
+    });
+
+    // All hub markers share one cluster group; the layer and venue-type
+    // pills just decide which are currently in it. Events sit in their own
+    // plain layer, toggled by the Events pill.
     const activeLayers = new Set(
       Array.from(document.querySelectorAll<HTMLElement>('[data-layer]')).map((btn) => btn.dataset.layer),
     );
@@ -312,15 +332,15 @@ const usedTypes = Object.keys(typeLabels).filter((t) => locationPoints.some((loc
               .map(({ marker }) => marker)
           : []),
         ...(activeLayers.has('planned') ? plannedMarkers : []),
-        ...(activeLayers.has('events') ? eventMarkers : []),
       ];
       cluster.clearLayers();
       cluster.addLayers(visible);
+      if (activeLayers.has('events')) eventsLayer.addTo(map);
+      else map.removeLayer(eventsLayer);
       listTypeItems.forEach((item) => {
         item.hidden = typeFilterBtns.length > 0 && !activeTypes.has(item.dataset.type);
       });
     }
-
 
     // Frame the initial view on permanent locations only, not events. Events
     // can be anywhere in the world (C.O.D.E Bowl VII is in San Diego), and
@@ -334,9 +354,9 @@ const usedTypes = Object.keys(typeLabels).filter((t) => locationPoints.some((loc
         homeRegionPoints.map((p) => [p.lat, p.long]),
         { padding: [40, 40], maxZoom: 12 },
       );
-    } else if (eventPoints.length > 0) {
+    } else if (currentEvents.length > 0) {
       map.fitBounds(
-        eventPoints.map((p) => [p.lat, p.long]),
+        currentEvents.map((p) => [p.lat, p.long]),
         { padding: [40, 40], maxZoom: 12 },
       );
     } else {
@@ -502,7 +522,8 @@ const usedTypes = Object.keys(typeLabels).filter((t) => locationPoints.some((loc
     border-bottom: 1px solid var(--border);
   }
 
-  .mapview__list-item[hidden] {
+  .mapview__list-item[hidden],
+  .mapview__live-dot[hidden] {
     display: none;
   }
 
@@ -636,8 +657,8 @@ const usedTypes = Object.keys(typeLabels).filter((t) => locationPoints.some((loc
     stroke-linejoin: round;
   }
 
-  /* A live event's triangle fills crimson and pulses; upcoming and past
-     events stay a plain white outline */
+  /* A live event's triangle fills crimson and pulses; upcoming events stay
+     a plain white outline (past events aren't shown on the map at all) */
   :global(.map-pin--event.map-pin--pulse path) {
     fill: var(--crimson-bright);
     stroke: #fff;
