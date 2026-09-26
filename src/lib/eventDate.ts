@@ -27,13 +27,23 @@ export interface LiveStatus {
 // with the same "drop everything, it's on right now" urgency as a 3-day
 // LAN final.
 const SHORT_SPAN_DAYS = 5;
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+// Dates are stored as midnight at the *start* of the day, but an event runs
+// to the end of its last day — so it's only over from midnight the day
+// after. Use this everywhere "has this event finished?" is decided, rather
+// than comparing against the raw end date (which drops an event a day early,
+// and a one-day event at 00:00 on its own day).
+export function eventEndMs(event: { date: Date | string; endDate?: Date | string }): number {
+  return toDate(event.endDate ?? event.date).getTime() + DAY_MS;
+}
 
 export function getLiveStatus(
   event: { presenceType: string; dateStatus?: DateStatus; date: Date | string; endDate?: Date | string },
   now: number,
 ): LiveStatus {
   const start = toDate(event.date).getTime();
-  const end = event.endDate ? toDate(event.endDate).getTime() : start + 24 * 60 * 60 * 1000;
+  const end = eventEndMs(event);
   const eligible =
     event.presenceType !== 'community-outreach' &&
     (event.dateStatus ?? 'confirmed') === 'confirmed' &&
@@ -99,8 +109,7 @@ export function formatEventDate(event: EventDateInfo): FormattedEventDate {
     // nonsensical for an event that's already over. For a past event with
     // only an approximate date on record, just state the window plainly
     // (e.g. "2020" or "Dec 2020"), no "Likely" prefix.
-    const endDate = event.endDate ? toDate(event.endDate) : date;
-    const isPast = endDate.getTime() < Date.now();
+    const isPast = eventEndMs(event) < Date.now();
     const windowText =
       event.dateOptions && event.dateOptions.length > 0
         ? event.dateOptions.map(formatRoughOption).join(' or ')

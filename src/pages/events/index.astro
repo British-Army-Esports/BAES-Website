@@ -2,7 +2,7 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import EventCard from '../../components/EventCard.astro';
-import { formatEventDate, compareEventDates, getLiveStatus } from '../../lib/eventDate';
+import { formatEventDate, compareEventDates, getLiveStatus, eventEndMs } from '../../lib/eventDate';
 
 const allDisciplines = await getCollection('disciplines', ({ data }) => data.active);
 const disciplineInfo = new Map(
@@ -18,7 +18,7 @@ const events = (await getCollection('events'))
     const accentColor = disciplineIds.map((id) => disciplineInfo.get(id)?.color).find(Boolean);
 
     const start = event.data.date.getTime();
-    const end = (event.data.endDate ?? event.data.date).getTime();
+    const end = eventEndMs(event.data);
     // A TBC date is, by definition, not a known point in time, so it can
     // never honestly be classified as "past" — it always sits in Upcoming
     // until someone confirms a real date.
@@ -224,7 +224,7 @@ const filterPresenceTypes = presenceOrder.filter((p) => usedPresenceTypes.has(p)
 </BaseLayout>
 
 <script>
-  import { getLiveStatus, formatEventDate } from '../../lib/eventDate';
+  import { getLiveStatus, formatEventDate, eventEndMs } from '../../lib/eventDate';
 
   // Astro bakes "now" in at build time — a static site has no per-request
   // render, so without this, an event only moves from Upcoming to Past (or
@@ -248,7 +248,7 @@ const filterPresenceTypes = presenceOrder.filter((p) => usedPresenceTypes.has(p)
       const presenceType = card.getAttribute('data-presence') || '';
       const eventInfo = { date: rawDate, endDate: rawEndDate, dateStatus, presenceType };
 
-      const end = new Date(rawEndDate || rawDate).getTime();
+      const end = eventEndMs({ date: rawDate, endDate: rawEndDate });
       const isPast = dateStatus !== 'tbc' && end < now;
 
       // Refresh the visible date text/badge regardless of bucket — a

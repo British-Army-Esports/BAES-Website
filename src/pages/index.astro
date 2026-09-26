@@ -6,7 +6,7 @@ import Card from '../components/Card.astro';
 import Table from '../components/Table.astro';
 import MapView from '../components/MapView.astro';
 import EventCard from '../components/EventCard.astro';
-import { formatEventDate, compareEventDates, getLiveStatus } from '../lib/eventDate';
+import { formatEventDate, compareEventDates, getLiveStatus, eventEndMs } from '../lib/eventDate';
 
 const disciplines = await getCollection('disciplines');
 
@@ -28,7 +28,7 @@ const keyEvents = (await getCollection('events'))
     const disciplineNames = disciplineIds.map((id) => disciplineInfo.get(id)?.name).filter(Boolean);
     const accentColor = disciplineIds.map((id) => disciplineInfo.get(id)?.color).find(Boolean);
     const start = event.data.date.getTime();
-    const end = (event.data.endDate ?? event.data.date).getTime();
+    const end = eventEndMs(event.data);
     const isPast = event.data.dateStatus !== 'tbc' && end < now;
     const { isLive, isOngoingBroadcast } = getLiveStatus(event.data, now);
     return {
