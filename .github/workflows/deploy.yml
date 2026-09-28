@@ -1,0 +1,55 @@
+# Builds the site on GitHub and uploads it to Netlify.
+#
+# Why not Netlify's own Git-connected builds: Netlify only builds private
+# repos owned by a GitHub *organisation* on its paid Pro plan. Building here
+# and uploading the finished site keeps the repo private and org-owned
+# while Netlify stays on the free plan.
+#
+# Manual only (Actions tab → "Deploy to Netlify" → Run workflow), matching
+# the "deploy deliberately, in batches" habit — each production deploy
+# costs Netlify credits.
+#
+# Needs two repository secrets: NETLIFY_AUTH_TOKEN (a Netlify personal
+# access token) and NETLIFY_SITE_ID (Netlify → Site configuration →
+# General → Project/Site ID).
+name: Deploy to Netlify
+
+on:
+  workflow_dispatch:
+    inputs:
+      message:
+        description: "Deploy note (shows in Netlify's deploy list)"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+concurrency:
+  group: netlify-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run build
+
+      - name: Upload to Netlify (production)
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+          DEPLOY_MESSAGE: ${{ inputs.message }}
+        run: |
+          npx --yes netlify-cli@latest deploy --prod --dir=dist \
+            --message "${DEPLOY_MESSAGE:-GitHub Actions deploy} (${GITHUB_SHA::7})"
