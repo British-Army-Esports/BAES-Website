@@ -9,6 +9,5 @@ location:
 equipment:
   - "6+ PCs"
 status: "PC count to be confirmed."
-contactPending: true
 active: true
 ---

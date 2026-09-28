@@ -166,10 +166,10 @@ const locations = defineCollection({
     status: z.string().optional(),
     pocName: z.string().optional(),
     pocRole: z.string().optional(),
-    // True when there's no point of contact for this hub yet — the request
-    // page then says honestly that messages come to BAES to pass on, rather
-    // than claiming they go straight to the hub.
-    contactPending: z.boolean().default(false),
+    // Who this hub's request form goes to, when it isn't the BAES bookings
+    // team (e.g. "Royal Navy Esports"). Only the request page wording reads
+    // this — the actual email routing is set in Netlify's form notifications.
+    contactVia: z.string().optional(),
     photos: z.array(z.string()).optional(),
     // AI-stylised "vision" shots — deliberately a separate field from
     // `photos`, never shown by default, never mixed into the real gallery.

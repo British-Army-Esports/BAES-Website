@@ -42,9 +42,9 @@ const serviceLabels: Record<string, string> = { army: 'British Army', navy: 'Roy
     <p class="section__intro">
       Fill in the form below to request access, ask a question, or arrange a visit.
       {
-        location.data.contactPending
-          ? " We don't have a point of contact for this hub yet — your message comes to British Army Esports and we'll pass it on."
-          : " Your message goes directly to this hub's point of contact."
+        location.data.contactVia
+          ? ` Your message goes to ${location.data.contactVia}.`
+          : " Your message goes to the British Army Esports bookings team, who'll pass it to the hub."
       }
     </p>
 

@@ -9,6 +9,6 @@ location:
 equipment:
   - "7+ PCs"
 status: "PC count to be confirmed."
-contactPending: true
+contactVia: "Royal Navy Esports"
 active: true
 ---

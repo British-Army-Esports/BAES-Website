@@ -9,6 +9,6 @@ location:
 equipment:
   - "7+ PCs"
 status: "Aboard HMS Prince of Wales; shown at her home port, HMNB Portsmouth. PC count to be confirmed."
-contactPending: true
+contactVia: "Royal Navy Esports"
 active: true
 ---
