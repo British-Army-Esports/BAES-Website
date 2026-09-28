@@ -2,6 +2,7 @@
 title: "BFBS Pro League 2026: Lions Win League of Legends, Buzzards Runners-Up at the LAN Final"
 date: 2026-09-28
 summary: "BAES Lions took the League of Legends title, Army drivers finished 1st, 2nd and 4th in F1 25, and the BAES Buzzards reached an overtime-packed Rocket League final at the BFBS Pro League LAN."
+layout: "custom"
 relatedEvent: "bfbs-pro-league-grand-final"
 image: "/photos/news/bfbs-pro-league-2026/rl-final-buzzards-vs-dragons.jpg"
 sources:

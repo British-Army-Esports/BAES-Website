@@ -1,17 +1,27 @@
 ---
 // Shared photo grid + click-to-zoom lightbox, used on location request pages
 // (with an optional AI-"enhanced" second set behind a toggle) and event
-// detail pages (real photos only, no enhanced set).
+// detail pages and news articles (real photos only, no enhanced set).
+// A photo is either a plain URL, or an object with a separate full-size URL
+// for the lightbox and an optional caption (shown under the tile and in the
+// lightbox).
 //
 // Only render one instance of this component per page — its script queries
 // the document for all `[data-photo-open]`/`[data-photo-toggle]` elements,
 // so a second instance on the same page would double up the wiring.
+export type PhotoItem = string | { src: string; full?: string; caption?: string };
+
 interface Props {
-  photos?: string[];
+  photos?: PhotoItem[];
   enhancedPhotos?: string[];
 }
 
-const { photos, enhancedPhotos } = Astro.props;
+const { photos: rawPhotos, enhancedPhotos } = Astro.props;
+const photos = rawPhotos?.map((p) =>
+  typeof p === 'string'
+    ? { src: p, full: p, caption: undefined }
+    : { src: p.src, full: p.full ?? p.src, caption: p.caption },
+);
 ---
 
 {
@@ -34,9 +44,16 @@ const { photos, enhancedPhotos } = Astro.props;
       {
         photos && photos.length > 0 && (
           <div class="photo-grid" data-photo-grid="real">
-            {photos.map((src: string) => (
-              <button type="button" class="photo-grid__btn" data-photo-open={src}>
-                <img class="photo-grid__img clip-tl-sm" src={src} alt="" loading="lazy" />
+            {photos.map((p) => (
+              <button
+                type="button"
+                class="photo-grid__btn"
+                data-photo-open={p.full}
+                data-photo-caption={p.caption ?? ''}
+                aria-label={p.caption ? `View photo: ${p.caption}` : 'View photo full size'}
+              >
+                <img class="photo-grid__img clip-tl-sm" src={p.src} alt={p.caption ?? ''} loading="lazy" />
+                {p.caption && <span class="photo-grid__caption">{p.caption}</span>}
               </button>
             ))}
           </div>
@@ -62,7 +79,10 @@ const { photos, enhancedPhotos } = Astro.props;
   <button type="button" class="lightbox__close" data-lightbox-close aria-label="Close">
     ✕
   </button>
-  <img class="lightbox__img" data-lightbox-img src="" alt="" />
+  <figure class="lightbox__figure">
+    <img class="lightbox__img" data-lightbox-img src="" alt="" />
+    <figcaption class="lightbox__caption" data-lightbox-caption hidden></figcaption>
+  </figure>
 </div>
 
 <script>
@@ -88,10 +108,16 @@ const { photos, enhancedPhotos } = Astro.props;
   const lightbox = document.querySelector('[data-lightbox]');
   const lightboxImg = document.querySelector('[data-lightbox-img]');
   const lightboxClose = document.querySelector('[data-lightbox-close]');
+  const lightboxCaption = document.querySelector<HTMLElement>('[data-lightbox-caption]');
 
-  function openLightbox(src: string) {
+  function openLightbox(src: string, caption = '') {
     if (!lightbox || !lightboxImg) return;
     (lightboxImg as HTMLImageElement).src = src;
+    (lightboxImg as HTMLImageElement).alt = caption;
+    if (lightboxCaption) {
+      lightboxCaption.textContent = caption;
+      lightboxCaption.hidden = !caption;
+    }
     (lightbox as HTMLElement).hidden = false;
   }
 
@@ -102,7 +128,9 @@ const { photos, enhancedPhotos } = Astro.props;
   }
 
   document.querySelectorAll('[data-photo-open]').forEach((btn) => {
-    btn.addEventListener('click', () => openLightbox(btn.getAttribute('data-photo-open')!));
+    btn.addEventListener('click', () =>
+      openLightbox(btn.getAttribute('data-photo-open')!, btn.getAttribute('data-photo-caption') ?? ''),
+    );
   });
   lightboxClose?.addEventListener('click', closeLightbox);
   lightbox?.addEventListener('click', (e) => {
@@ -199,6 +227,37 @@ const { photos, enhancedPhotos } = Astro.props;
     opacity: 0.85;
   }
 
+  .photo-grid__caption {
+    display: block;
+    margin-top: 0.4rem;
+    font-family: var(--font-body);
+    font-size: 0.78rem;
+    line-height: 1.45;
+    color: var(--text-secondary);
+    text-align: left;
+  }
+
+  .lightbox__figure {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    max-width: 100%;
+    max-height: 100%;
+  }
+
+  .lightbox__caption {
+    color: var(--text-primary-dim);
+    font-size: 0.9rem;
+    text-align: center;
+    max-width: 60ch;
+  }
+
+  .lightbox__caption[hidden] {
+    display: none;
+  }
+
   .lightbox {
     position: fixed;
     inset: 0;
@@ -216,7 +275,7 @@ const { photos, enhancedPhotos } = Astro.props;
 
   .lightbox__img {
     max-width: 100%;
-    max-height: 100%;
+    max-height: calc(100vh - 10rem);
     object-fit: contain;
     border: 1px solid var(--border);
   }

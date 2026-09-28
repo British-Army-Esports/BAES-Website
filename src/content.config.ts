@@ -181,18 +181,40 @@ const locations = defineCollection({
   }),
 });
 
+// News articles come in two shapes:
+// - "standard" (the CMS template): lead photo, text, captioned photo reel.
+//   CMS articles live in their own folder (`<slug>/index.md`) with their
+//   photos beside them, so Astro resizes/compresses those photos at build.
+// - "custom": hand-built articles with photos placed through the text
+//   (raw <figure> HTML using /photos/... site paths); the page renders only
+//   the body, no automatic lead photo or reel.
 const news = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/news' }),
-  schema: z.object({
-    title: z.string(),
-    date: z.coerce.date(),
-    summary: z.string().optional(),
-    relatedEvent: reference('events').optional(),
-    // Lead photo (site path): used as the article's social preview image.
-    image: z.string().optional(),
-    // External press coverage of the same story — outlet name + link.
-    sources: z.array(z.object({ label: z.string(), url: z.string().url() })).optional(),
+  loader: glob({
+    pattern: '**/*.md',
+    base: './src/content/news',
+    // `my-article/index.md` → id `my-article`, same as a flat `my-article.md`.
+    generateId: ({ entry }) => entry.replace(/(\/index)?\.md$/, ''),
   }),
+  schema: ({ image }) => {
+    // A photo is either a site path (/photos/...) or a file next to the
+    // article (e.g. `lead.jpg`), which Astro optimises at build. Checked in
+    // that order so a site path never gets treated as a local file.
+    const photo = z.union([z.string().startsWith('/'), image()]);
+    return z.object({
+      title: z.string(),
+      date: z.coerce.date(),
+      summary: blankable(z.string()),
+      layout: z.enum(['standard', 'custom']).default('standard'),
+      relatedEvent: blankable(reference('events')),
+      // Lead photo: shown at the top of standard articles, and used as the
+      // article's social preview image either way.
+      image: blankable(photo),
+      imageCaption: blankable(z.string()),
+      gallery: z.array(z.object({ src: photo, caption: blankable(z.string()) })).optional(),
+      // External press coverage of the same story — outlet name + link.
+      sources: z.array(z.object({ label: z.string(), url: z.string().url() })).optional(),
+    });
+  },
 });
 
 const sponsors = defineCollection({
