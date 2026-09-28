@@ -182,6 +182,105 @@ collections:
         required: false
         hint: "Only if players need to sign up ahead of time. Leave blank if there's no separate registration step."
 
+  # News: fixed "standard" template only — lead photo, text, captioned photo
+  # reel. Bigger hand-built ("custom") articles are done in code and are
+  # filtered out of this list so the CMS can't flatten their layout.
+  # Each article is saved as its own folder (<slug>/index.md) with its photos
+  # beside it; the site resizes/compresses those photos at build.
+  - name: "news"
+    label: "News"
+    label_singular: "Article"
+    description: >-
+      Simple news articles: a lead photo, the story, and a photo reel. For a
+      bigger feature with photos placed through the text, send the notes and
+      photos to whoever maintains the site instead.
+    folder: "src/content/news"
+    create: true
+    delete: true
+    path: "{{slug}}/index"
+    media_folder: ""
+    public_folder: ""
+    identifier_field: "title"
+    extension: "md"
+    format: "frontmatter"
+    filter: { field: "layout", value: "standard" }
+    sortable_fields: ["date", "title"]
+    summary: "{{title}} ({{date}})"
+    fields:
+      - { name: "layout", widget: "hidden", default: "standard" }
+
+      - label: "Title"
+        name: "title"
+        widget: "string"
+        hint: "Keep it factual, e.g. \"BAES Lions win BFBS Pro League League of Legends\""
+
+      - label: "Date"
+        name: "date"
+        widget: "datetime"
+        format: "YYYY-MM-DD"
+        date_format: true
+        time_format: false
+
+      - label: "Summary"
+        name: "summary"
+        widget: "text"
+        required: false
+        hint: "One or two sentences. Shown on the News page and when the link is shared (Discord, X etc.)."
+
+      - label: "Lead photo"
+        name: "image"
+        widget: "image"
+        required: false
+        hint: >-
+          Shown at the top of the article and used as the preview when the link
+          is shared. Landscape works best. Before uploading, check: no one in
+          shot who hasn't agreed to be, and no real names visible — gamertags only.
+
+      - label: "Lead photo caption"
+        name: "imageCaption"
+        widget: "string"
+        required: false
+
+      - label: "Article"
+        name: "body"
+        widget: "markdown"
+        modes: ["rich_text"]
+        buttons: ["bold", "italic", "link", "heading-two", "bulleted-list", "numbered-list"]
+        editor_components: []
+        hint: >-
+          Short paragraphs. Use a sub-heading to split sections (e.g. one per game).
+          Refer to players by gamertag only. Photos go in the reel below, not in
+          the text.
+
+      - label: "Photo reel"
+        name: "gallery"
+        widget: "list"
+        required: false
+        summary: "{{fields.caption}}"
+        hint: "Shown as a grid under the article; each opens full size. 4–12 is plenty."
+        fields:
+          - { label: "Photo", name: "src", widget: "image" }
+          - { label: "Caption", name: "caption", widget: "string", required: false }
+
+      - label: "Related event"
+        name: "relatedEvent"
+        widget: "relation"
+        collection: "events"
+        search_fields: ["title"]
+        value_field: "{{slug}}"
+        display_fields: ["title"]
+        required: false
+        hint: "Links the article to the fixture it's about."
+
+      - label: "Further coverage"
+        name: "sources"
+        widget: "list"
+        required: false
+        hint: "Links to other outlets' coverage of the same story."
+        fields:
+          - { label: "Outlet", name: "label", widget: "string" }
+          - { label: "Link", name: "url", widget: "string" }
+
   # Reference-only collections so the relation fields above can look up real
   # disciplines/Corps. Hidden from the editor's main nav — not meant to be
   # edited here, just to power the dropdowns on the Events form.
