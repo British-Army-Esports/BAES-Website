@@ -4,6 +4,12 @@
 
 [build.environment]
   NODE_VERSION = "22"
+  # Netlify's secret scanner flags anything shaped like a Google API key.
+  # This one is deliberately public: the stream calendar key in
+  # src/lib/streams.ts, restricted in Google Cloud to the Calendar API
+  # (read-only) and to this site's domains. Only this exact value is
+  # allowed through — scanning stays on for everything else.
+  SECRETS_SCAN_SMART_DETECTION_OMIT_VALUES = "AIzaSyClK8L9GUkWMURh8xo3wm46lv0NDVQof40"
 
 [[headers]]
   for = "/*"
