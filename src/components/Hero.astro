@@ -28,6 +28,17 @@ const {
     </svg>
   </div>
 
+  <img
+    class="hero__crest"
+    src="/logos/brand/baes-crest-hero.webp"
+    srcset="/logos/brand/baes-crest-hero-sm.webp 351w, /logos/brand/baes-crest-hero.webp 702w"
+    sizes="(max-width: 860px) 176px, 351px"
+    alt=""
+    width="702"
+    height="880"
+    fetchpriority="high"
+  />
+
   <div class="hero__inner container">
     <p class="hero__kicker label">{kicker}</p>
     <h1 class="hero__headline" id="hero-headline">
@@ -77,8 +88,52 @@ const {
 
   .hero__inner {
     position: relative;
+    z-index: 1;
     padding-top: clamp(3rem, 10vw, 6rem);
     padding-bottom: clamp(3rem, 8vw, 5rem);
+  }
+
+  /* The BAES crest: the team/community identity, featured here while the
+     official Army lockup carries the header, footer and icons. */
+  .hero__crest {
+    position: absolute;
+    right: clamp(1.5rem, 7vw, 7rem);
+    top: 50%;
+    transform: translateY(-50%);
+    height: min(62vh, 440px);
+    width: auto;
+    filter: drop-shadow(0 18px 50px rgba(200, 16, 46, 0.35));
+    pointer-events: none;
+  }
+
+  /* Mid widths (most laptops): not enough room beside the headline, so it
+     becomes a faint watermark behind the text instead of colliding. */
+  @media (min-width: 861px) and (max-width: 1339px) {
+    .hero__crest {
+      right: -2vw;
+      opacity: 0.22;
+      filter: none;
+    }
+  }
+
+  /* Narrow screens: sits in the open space above the bottom-aligned
+     headline instead of beside it. */
+  @media (max-width: 860px) {
+    .hero__crest {
+      right: auto;
+      left: 50%;
+      top: clamp(1.25rem, 5vh, 2.5rem);
+      transform: translateX(-50%);
+      height: min(30vh, 220px);
+    }
+  }
+
+  /* Very short screens (landscape phones): not enough room above the
+     headline, so leave it out rather than overlap the text. */
+  @media (max-width: 860px) and (max-height: 640px) {
+    .hero__crest {
+      display: none;
+    }
   }
 
   .hero__kicker {

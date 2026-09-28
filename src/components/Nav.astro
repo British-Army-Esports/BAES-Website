@@ -18,13 +18,13 @@ const links = [
 <header class="nav">
   <div class="nav__inner container">
     <a class="nav__brand" href="/">
-      <img class="nav__crest" src="/logos/brand/baes-crest-sm.webp" alt="" width="115" height="144" />
-      <span class="nav__wordmark">
-        <span class="nav__wordmark-line">
-          <span class="nav__wordmark-white">BRITISH ARMY</span>
-        </span>
-        <span class="nav__wordmark-crimson">ESPORTS</span>
-      </span>
+      <img
+        class="nav__logo"
+        src="/logos/brand/army-esports-lockup-sm.webp"
+        alt="British Army Esports home"
+        width="144"
+        height="144"
+      />
     </a>
 
     <input type="checkbox" id="nav-toggle" class="nav__toggle-input" aria-label="Toggle menu" />
@@ -91,32 +91,10 @@ const links = [
     flex-shrink: 0;
   }
 
-  .nav__crest {
-    height: 46px;
-    width: auto;
-  }
-
-  .nav__wordmark {
-    display: flex;
-    flex-direction: column;
-    line-height: 1;
-  }
-
-  .nav__wordmark-white,
-  .nav__wordmark-crimson {
-    font-family: var(--font-display);
-    font-weight: 700;
-    letter-spacing: 0.04em;
-  }
-
-  .nav__wordmark-white {
-    color: var(--text-primary);
-    font-size: 0.8rem;
-  }
-
-  .nav__wordmark-crimson {
-    color: var(--crimson-text);
-    font-size: 1.15rem;
+  .nav__logo {
+    display: block;
+    height: 48px;
+    width: 48px;
   }
 
   .nav__links {

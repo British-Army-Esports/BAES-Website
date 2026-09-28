@@ -6,11 +6,13 @@ const year = new Date().getFullYear();
   <div class="container footer__top">
     <div class="footer__brand">
       <a href="/" class="footer__brand-link">
-        <img class="footer__crest" src="/logos/brand/baes-crest-sm.webp" alt="" width="115" height="144" />
-        <span class="footer__wordmark">
-          <span class="footer__wordmark-white">BRITISH ARMY</span>
-          <span class="footer__wordmark-crimson">ESPORTS</span>
-        </span>
+        <img
+          class="footer__logo"
+          src="/logos/brand/army-esports-lockup-sm.webp"
+          alt="British Army Esports home"
+          width="144"
+          height="144"
+        />
       </a>
       <p class="footer__tagline label">Adaptability. Excellence. Together.</p>
       <div class="footer__social">
@@ -83,33 +85,13 @@ const year = new Date().getFullYear();
   }
 
   .footer__brand-link {
-    display: flex;
-    align-items: center;
-    gap: 0.65rem;
+    display: inline-block;
   }
 
-  .footer__crest {
-    height: 40px;
-    width: auto;
-  }
-
-  .footer__wordmark {
-    display: flex;
-    flex-direction: column;
-    line-height: 1;
-    font-family: var(--font-display);
-    font-weight: 700;
-    letter-spacing: 0.04em;
-  }
-
-  .footer__wordmark-white {
-    color: var(--text-primary);
-    font-size: 0.75rem;
-  }
-
-  .footer__wordmark-crimson {
-    color: var(--crimson-text);
-    font-size: 1.05rem;
+  .footer__logo {
+    display: block;
+    height: 72px;
+    width: 72px;
   }
 
   .footer__tagline {
