@@ -188,6 +188,8 @@ const news = defineCollection({
     date: z.coerce.date(),
     summary: z.string().optional(),
     relatedEvent: reference('events').optional(),
+    // Lead photo (site path): used as the article's social preview image.
+    image: z.string().optional(),
     // External press coverage of the same story — outlet name + link.
     sources: z.array(z.object({ label: z.string(), url: z.string().url() })).optional(),
   }),

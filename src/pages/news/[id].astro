@@ -14,7 +14,7 @@ const { post } = Astro.props;
 const { Content } = await render(post);
 ---
 
-<BaseLayout title={post.data.title} active="News" description={post.data.summary}>
+<BaseLayout title={post.data.title} active="News" description={post.data.summary} image={post.data.image}>
   <article class="section container">
     <p class="section__eyebrow label">
       {post.data.date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
@@ -75,6 +75,43 @@ const { Content } = await render(post);
     height: auto;
     border: 1px solid var(--border);
     margin: 0 0 1.25rem;
+  }
+
+  .prose :global(h2) {
+    font-size: 1.3rem;
+    color: var(--text-primary);
+    margin: 2.25rem 0 0.9rem;
+  }
+
+  .prose :global(a) {
+    color: var(--crimson-text);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .prose :global(figure) {
+    margin: 0 0 1.5rem;
+  }
+
+  .prose :global(figure img) {
+    margin: 0;
+  }
+
+  .prose :global(figcaption) {
+    margin-top: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+
+  /* Tall/portrait images (phone screenshots, portrait photos) capped so a
+     single one doesn't fill several screens. */
+  .prose :global(figure.portrait img) {
+    width: auto;
+    max-width: 100%;
+    max-height: 560px;
+    margin: 0 auto;
   }
 
   .sources {
