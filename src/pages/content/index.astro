@@ -1,5 +1,10 @@
 ---
+import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+
+// Tags of events whose streams are in the production calendar; the Upcoming
+// Streams list shows only calendar entries matching one of these.
+const streamTags = [...new Set((await getCollection('events')).map((e) => e.data.streamTag).filter(Boolean))];
 
 const baesChannels = [
   { handle: 'britisharmyesports', label: 'British Army Esports' },
@@ -37,6 +42,11 @@ const corpsChannels = [
         YouTube
       </a>.
     </p>
+
+    <section class="streams" data-upcoming-streams={JSON.stringify(streamTags)} hidden>
+      <h2 class="section__subheading">Upcoming Streams</h2>
+      <ul class="streams__list" data-upcoming-list></ul>
+    </section>
 
     <h2 class="section__subheading">Watch the Army Team Compete</h2>
     <div class="channel-grid">
@@ -101,6 +111,47 @@ const corpsChannels = [
 </BaseLayout>
 
 <script>
+  import { getStreams, matchesTag, ukDayLabel, ukTime } from '../../lib/streams';
+
+  // Upcoming Streams: next few tagged entries from the production calendar,
+  // read live in the browser. Hidden entirely if there's nothing coming up
+  // or the calendar can't be reached.
+  const upcoming = document.querySelector<HTMLElement>('[data-upcoming-streams]');
+  if (upcoming) {
+    const tags: string[] = JSON.parse(upcoming.dataset.upcomingStreams!);
+    const list = upcoming.querySelector<HTMLElement>('[data-upcoming-list]')!;
+    getStreams().then((streams) => {
+      const now = Date.now();
+      const next = (streams ?? [])
+        .filter((e) => e.end > now && tags.some((t) => matchesTag(e.title, t)))
+        .slice(0, 6);
+      if (next.length === 0) return;
+      list.replaceChildren(
+        ...next.map((e) => {
+          const li = document.createElement('li');
+          li.className = 'streams__item';
+          const live = e.start <= now;
+          const when = document.createElement('span');
+          when.className = live ? 'streams__when streams__when--live' : 'streams__when';
+          const day = ukDayLabel(e.start, now);
+          when.textContent = live ? '● Live now' : `${day[0].toUpperCase()}${day.slice(1)} ${ukTime(e.start)}`;
+          const name = document.createElement('span');
+          name.className = 'streams__title';
+          name.textContent = e.title;
+          const a = document.createElement('a');
+          a.className = 'streams__watch';
+          a.href = e.link ?? 'https://www.twitch.tv/britisharmyesports';
+          a.target = '_blank';
+          a.rel = 'noopener noreferrer';
+          a.textContent = live ? 'Watch →' : 'Channel →';
+          li.append(when, name, a);
+          return li;
+        }),
+      );
+      upcoming.hidden = false;
+    });
+  }
+
   // Twitch's embed player already shows live video or an offline banner on
   // its own; loading 12 of them at once on page load would be heavy, so
   // each channel stays a compact link until someone actually clicks Watch,
@@ -152,6 +203,63 @@ const corpsChannels = [
   .section__subheading {
     font-size: 1.3rem;
     margin: 2.5rem 0 1.25rem;
+  }
+
+  .streams[hidden] {
+    display: none;
+  }
+
+  .streams__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .streams__list :global(.streams__item) {
+    display: grid;
+    grid-template-columns: 11rem 1fr auto;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.8rem 1.1rem;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.9rem;
+  }
+
+  .streams__list :global(.streams__item:last-child) {
+    border-bottom: none;
+  }
+
+  .streams__list :global(.streams__when) {
+    color: var(--text-secondary-alt);
+    font-weight: 600;
+  }
+
+  .streams__list :global(.streams__when--live) {
+    color: var(--crimson-text);
+  }
+
+  .streams__list :global(.streams__title) {
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+
+  .streams__list :global(.streams__watch) {
+    color: var(--crimson-text);
+    font-weight: 600;
+    font-size: 0.8rem;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 600px) {
+    .streams__list :global(.streams__item) {
+      grid-template-columns: 1fr auto;
+    }
+
+    .streams__list :global(.streams__when) {
+      grid-column: 1 / -1;
+    }
   }
 
   .channel-grid {

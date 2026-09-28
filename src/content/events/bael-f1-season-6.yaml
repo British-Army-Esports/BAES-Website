@@ -7,5 +7,8 @@ tier: "minor"
 date: 2026-09-07
 endDate: 2027-02-01
 dateStatus: "confirmed"
-streamTime: "19:00"
+streamTag: "BAEL F1"
+streamTime: "19:45"
+streamDays:
+  - "Monday"
 description: "The British Army Electronic League (BAEL): the Army's Inter-Corps F1 sim racing championship, back for a sixth season. 15 rounds across real-world F1 circuits, run online, from Imola in September through to a mystery Round 15 finale in February."

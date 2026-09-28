@@ -12,10 +12,15 @@ const events = await getCollection('events');
 // streaming that hour). Those still get a calmer badge on their own
 // event card instead; see getLiveStatus's isOngoingBroadcast.
 const liveEvent = events.find((event) => getLiveStatus(event.data, now).isLive);
+
+// Tags of events whose streams come from the production calendar. If no
+// event is live at build, the browser checks the calendar and shows this bar
+// while a tagged stream is actually on (see script below).
+const streamTags = [...new Set(events.map((e) => e.data.streamTag).filter(Boolean))];
 ---
 
 {
-  liveEvent && (
+  liveEvent ? (
     <div class="ticker">
       <div class="ticker__inner container">
         <span class="ticker__pill">
@@ -31,8 +36,53 @@ const liveEvent = events.find((event) => getLiveStatus(event.data, now).isLive);
         </a>
       </div>
     </div>
+  ) : (
+    streamTags.length > 0 && (
+      <div class="ticker" data-stream-ticker={JSON.stringify(streamTags)} hidden>
+        <div class="ticker__inner container">
+          <span class="ticker__pill">
+            <span class="pulse-dot" />
+            Live Now
+          </span>
+          <span class="ticker__info" data-stream-ticker-title />
+          <a
+            href="https://www.twitch.tv/britisharmyesports"
+            class="ticker__watch"
+            target="_blank"
+            rel="noopener noreferrer"
+            data-stream-ticker-link
+          >
+            Watch Live →
+          </a>
+        </div>
+      </div>
+    )
   )
 }
+
+<script>
+  import { getStreams, matchesTag } from '../lib/streams';
+
+  const bar = document.querySelector<HTMLElement>('[data-stream-ticker]');
+  if (bar) {
+    const tags: string[] = JSON.parse(bar.dataset.streamTicker!);
+    const title = bar.querySelector<HTMLElement>('[data-stream-ticker-title]')!;
+    const link = bar.querySelector<HTMLAnchorElement>('[data-stream-ticker-link]')!;
+    getStreams().then((streams) => {
+      const refresh = () => {
+        const now = Date.now();
+        const live = streams?.find((e) => e.start <= now && now < e.end && tags.some((t) => matchesTag(e.title, t)));
+        bar.hidden = !live;
+        if (live) {
+          title.textContent = live.title;
+          if (live.link) link.href = live.link;
+        }
+      };
+      refresh();
+      setInterval(refresh, 60_000);
+    });
+  }
+</script>
 
 <style>
   .ticker {

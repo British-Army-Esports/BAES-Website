@@ -109,6 +109,15 @@ collections:
         required: false
         hint: "Only for multi-day events. Leave blank for single-day fixtures."
 
+      - label: "Stream Calendar Tag"
+        name: "streamTag"
+        widget: "string"
+        required: false
+        hint: >-
+          For long-running seasons/leagues. The start of the matching entries' titles in
+          the production stream calendar, e.g. "BAEL F1" matches "BAEL F1 S6". Real stream
+          times then come straight from the calendar. The time/days below are the fallback.
+
       - label: "Stream Time (UK)"
         name: "streamTime"
         widget: "string"

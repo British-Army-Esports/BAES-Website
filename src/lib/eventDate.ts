@@ -71,6 +71,9 @@ export interface SeasonInfo {
   endDate?: string; // ISO date
   streamTime?: string; // "HH:MM", UK time
   streamDays?: Weekday[];
+  // Matches this season to entries in the production stream calendar
+  // (see lib/streams). Time/days above are the fallback if it can't be read.
+  streamTag?: string;
 }
 
 // Long, confirmed, non-outreach events — the ones that get a season badge
@@ -82,6 +85,7 @@ export function seasonInfo(event: {
   endDate?: Date;
   streamTime?: string;
   streamDays?: Weekday[];
+  streamTag?: string;
 }): SeasonInfo | undefined {
   if (event.presenceType === 'community-outreach' || (event.dateStatus ?? 'confirmed') !== 'confirmed') return undefined;
   const spanDays = (eventEndMs(event) - event.date.getTime()) / DAY_MS;
@@ -91,6 +95,7 @@ export function seasonInfo(event: {
     endDate: event.endDate?.toISOString(),
     streamTime: event.streamTime,
     streamDays: event.streamDays,
+    streamTag: event.streamTag,
   };
 }
 

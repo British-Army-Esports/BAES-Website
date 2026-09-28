@@ -133,6 +133,10 @@ const events = defineCollection({
     // card can say "Stream starts 19:00" / "Streaming now" / "Next stream
     // Wed 19:00" instead of claiming to be live all day, every day.
     streamTime: blankable(z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Use 24-hour HH:MM, e.g. 19:00')),
+    // Start of the matching entries' titles in the production stream calendar
+    // (e.g. "BAEL F1" matches "BAEL F1 S6"). When set, real calendar times
+    // drive the badge and streamTime/streamDays become the fallback.
+    streamTag: blankable(z.string()),
     streamDays: z.preprocess(
       (v) => (v === '' || (Array.isArray(v) && v.length === 0) ? undefined : v),
       z.array(z.enum(WEEKDAYS)).optional(),

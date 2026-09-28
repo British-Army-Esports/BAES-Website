@@ -87,14 +87,29 @@ const accent = event.accentColor || '#c8102e';
 </div>
 
 <script>
-  import { seasonBadge } from '../lib/eventDate';
+  import { seasonBadge, eventEndMs, type SeasonInfo } from '../lib/eventDate';
+  import { getStreams, matchesTag, streamBadge, type StreamEntry } from '../lib/streams';
 
   // Season badges depend on the time of day, so they're set here rather than
-  // at build, and re-checked each minute ("starts 19:00" → "Streaming now").
+  // at build, and re-checked each minute ("starts 19:45" → "Streaming now").
+  // Real times come from the stream calendar when the season has a
+  // streamTag; its streamTime/streamDays are the fallback if the calendar
+  // can't be reached.
+  let streams: StreamEntry[] | null = null;
+
+  function badgeFor(season: SeasonInfo, now: number) {
+    const fallback = seasonBadge(season, now); // null = season not in progress
+    if (!fallback || !season.streamTag || !streams) return fallback;
+    const from = Date.parse(season.start);
+    const to = eventEndMs({ date: season.start, endDate: season.endDate });
+    const mine = streams.filter((e) => matchesTag(e.title, season.streamTag!) && e.end > from && e.start < to);
+    return streamBadge(mine, now);
+  }
+
   function refreshSeasonBadges() {
     const now = Date.now();
     document.querySelectorAll<HTMLElement>('[data-season]').forEach((el) => {
-      const badge = seasonBadge(JSON.parse(el.dataset.season!), now);
+      const badge = badgeFor(JSON.parse(el.dataset.season!), now);
       el.hidden = !badge;
       el.textContent = badge?.text ?? '';
       el.classList.toggle('event-card__ongoing--live', !!badge?.live);
@@ -103,6 +118,12 @@ const accent = event.accentColor || '#c8102e';
   }
 
   refreshSeasonBadges();
+  if (document.querySelector('[data-season]')) {
+    getStreams().then((s) => {
+      streams = s;
+      refreshSeasonBadges();
+    });
+  }
   setInterval(refreshSeasonBadges, 60_000);
 </script>
 
