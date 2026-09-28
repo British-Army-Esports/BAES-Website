@@ -56,6 +56,87 @@ export function getLiveStatus(
   };
 }
 
+// ---- Stream badge for long-running seasons -------------------------------
+// A season (e.g. a 5-month league) is "in progress" for its whole date range,
+// but only actually streams on certain nights. Dates alone can't say whether
+// a stream is on *right now*, so events can carry an optional stream time and
+// days (UK time). Worked out in the visitor's browser, since time of day
+// matters and a static build only knows the day it was built.
+
+export const WEEKDAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] as const;
+export type Weekday = (typeof WEEKDAYS)[number];
+
+export interface SeasonInfo {
+  start: string; // ISO date
+  endDate?: string; // ISO date
+  streamTime?: string; // "HH:MM", UK time
+  streamDays?: Weekday[];
+}
+
+// Long, confirmed, non-outreach events — the ones that get a season badge
+// rather than the pulsing LIVE treatment (see getLiveStatus).
+export function seasonInfo(event: {
+  presenceType: string;
+  dateStatus?: DateStatus;
+  date: Date;
+  endDate?: Date;
+  streamTime?: string;
+  streamDays?: Weekday[];
+}): SeasonInfo | undefined {
+  if (event.presenceType === 'community-outreach' || (event.dateStatus ?? 'confirmed') !== 'confirmed') return undefined;
+  const spanDays = (eventEndMs(event) - event.date.getTime()) / DAY_MS;
+  if (spanDays <= SHORT_SPAN_DAYS) return undefined;
+  return {
+    start: event.date.toISOString(),
+    endDate: event.endDate?.toISOString(),
+    streamTime: event.streamTime,
+    streamDays: event.streamDays,
+  };
+}
+
+const STREAM_WINDOW_MINUTES = 180;
+
+function ukNow(now: number): { weekday: Weekday; minutes: number } {
+  const parts = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Europe/London',
+    weekday: 'long',
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+  }).formatToParts(new Date(now));
+  const get = (t: string) => parts.find((p) => p.type === t)?.value ?? '';
+  return { weekday: get('weekday') as Weekday, minutes: Number(get('hour')) * 60 + Number(get('minute')) };
+}
+
+// null = season not in progress right now (not started, or finished).
+export function seasonBadge(season: SeasonInfo, now: number): { text: string; live: boolean } | null {
+  const start = new Date(season.start).getTime();
+  if (now < start || now >= eventEndMs({ date: season.start, endDate: season.endDate })) return null;
+
+  const time = season.streamTime;
+  const days = season.streamDays ?? [];
+  if (!time) return { text: 'Season in progress', live: false };
+  if (days.length === 0) return { text: `📺 Streams ${time}`, live: false };
+
+  const [h, m] = time.split(':').map(Number);
+  const startMin = h * 60 + m;
+  const today = ukNow(now);
+  if (days.includes(today.weekday)) {
+    if (today.minutes < startMin) return { text: `📺 Stream starts ${time}`, live: false };
+    if (today.minutes < startMin + STREAM_WINDOW_MINUTES) return { text: '📺 Streaming now', live: true };
+  }
+  // Next stream day after today (wrapping round the week).
+  const todayIdx = WEEKDAYS.indexOf(today.weekday);
+  for (let i = 1; i <= 7; i++) {
+    const day = WEEKDAYS[(todayIdx + i) % 7];
+    if (days.includes(day)) {
+      const label = i === 1 ? 'tomorrow' : day.slice(0, 3);
+      return { text: `📺 Next stream ${label} ${time}`, live: false };
+    }
+  }
+  return { text: 'Season in progress', live: false };
+}
+
 export interface FormattedEventDate {
   text: string;
   badge: DateStatus;

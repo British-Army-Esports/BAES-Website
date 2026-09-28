@@ -1,4 +1,6 @@
 ---
+import type { SeasonInfo } from '../lib/eventDate';
+
 export interface EventCardData {
   id: string;
   title: string;
@@ -22,6 +24,9 @@ export interface EventCardData {
   rawDate?: string;
   rawEndDate?: string;
   dateStatus?: 'confirmed' | 'provisional' | 'tbc';
+  // Set for long-running seasons: the badge ("Stream starts 19:00" etc.) is
+  // worked out in the browser from this — see seasonBadge in lib/eventDate.
+  season?: SeasonInfo;
 }
 
 export interface Props {
@@ -29,19 +34,14 @@ export interface Props {
   scaleLabels: Record<string, string>;
   teamLabels: Record<string, string>;
   live?: boolean;
-  // Currently within its date range like `live`, but spans too long (a
-  // season/qualifier run) to honestly badge as "happening right now" — a
-  // calmer, non-pulsing indicator instead. Mutually exclusive with `live`
-  // in practice (a card is one or the other, never both).
-  ongoing?: boolean;
 }
 
-const { event, scaleLabels, teamLabels, live = false, ongoing = false } = Astro.props;
+const { event, scaleLabels, teamLabels, live = false } = Astro.props;
 const accent = event.accentColor || '#c8102e';
 ---
 
 <div
-  class:list={['event-card', 'clip-tl', { 'event-card--live': live, 'event-card--ongoing': ongoing }]}
+  class:list={['event-card', 'clip-tl', { 'event-card--live': live }]}
   data-disciplines={event.disciplineIds.join(',')}
   data-scale={event.scale}
   data-presence={event.presenceType}
@@ -56,7 +56,7 @@ const accent = event.accentColor || '#c8102e';
     <div class="event-card__top">
       <span class:list={['event-card__date', `event-card__date--${event.badge}`]}>{event.text}</span>
       {live && <span class="event-card__live">● LIVE</span>}
-      {ongoing && <span class="event-card__ongoing">📺 Streaming Now</span>}
+      {event.season && <span class="event-card__ongoing" data-season={JSON.stringify(event.season)} hidden />}
     </div>
     <h3 class="event-card__title">
       {
@@ -85,6 +85,26 @@ const accent = event.accentColor || '#c8102e';
     <p class="event-card__location">{event.locationName}</p>
   </div>
 </div>
+
+<script>
+  import { seasonBadge } from '../lib/eventDate';
+
+  // Season badges depend on the time of day, so they're set here rather than
+  // at build, and re-checked each minute ("starts 19:00" → "Streaming now").
+  function refreshSeasonBadges() {
+    const now = Date.now();
+    document.querySelectorAll<HTMLElement>('[data-season]').forEach((el) => {
+      const badge = seasonBadge(JSON.parse(el.dataset.season!), now);
+      el.hidden = !badge;
+      el.textContent = badge?.text ?? '';
+      el.classList.toggle('event-card__ongoing--live', !!badge?.live);
+      el.closest('.event-card')?.classList.toggle('event-card--ongoing', !!badge);
+    });
+  }
+
+  refreshSeasonBadges();
+  setInterval(refreshSeasonBadges, 60_000);
+</script>
 
 <style>
   .event-card {
@@ -174,6 +194,14 @@ const accent = event.accentColor || '#c8102e';
     font-size: 0.7rem;
     letter-spacing: 0.03em;
     flex-shrink: 0;
+  }
+
+  .event-card__ongoing[hidden] {
+    display: none;
+  }
+
+  .event-card__ongoing--live {
+    color: var(--crimson-text);
   }
 
   .event-card--ongoing {

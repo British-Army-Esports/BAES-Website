@@ -109,6 +109,24 @@ collections:
         required: false
         hint: "Only for multi-day events. Leave blank for single-day fixtures."
 
+      - label: "Stream Time (UK)"
+        name: "streamTime"
+        widget: "string"
+        required: false
+        pattern: ['^([01]\d|2[0-3]):[0-5]\d$', "Use 24-hour time, e.g. 19:00"]
+        hint: >-
+          For long-running seasons/leagues only. When streams start, e.g. 19:00.
+          The card then says "Stream starts 19:00" / "Streaming now" instead of
+          being badged as live all day. Leave blank for one-off events.
+
+      - label: "Stream Days"
+        name: "streamDays"
+        widget: "select"
+        multiple: true
+        required: false
+        options: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+        hint: "Which days the season streams. With a time and days set, the card can say \"Next stream Wed 19:00\"."
+
       - label: "Date Status"
         name: "dateStatus"
         widget: "select"

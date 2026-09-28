@@ -1,5 +1,6 @@
 import { defineCollection, reference, z } from 'astro:content';
 import { glob } from 'astro/loaders';
+import { WEEKDAYS } from './lib/eventDate';
 
 // Decap CMS serialises a left-blank optional field as an empty string "",
 // not as an omitted key — but zod's `.optional()` only accepts `undefined`,
@@ -128,6 +129,14 @@ const events = defineCollection({
     // the event's own date. Optional: most fixtures (outreach presences,
     // things with no open sign-up) don't have one.
     registrationDeadline: blankable(z.coerce.date()),
+    // Long-running seasons: when streams actually happen (UK time), so the
+    // card can say "Stream starts 19:00" / "Streaming now" / "Next stream
+    // Wed 19:00" instead of claiming to be live all day, every day.
+    streamTime: blankable(z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Use 24-hour HH:MM, e.g. 19:00')),
+    streamDays: z.preprocess(
+      (v) => (v === '' || (Array.isArray(v) && v.length === 0) ? undefined : v),
+      z.array(z.enum(WEEKDAYS)).optional(),
+    ),
     // Real photos from the event itself — team shots, LAN floor, action
     // shots. See public/photos/events/README.md for the folder convention
     // and the PERSEC note on faces/names in this category vs. location
