@@ -17,6 +17,11 @@ away with results across all three games.
 Earlier in the tournament, the BAES Lions took first place in League of Legends, defeating Real Humans
 to win the title.
 
+<figure class="portrait">
+  <img src="/photos/news/bfbs-pro-league-2026/lions-victory.jpg" alt="BAES Lions victory graphic. Top lane Kledd, jungle Clannish, mid lane Steve, AD carry LightofLoL, support Pogriguez; coaches Moose and Prae; manager Kempy." loading="lazy" />
+  <figcaption>The BAES Lions: Kledd, Clannish, Steve, LightofLoL and Pogriguez, coached by Moose and Prae, managed by Kempy.</figcaption>
+</figure>
+
 ## F1 25: Army drivers 1st, 2nd and 4th
 
 Army drivers finished first, second and fourth in the F1 25 championship standings.
