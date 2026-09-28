@@ -6,9 +6,24 @@ import Card from '../components/Card.astro';
 import Table from '../components/Table.astro';
 import MapView from '../components/MapView.astro';
 import EventCard from '../components/EventCard.astro';
+import { getImage } from 'astro:assets';
 import { formatEventDate, compareEventDates, getLiveStatus, eventEndMs, seasonInfo } from '../lib/eventDate';
 
 const disciplines = await getCollection('disciplines');
+
+// Latest News: a teaser for the newest article, not the article itself.
+// CMS-uploaded lead photos are resized here the same way the article page
+// does it; site-path photos (/photos/...) are already web-sized.
+const latestPost = (await getCollection('news')).sort(
+  (a, b) => b.data.date.getTime() - a.data.date.getTime(),
+)[0];
+const latestImage = latestPost?.data.image;
+const latestImageSrc =
+  latestImage === undefined
+    ? undefined
+    : typeof latestImage === 'string'
+      ? latestImage
+      : (await getImage({ src: latestImage, width: Math.min(900, latestImage.width), format: 'webp' })).src;
 
 const allDisciplines = await getCollection('disciplines', ({ data }) => data.active);
 const disciplineInfo = new Map(
@@ -113,6 +128,30 @@ const orgJsonLd = {
 <BaseLayout title="Home" active="Home" jsonLd={orgJsonLd}>
   <Hero />
 
+  {
+    latestPost && (
+      <section class="section container">
+        <h2 class="section__heading">Latest News</h2>
+        <p class="section__note label">
+          <a href="/news">All news →</a>
+        </p>
+        <a class:list={['latest', { 'latest--no-image': !latestImageSrc }]} href={`/news/${latestPost.id}`}>
+          {latestImageSrc && (
+            <img class="latest__img" src={latestImageSrc} alt="" loading="lazy" decoding="async" />
+          )}
+          <div class="latest__body">
+            <p class="latest__date label">
+              {latestPost.data.date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+            </p>
+            <h3 class="latest__title">{latestPost.data.title}</h3>
+            <p class="latest__summary">{latestPost.data.summary}</p>
+            <span class="latest__more">Read the full story <span aria-hidden="true">→</span></span>
+          </div>
+        </a>
+      </section>
+    )
+  }
+
   <section class="section container">
     <h2 class="section__heading">Disciplines</h2>
     <div class="grid">
@@ -206,5 +245,81 @@ const orgJsonLd = {
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 1.25rem;
     margin-top: 1.5rem;
+  }
+
+  .latest {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--crimson);
+    color: inherit;
+    transition: border-color 0.2s var(--ease-out);
+  }
+
+  .latest:hover {
+    border-color: var(--crimson-bright);
+  }
+
+  .latest--no-image {
+    grid-template-columns: 1fr;
+  }
+
+  .latest__img {
+    width: 100%;
+    height: 100%;
+    min-height: 220px;
+    max-height: 360px;
+    object-fit: cover;
+    display: block;
+  }
+
+  .latest__body {
+    padding: clamp(1.25rem, 3vw, 2rem);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.75rem;
+  }
+
+  .latest__date {
+    color: var(--crimson-text);
+  }
+
+  .latest__title {
+    font-size: clamp(1.25rem, 2.2vw, 1.75rem);
+    line-height: 1.15;
+  }
+
+  .latest__summary {
+    color: var(--text-secondary-alt);
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  .latest__more {
+    color: var(--crimson-text);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+  }
+
+  .latest:hover .latest__more {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  @media (max-width: 760px) {
+    .latest {
+      grid-template-columns: 1fr;
+    }
+
+    .latest__img {
+      height: auto;
+      aspect-ratio: 16 / 9;
+      min-height: 0;
+    }
   }
 </style>

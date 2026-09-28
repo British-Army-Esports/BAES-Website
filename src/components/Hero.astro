@@ -110,7 +110,9 @@ const {
      becomes a faint watermark behind the text instead of colliding. */
   @media (min-width: 861px) and (max-width: 1339px) {
     .hero__crest {
-      right: -2vw;
+      /* Flush to the edge, not past it: .hero doesn't clip (see above),
+         so anything beyond the right edge adds a sideways page scroll. */
+      right: 0;
       opacity: 0.22;
       filter: none;
     }
