@@ -4,7 +4,7 @@ Source list of external links to integrate across the site. Updated as of 2026-0
 
 | Link | Placement |
 |---|---|
-| https://discord.gg/D5SrQ6xAdw | Nav social icon + Footer (Community) |
+| https://discord.gg/7stxZhnFVa | Nav social icon + Footer (Community) |
 | http://ideg.gg/ | Footer (Wider Esports Ecosystem) |
 | https://britisharmysport.com/army-e-sports/ | Footer (Wider Esports Ecosystem) |
 | https://www.twitch.tv/britisharmyesports | Nav social icon + Footer (Community) |
