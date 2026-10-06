@@ -2,7 +2,7 @@
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Table from '../../components/Table.astro';
-import { formatEventDate, compareEventDates, getLiveStatus, eventEndMs } from '../../lib/eventDate';
+import { formatEventDate, compareEventDates, getLiveStatus, eventEndMs, locationLabel } from '../../lib/eventDate';
 
 export async function getStaticPaths() {
   const disciplines = await getCollection('disciplines');
@@ -30,7 +30,7 @@ const relatedEvents = (await getCollection('events'))
     const { isLive } = getLiveStatus(event.data, now);
     return {
       title: event.data.title,
-      locationName: event.data.location?.name ?? (isPast ? 'Not recorded' : 'Online / TBC'),
+      locationName: locationLabel(event.data, isPast),
       sortDate: start,
       isPast,
       isLive,

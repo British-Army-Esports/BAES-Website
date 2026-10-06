@@ -1,16 +1,17 @@
 title: "EPIC49"
 disciplines:
   - "counter-strike-2"
-scale: "engagement"
+scale: "uk-national"
 team: "baes"
-presenceType: "community-outreach"
+presenceType: "mixed"
 tier: "major"
-date: 2026-10-29
+date: 2026-10-30
 endDate: 2026-11-01
 dateStatus: "confirmed"
+format: "in-person"
 location:
   name: "Kettering Leisure Village, Kettering"
   lat: 52.3875664
   long: -0.7355546
-description: "EPIC LAN gaming festival. Tournament games include CS2, StarCraft 2, VALORANT, osu! and others (only CS2 is a recognised British Army Esports discipline). Army gaming presence, no competitive Army result logged here."
+description: "The British Army Esports CS2 team takes on the EPIC LAN Counter-Strike 2 tournament: up to 48 teams competing for a prize pool of up to £6,500. EPIC LAN is one of the UK's longest-running LAN gaming festivals. Watch the tournament live at twitch.tv/epiclan1."
 externalLink: "https://www.epiclan.co.uk/epic49"

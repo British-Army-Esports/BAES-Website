@@ -93,9 +93,10 @@ const events = defineCollection({
     // never shown as a real date.
     dateStatus: z.enum(['confirmed', 'provisional', 'tbc']).default('confirmed'),
     dateOptions: z.array(z.string()).optional(),
-    // Editorial-only signal, not read anywhere in the rendering code (the
-    // pages already infer online-vs-physical from whether `location` is
-    // set). Exists purely so the Decap form can put a clear "Online or
+    // Mostly an editorial signal. The only rendering use is the card
+    // location line (locationLabel in lib/eventDate): with no venue set,
+    // "online" shows "Online" instead of "Location not recorded". It
+    // exists so the Decap form can put a clear "Online or
     // In-Person" choice right before the Location section, since a lay
     // editor was putting a Discord server name into Venue Name — Decap has
     // no native conditional-field support to actually hide Location when

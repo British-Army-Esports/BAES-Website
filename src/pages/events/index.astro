@@ -2,7 +2,7 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import EventCard from '../../components/EventCard.astro';
-import { formatEventDate, compareEventDates, getLiveStatus, eventEndMs, seasonInfo } from '../../lib/eventDate';
+import { formatEventDate, compareEventDates, getLiveStatus, eventEndMs, seasonInfo, locationLabel } from '../../lib/eventDate';
 
 const allDisciplines = await getCollection('disciplines', ({ data }) => data.active);
 const disciplineInfo = new Map(
@@ -38,7 +38,7 @@ const events = (await getCollection('events'))
       // "TBC" is a claim about an unresolved future — never honest for
       // something that's already happened, so a past event with no
       // recorded venue just says so plainly instead.
-      locationName: event.data.location?.name ?? (isPast ? 'Not recorded' : 'Online / TBC'),
+      locationName: locationLabel(event.data, isPast),
       externalLink: event.data.externalLink,
       resultsSummary: event.data.resultsSummary,
       sortDate: start,
@@ -212,8 +212,8 @@ const filterPresenceTypes = presenceOrder.filter((p) => usedPresenceTypes.has(p)
             <span class="past-list__meta">
               {event.text}
               {event.locationName && ` · ${event.locationName}`}
-              {event.resultsSummary && ` · ${event.resultsSummary}`}
             </span>
+            {event.resultsSummary && <span class="past-list__result">{event.resultsSummary}</span>}
           </li>
         ))
       }
@@ -279,8 +279,14 @@ const filterPresenceTypes = presenceOrder.filter((p) => usedPresenceTypes.has(p)
           a.textContent = (titleLink?.textContent || '').replace(/\s*↗$/, '');
           const meta = document.createElement('span');
           meta.className = 'past-list__meta';
-          meta.textContent = [text, location, result].filter(Boolean).join(' · ');
+          meta.textContent = [text, location].filter(Boolean).join(' · ');
           li.append(a, meta);
+          if (result) {
+            const resultEl = document.createElement('span');
+            resultEl.className = 'past-list__result';
+            resultEl.textContent = result;
+            li.append(resultEl);
+          }
           pastList.insertBefore(li, pastList.firstChild);
         }
         card.remove();
@@ -549,12 +555,14 @@ const filterPresenceTypes = presenceOrder.filter((p) => usedPresenceTypes.has(p)
     background: var(--bg-base-alt);
   }
 
+  /* Stacked: title, then the small grey date/location line, then any
+     result as its own highlighted line, all left-aligned. */
   .past-list li {
     display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    gap: 0.4rem 1.5rem;
-    padding: 0.65rem 1.1rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.2rem;
+    padding: 0.8rem 1.1rem;
     border-bottom: 1px solid var(--border);
     font-size: 0.85rem;
   }
@@ -579,7 +587,21 @@ const filterPresenceTypes = presenceOrder.filter((p) => usedPresenceTypes.has(p)
 
   .past-list__meta {
     color: var(--text-secondary);
-    text-align: right;
+    font-size: 0.78rem;
+  }
+
+  /* Results get the site's crimson accent bar (as on cards and the
+     Latest News panel) rather than quote marks: they're our own summary,
+     not a quotation. */
+  .past-list__result {
+    margin-top: 0.35rem;
+    padding-left: 0.65rem;
+    border-left: 2px solid var(--crimson-bright);
+    color: var(--crimson-text);
+    font-size: 0.95rem;
+    font-weight: 700;
+    font-style: italic;
+    line-height: 1.4;
   }
 
   .past-list .empty {

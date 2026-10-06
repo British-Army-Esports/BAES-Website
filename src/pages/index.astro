@@ -7,7 +7,7 @@ import Table from '../components/Table.astro';
 import MapView from '../components/MapView.astro';
 import EventCard from '../components/EventCard.astro';
 import { getImage } from 'astro:assets';
-import { formatEventDate, compareEventDates, getLiveStatus, eventEndMs, seasonInfo } from '../lib/eventDate';
+import { formatEventDate, compareEventDates, getLiveStatus, eventEndMs, seasonInfo, locationLabel } from '../lib/eventDate';
 
 const disciplines = await getCollection('disciplines');
 
@@ -55,7 +55,7 @@ const keyEvents = (await getCollection('events'))
       disciplineIds,
       disciplineNames,
       accentColor,
-      locationName: event.data.location?.name ?? (isPast ? 'Not recorded' : 'Online / TBC'),
+      locationName: locationLabel(event.data, isPast),
       externalLink: event.data.externalLink,
       resultsSummary: event.data.resultsSummary,
       sortDate: start,
