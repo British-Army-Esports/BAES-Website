@@ -174,10 +174,13 @@ const standingsTableRows = standingsRows.map((r) => ({ ...r, name: corpsNames.ge
     align-items: flex-start;
   }
 
+  /* Fixed height, natural width (capped): wide logos like League of Legends
+     show whole instead of being centre-cropped to a square. */
   .header__icon {
-    width: 88px;
     height: 88px;
-    object-fit: cover;
+    width: auto;
+    max-width: 176px;
+    object-fit: contain;
     flex-shrink: 0;
     border: 1px solid var(--border);
   }
