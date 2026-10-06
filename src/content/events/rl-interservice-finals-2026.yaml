@@ -1,0 +1,14 @@
+title: "Rocket League Interservice Finals"
+disciplines:
+  - "rocket-league"
+scale: "military"
+team: "baes"
+presenceType: "competitive"
+tier: "major"
+date: 2026-12-16
+endDate: 2026-12-20
+dateStatus: "confirmed"
+format: "in-person"
+location:
+  name: "College of Esports, Sunderland"
+description: "LAN finals of the Rocket League Interservice competition between the Army, Royal Navy and RAF."

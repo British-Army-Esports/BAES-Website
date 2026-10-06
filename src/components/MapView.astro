@@ -41,12 +41,17 @@ function displayType(type: string): string {
   return type === 'limited-setup' || type === 'unspecified' ? 'gaming-room' : type;
 }
 
+// UK postcodes ("DT11 8RE") must never wrap mid-code in the list or popups:
+// join the two halves with a non-breaking space.
+const keepPostcodeTogether = (address: string) =>
+  address.replace(/\b([A-Z]{1,2}\d[A-Z\d]?) (\d[A-Z]{2})\b/g, '$1\xa0$2');
+
 const locationPoints = allLocations.map((loc) => ({
   id: loc.id,
   name: loc.data.name,
   type: displayType(loc.data.type),
   service: loc.data.service,
-  address: loc.data.address,
+  address: keepPostcodeTogether(loc.data.address),
   equipment: loc.data.equipment ?? [],
   lat: loc.data.location.lat,
   long: loc.data.location.long,
@@ -55,7 +60,7 @@ const locationPoints = allLocations.map((loc) => ({
 const plannedPoints = plannedLocations.map((loc) => ({
   id: loc.id,
   name: loc.data.name,
-  address: loc.data.address,
+  address: keepPostcodeTogether(loc.data.address),
   status: loc.data.status,
   lat: loc.data.location.lat,
   long: loc.data.location.long,
@@ -215,11 +220,38 @@ const hasSisterHubs = locationPoints.some((loc) => loc.service !== 'army');
   const serviceLabels = { navy: 'Royal Navy', raf: 'RAF' };
 
   {
+    // On touch screens one finger scrolls the page and two fingers move or
+    // zoom the map. Otherwise a one-finger swipe that starts on the map
+    // drags the map instead, trapping anyone trying to scroll past it.
+    // Pinch-zoom still pans, so with one-finger dragging off, a two-finger
+    // gesture moves the map. Mouse users keep normal drag.
+    const touchScreen = window.matchMedia('(pointer: coarse)').matches;
     const map = L.map('baes-map', {
       zoomControl: true,
       attributionControl: true,
       minZoom: 4,
+      dragging: !touchScreen,
     });
+
+    if (touchScreen) {
+      const mapEl = map.getContainer();
+      const hint = document.createElement('div');
+      hint.className = 'map-touch-hint';
+      hint.setAttribute('aria-hidden', 'true');
+      hint.textContent = 'Use two fingers to move the map';
+      mapEl.appendChild(hint);
+      let hintTimer: number | undefined;
+      mapEl.addEventListener(
+        'touchmove',
+        (e) => {
+          if (e.touches.length !== 1) return;
+          hint.classList.add('is-visible');
+          window.clearTimeout(hintTimer);
+          hintTimer = window.setTimeout(() => hint.classList.remove('is-visible'), 1200);
+        },
+        { passive: true },
+      );
+    }
 
     // Standard OSM tiles rather than a niche third-party dark-tile CDN —
     // tile.openstreetmap.org is about as universally allowlisted as a tile
@@ -445,8 +477,12 @@ const hasSisterHubs = locationPoints.some((loc) => loc.service !== 'army');
     border-bottom: 1px solid var(--border);
   }
 
+  /* Wraps so a long row of pills (Our Locations / Sister Services / Planned
+     / Events) can never be wider than a phone screen and drag the whole
+     page into sideways scrolling. */
   .mapview__group {
     display: flex;
+    flex-wrap: wrap;
     gap: 0.5rem;
   }
 
@@ -531,6 +567,29 @@ const hasSisterHubs = locationPoints.some((loc) => loc.service !== 'army');
      the tile pane only so markers/popups/controls keep their real colours. */
   :global(.mapview__map .leaflet-tile-pane) {
     filter: invert(1) hue-rotate(180deg) brightness(0.95) contrast(0.9) saturate(0.6);
+  }
+
+  /* Shown briefly when someone swipes the map with one finger (touch only). */
+  :global(.map-touch-hint) {
+    position: absolute;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    text-align: center;
+    background: rgba(10, 10, 10, 0.7);
+    color: #fff;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s var(--ease-out);
+  }
+
+  :global(.map-touch-hint.is-visible) {
+    opacity: 1;
   }
 
   .mapview__list {

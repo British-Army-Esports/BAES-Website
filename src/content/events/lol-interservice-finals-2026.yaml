@@ -1,0 +1,16 @@
+title: "League of Legends Interservice Finals"
+disciplines:
+  - "league-of-legends"
+scale: "military"
+team: "baes"
+presenceType: "competitive"
+tier: "major"
+date: 2026-12-07
+endDate: 2026-12-09
+dateStatus: "confirmed"
+format: "in-person"
+location:
+  name: "University Campus of Esports, Lee Valley VeloPark, London"
+  lat: 51.550397
+  long: -0.015228
+description: "LAN finals of the League of Legends Interservice competition between the Army, Royal Navy and RAF."
