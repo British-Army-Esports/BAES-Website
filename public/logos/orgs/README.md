@@ -16,10 +16,9 @@ public/logos/orgs/<org>.png
 
 Still needed (unset `logo` for now, renders as plain text until added):
 
-- UK Armed Forces Sport
 - BFBS Esports
 
-Have: `army-sport.png`, `raf-esports.png`, `rn-esports.jpg`,
+Have: `uk-armed-forces-sport.png` (no website, so no link), `army-sport.png`, `raf-esports.png`, `rn-esports.jpg`,
 `british-esports.png`, `ideg.png`, `uk-veterans-gaming.png` (trimmed and
 resized to 160px; originals not kept in the repo).
 
