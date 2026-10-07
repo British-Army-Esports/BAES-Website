@@ -17,15 +17,11 @@ public/logos/orgs/<org>.png
 Still needed (unset `logo` for now, renders as plain text until added):
 
 - UK Armed Forces Sport
-- Army Sport
-- RAF Esports
-- British Esports
-- International Defence Esports Games (IDEG)
 - BFBS Esports
-- UK Veterans Gaming
 
-Already have one: `rn-esports.jpg` (moved here from `logos/teams/`,
-where it was unused).
+Have: `army-sport.png`, `raf-esports.png`, `rn-esports.jpg`,
+`british-esports.png`, `ideg.png`, `uk-veterans-gaming.png` (trimmed and
+resized to 160px; originals not kept in the repo).
 
 Use each org's own official logo file where possible (media kit,
 official site) rather than a screenshot/crop — same reasoning as the

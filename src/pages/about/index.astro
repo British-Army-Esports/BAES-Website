@@ -37,13 +37,17 @@ const govGroups = [
     label: 'Reports To',
     items: [
       { name: 'UK Armed Forces Sport' },
-      { name: 'Army Sport', href: 'https://britisharmysport.com/' },
+      { name: 'Army Sport', href: 'https://britisharmysport.com/', logo: '/logos/orgs/army-sport.png' },
     ],
   },
   {
     label: 'Sister Services',
     items: [
-      { name: 'RAF Esports', href: 'https://x.com/RAF_Esports' },
+      {
+        name: 'RAF Esports',
+        href: 'https://www.rafcf.org.uk/sports/raf-esports/',
+        logo: '/logos/orgs/raf-esports.png',
+      },
       {
         name: 'RN Esports',
         href: 'https://www.royalnavy.mod.uk/navy-sport/all-sports/esports',
@@ -53,14 +57,14 @@ const govGroups = [
   },
   {
     label: 'National Governing Body',
-    items: [{ name: 'British Esports', href: 'https://britishesports.org/' }],
+    items: [{ name: 'British Esports', href: 'https://britishesports.org/', logo: '/logos/orgs/british-esports.png' }],
   },
   {
     label: 'Wider Recognition',
     items: [
-      { name: 'International Defence Esports Games', href: 'http://ideg.gg/' },
+      { name: 'International Defence Esports Games', href: 'http://ideg.gg/', logo: '/logos/orgs/ideg.png' },
       { name: 'BFBS Esports', href: 'https://bfbsesports.com/' },
-      { name: 'UK Veterans Gaming', href: 'https://ukveterans.gg/' },
+      { name: 'UK Veterans Gaming', href: 'https://ukveterans.gg/', logo: '/logos/orgs/uk-veterans-gaming.png' },
     ],
   },
 ];
@@ -274,9 +278,9 @@ const govGroups = [
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 1.75rem;
-    height: 1.75rem;
-    background: #f2f2f2;
+    width: 2.5rem;
+    height: 2.5rem;
+    background: #fff;
     padding: 0.2rem;
   }
 
