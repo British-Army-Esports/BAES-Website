@@ -8,7 +8,7 @@ const streamTags = [...new Set((await getCollection('events')).map((e) => e.data
 
 const baesChannels = [
   { handle: 'britisharmyesports', label: 'British Army Esports' },
-  { handle: 'britisharmyxtra', label: 'British Army Xtra' },
+  { handle: 'defenceuk', label: 'Defence UK' },
   { handle: 'rafesports', label: 'RAF Esports' },
   { handle: 'royalnavyesports', label: 'Royal Navy Esports' },
   { handle: 'bfbsesports', label: 'BFBS Esports' },
@@ -66,10 +66,11 @@ const corpsChannels = [
                 </svg>
                 <span>{c.label}</span>
               </a>
-              <button type="button" class="channel-card__watch" data-watch-btn>
+              <button type="button" class="channel-card__watch" data-watch-btn aria-expanded="false">
                 Watch ▶
               </button>
             </div>
+            <div class="channel-card__frame" data-frame hidden />
           </div>
         ))
       }
@@ -93,10 +94,11 @@ const corpsChannels = [
                 </svg>
                 <span>{c.label}</span>
               </a>
-              <button type="button" class="channel-card__watch" data-watch-btn>
+              <button type="button" class="channel-card__watch" data-watch-btn aria-expanded="false">
                 Watch ▶
               </button>
             </div>
+            <div class="channel-card__frame" data-frame hidden />
           </div>
         ))
       }
@@ -154,20 +156,29 @@ const corpsChannels = [
 
   // Twitch's embed player already shows live video or an offline banner on
   // its own; loading 12 of them at once on page load would be heavy, so
-  // each channel stays a compact link until someone actually clicks Watch,
-  // at which point its player loads inline in place of the button.
-  document.querySelectorAll('[data-watch-btn]').forEach((btn) => {
+  // each channel stays a compact link until someone clicks Watch. The player
+  // then opens below the channel name and the button becomes Close, so it
+  // can always be shut again (an offline channel's player can be blank on
+  // mobile, which used to leave an empty box with no way to dismiss it).
+  document.querySelectorAll<HTMLButtonElement>('[data-watch-btn]').forEach((btn) => {
     btn.addEventListener('click', () => {
-      const wrapper = btn.closest('[data-channel]');
-      const channel = wrapper.dataset.channel;
-      const parent = window.location.hostname;
-      const iframe = document.createElement('iframe');
-      iframe.src = `https://player.twitch.tv/?channel=${channel}&parent=${parent}&muted=true`;
-      iframe.className = 'channel-card__iframe';
-      iframe.allowFullscreen = true;
-      wrapper.innerHTML = '';
-      wrapper.appendChild(iframe);
-      wrapper.classList.add('is-expanded');
+      const card = btn.closest('.channel-card')!;
+      const channel = card.querySelector<HTMLElement>('[data-channel]')!.dataset.channel;
+      const frame = card.querySelector<HTMLElement>('[data-frame]')!;
+      const opening = btn.getAttribute('aria-expanded') !== 'true';
+      if (opening) {
+        const iframe = document.createElement('iframe');
+        iframe.src = `https://player.twitch.tv/?channel=${channel}&parent=${window.location.hostname}&muted=true`;
+        iframe.className = 'channel-card__iframe';
+        iframe.title = `${channel} on Twitch`;
+        iframe.allowFullscreen = true;
+        frame.replaceChildren(iframe);
+      } else {
+        frame.replaceChildren();
+      }
+      frame.hidden = !opening;
+      btn.setAttribute('aria-expanded', String(opening));
+      btn.textContent = opening ? 'Close ✕' : 'Watch ▶';
     });
   });
 </script>
@@ -281,10 +292,14 @@ const corpsChannels = [
     padding: 1rem 1.25rem;
   }
 
-  .channel-card__player.is-expanded {
-    display: block;
-    padding: 0;
+  .channel-card__frame {
     aspect-ratio: 16 / 9;
+    border-top: 1px solid var(--border);
+    background: #000;
+  }
+
+  .channel-card__frame[hidden] {
+    display: none;
   }
 
   .channel-card__link {

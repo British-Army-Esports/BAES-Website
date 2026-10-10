@@ -200,6 +200,13 @@ collections:
         required: false
         hint: "The event's own official page, if it has one. Leave blank to show a \"more info coming soon\" placeholder instead."
 
+      - label: "Stream Link"
+        name: "streamUrl"
+        widget: "string"
+        required: false
+        hint: "Where to watch it live, e.g. https://www.twitch.tv/defenceuk. Shows a Watch the Stream button on the event page and powers the Live Now banner's link. Leave blank if it isn't streamed."
+        pattern: ['^$|^https?://', "Must be a full link starting with https://"]
+
       - label: "Registration Deadline"
         name: "registrationDeadline"
         widget: "datetime"

@@ -14,5 +14,6 @@ location:
   name: "British Arena, Sunderland"
   lat: 54.9143393
   long: -1.3852023
-description: "International Defence Esports Games finals, hosted at the National Gaming and Esports Arena (British Arena), Sunderland. Also features Velocidrone (drone racing). Competing teams are UK Armed Forces (tri-service) squads rather than British Army Esports alone."
+description: "International Defence Esports Games finals, hosted at the National Gaming and Esports Arena (British Arena), Sunderland. Also features Velocidrone (drone racing). Competing teams are UK Armed Forces (tri-service) squads rather than British Army Esports alone. Streamed live on the Defence UK Twitch channel."
 externalLink: "http://ideg.gg/"
+streamUrl: "https://www.twitch.tv/defenceuk"

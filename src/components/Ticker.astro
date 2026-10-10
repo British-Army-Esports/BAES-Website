@@ -31,7 +31,12 @@ const streamTags = [...new Set(events.map((e) => e.data.streamTag).filter(Boolea
           {liveEvent.data.title}
           {liveEvent.data.location && <> — {liveEvent.data.location.name}</>}
         </span>
-        <a href={liveEvent.data.externalLink ?? '#'} class="ticker__watch">
+        <a
+          href={liveEvent.data.streamUrl ?? liveEvent.data.externalLink ?? '#'}
+          class="ticker__watch"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           Watch Live →
         </a>
       </div>

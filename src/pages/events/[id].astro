@@ -139,6 +139,14 @@ const eventJsonLd =
     <PhotoGallery photos={event.data.photos} />
 
     {
+      event.data.streamUrl && (
+        <a class="cta cta--stream clip-tl-sm" href={event.data.streamUrl} target="_blank" rel="noopener noreferrer">
+          Watch the Stream ↗
+        </a>
+      )
+    }
+
+    {
       event.data.externalLink ? (
         <a class="cta clip-tl-sm" href={event.data.externalLink} target="_blank" rel="noopener noreferrer">
           Visit Official Event Page ↗
@@ -287,6 +295,11 @@ const eventJsonLd =
 
   .cta:hover {
     background: var(--crimson-bright);
+  }
+
+  /* Sits beside (or above, when it wraps) the official-page button. */
+  .cta--stream {
+    margin: 0 0.75rem 0.75rem 0;
   }
 
   .placeholder {

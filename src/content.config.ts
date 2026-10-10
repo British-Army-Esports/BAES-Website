@@ -126,6 +126,9 @@ const events = defineCollection({
     description: z.string().optional(),
     resultsSummary: z.string().optional(),
     externalLink: blankable(z.string().url()),
+    // Where to watch it live (e.g. a Twitch channel), when that isn't the
+    // event's own page. The Live Now banner and event page link here.
+    streamUrl: blankable(z.string().url()),
     // When players need to sign up ahead of the event itself, distinct from
     // the event's own date. Optional: most fixtures (outreach presences,
     // things with no open sign-up) don't have one.
