@@ -342,7 +342,9 @@ const corpsChannels = [
     border-color: var(--crimson);
   }
 
-  .channel-card__iframe {
+  /* :global — the iframe is created by the script on click, so it never
+     gets Astro's scoped-style attribute and a scoped rule wouldn't reach it. */
+  :global(.channel-card__iframe) {
     width: 100%;
     height: 100%;
     border: none;
