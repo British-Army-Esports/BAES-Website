@@ -245,13 +245,15 @@ export function compareEventDatesDesc(
 }
 
 // Card/list location line. A named venue wins; otherwise an event marked
-// Online in the CMS says so, and anything else falls back to an honest
-// "don't know" (past) or "not decided yet" (upcoming).
+// Online in the CMS says so, an in-person one still awaiting its venue says
+// "Venue TBC", and anything else falls back to an honest "don't know" (past)
+// or "not decided yet" (upcoming).
 export function locationLabel(
   event: { location?: { name: string }; format?: 'online' | 'in-person' },
   isPast: boolean,
 ): string {
   if (event.location?.name) return event.location.name;
   if (event.format === 'online') return 'Online';
+  if (event.format === 'in-person') return isPast ? 'Location not recorded' : 'Venue TBC';
   return isPast ? 'Location not recorded' : 'Online / TBC';
 }
