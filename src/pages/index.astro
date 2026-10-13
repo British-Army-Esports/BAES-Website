@@ -35,6 +35,7 @@ const now = Date.now();
 // Key Events: the next few fixtures worth front-page billing — genuinely
 // competitive/mixed presences at a national level or above, not every
 // festival stand or outreach appearance.
+const KEY_EVENTS_SHOWN = 3;
 const keyScales = new Set(['uk-national', 'international-military', 'military', 'european']);
 const keyEvents = (await getCollection('events'))
   .filter((e) => e.data.presenceType !== 'community-outreach' && keyScales.has(e.data.scale))
@@ -59,6 +60,9 @@ const keyEvents = (await getCollection('events'))
       externalLink: event.data.externalLink,
       resultsSummary: event.data.resultsSummary,
       sortDate: start,
+      rawDate: event.data.date.toISOString(),
+      rawEndDate: event.data.endDate?.toISOString(),
+      dateStatus: event.data.dateStatus ?? 'confirmed',
       isPast,
       isLive,
       season: seasonInfo(event.data),
@@ -67,7 +71,9 @@ const keyEvents = (await getCollection('events'))
   })
   .filter((e) => !e.isPast)
   .sort(compareEventDates)
-  .slice(0, 3);
+  // A few spares beyond the 3 shown: the browser hides any that have
+  // finished since the build and promotes the next one (script below).
+  .slice(0, KEY_EVENTS_SHOWN + 3);
 
 const keyEventScaleLabels: Record<string, string> = {
   engagement: 'Engagement',
@@ -174,22 +180,21 @@ const orgJsonLd = {
     <p class="section__note label">
       National-level fixtures and above, coming up. <a href="/events">Full fixtures list →</a>
     </p>
-    {
-      keyEvents.length > 0 ? (
-        <div class="grid">
-          {keyEvents.map((event) => (
-            <EventCard
-              event={event}
-              scaleLabels={keyEventScaleLabels}
-              teamLabels={keyEventTeamLabels}
-              live={event.isLive}
-            />
-          ))}
+    <div class="grid" data-key-events={KEY_EVENTS_SHOWN} hidden={keyEvents.length === 0}>
+      {keyEvents.map((event, i) => (
+        <div class="key-event" data-key-event hidden={i >= KEY_EVENTS_SHOWN}>
+          <EventCard
+            event={event}
+            scaleLabels={keyEventScaleLabels}
+            teamLabels={keyEventTeamLabels}
+            live={event.isLive}
+          />
         </div>
-      ) : (
-        <p class="empty">No national-level fixtures confirmed yet. Check the full fixtures list.</p>
-      )
-    }
+      ))}
+    </div>
+    <p class="empty" data-key-events-empty hidden={keyEvents.length > 0}>
+      No national-level fixtures confirmed yet. Check the full fixtures list.
+    </p>
   </section>
 
   <section class="section container">
@@ -212,7 +217,57 @@ const orgJsonLd = {
   </section>
 </BaseLayout>
 
+<script>
+  import { eventEndMs, getLiveStatus } from '../lib/eventDate';
+
+  // Key Events was chosen at build time; correct it against the visitor's
+  // clock so a fixture that has since finished drops off (and the next one
+  // moves up) without waiting for a redeploy, and one that has since started
+  // gets its LIVE badge.
+  const slots = [...document.querySelectorAll<HTMLElement>('[data-key-event]')];
+  const grid = document.querySelector<HTMLElement>('[data-key-events]');
+  if (grid && slots.length > 0) {
+    const limit = Number(grid.dataset.keyEvents);
+    const now = Date.now();
+    let shown = 0;
+    for (const slot of slots) {
+      const card = slot.querySelector<HTMLElement>('[data-event-date]');
+      if (!card) continue;
+      const info = {
+        date: card.dataset.eventDate!,
+        endDate: card.dataset.eventEndDate || undefined,
+        dateStatus: (card.dataset.eventDateStatus || 'confirmed') as 'confirmed' | 'provisional' | 'tbc',
+        presenceType: card.dataset.presence || '',
+      };
+      const ended = info.dateStatus !== 'tbc' && eventEndMs(info) < now;
+      slot.hidden = ended || shown >= limit;
+      if (slot.hidden) continue;
+      shown++;
+      if (getLiveStatus(info, now).isLive && !card.querySelector('.event-card__live')) {
+        card.classList.add('event-card--live');
+        const badge = document.createElement('span');
+        badge.className = 'event-card__live';
+        badge.textContent = '● LIVE';
+        card.querySelector('.event-card__top')?.appendChild(badge);
+      }
+    }
+    grid.hidden = shown === 0;
+    document.querySelector<HTMLElement>('[data-key-events-empty]')!.hidden = shown > 0;
+  }
+</script>
+
 <style>
+  /* Wrapper only exists so a spare card can be hidden; it adds no box of
+     its own, so the cards stay direct grid items. */
+  .key-event {
+    display: contents;
+  }
+
+  .key-event[hidden],
+  .grid[hidden] {
+    display: none;
+  }
+
   .section {
     padding-top: clamp(2.5rem, 6vw, 4rem);
     padding-bottom: clamp(2.5rem, 6vw, 4rem);

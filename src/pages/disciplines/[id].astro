@@ -32,6 +32,9 @@ const relatedEvents = (await getCollection('events'))
       title: event.data.title,
       locationName: locationLabel(event.data, isPast),
       sortDate: start,
+      rawDate: event.data.date.toISOString(),
+      rawEndDate: event.data.endDate?.toISOString(),
+      dateStatus: event.data.dateStatus ?? 'confirmed',
       isPast,
       isLive,
       ...formatEventDate(event.data),
@@ -93,60 +96,104 @@ const standingsTableRows = standingsRows.map((r) => ({ ...r, name: corpsNames.ge
 
     {
       liveFixtures.length > 0 && (
-        <>
+        <div data-fixtures-live>
           <h2 class="section__subheading section__subheading--live">
             <span class="live-dot" /> In Progress
           </h2>
           <ul class="event-list">
             {liveFixtures.map((event) => (
-              <li class="event-list__item">
+              <li
+                class="event-list__item"
+                data-fixture-date={event.rawDate}
+                data-fixture-end-date={event.rawEndDate}
+                data-fixture-date-status={event.dateStatus}
+              >
                 <span class="event-list__date">{event.text}</span>
                 <span class="event-list__title">{event.title}</span>
                 <span class="event-list__meta">{event.locationName}</span>
               </li>
             ))}
           </ul>
-        </>
+        </div>
       )
     }
 
     <h2 class="section__subheading">Upcoming Fixtures</h2>
-    {
-      upcomingFixtures.length > 0 ? (
-        <ul class="event-list">
-          {upcomingFixtures.map((event) => (
-            <li class="event-list__item">
-              <span class="event-list__date">{event.text}</span>
-              <span class="event-list__title">{event.title}</span>
-              <span class="event-list__meta">{event.locationName}</span>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p class="empty">No upcoming fixtures published yet for this discipline.</p>
-      )
-    }
+    <ul class="event-list" data-fixtures-upcoming hidden={upcomingFixtures.length === 0}>
+      {upcomingFixtures.map((event) => (
+        <li
+          class="event-list__item"
+          data-fixture-date={event.rawDate}
+          data-fixture-end-date={event.rawEndDate}
+          data-fixture-date-status={event.dateStatus}
+        >
+          <span class="event-list__date">{event.text}</span>
+          <span class="event-list__title">{event.title}</span>
+          <span class="event-list__meta">{event.locationName}</span>
+        </li>
+      ))}
+    </ul>
+    <p class="empty" data-fixtures-upcoming-empty hidden={upcomingFixtures.length > 0}>
+      No upcoming fixtures published yet for this discipline.
+    </p>
 
     <h2 class="section__subheading section__subheading--muted">Past Fixtures</h2>
-    {
-      pastFixtures.length > 0 ? (
-        <ul class="event-list event-list--past">
-          {pastFixtures.map((event) => (
-            <li class="event-list__item">
-              <span class="event-list__date">{event.text}</span>
-              <span class="event-list__title">{event.title}</span>
-              <span class="event-list__meta">{event.locationName}</span>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p class="empty">No past fixtures logged yet for this discipline.</p>
-      )
-    }
+    <ul class="event-list event-list--past" data-fixtures-past hidden={pastFixtures.length === 0}>
+      {pastFixtures.map((event) => (
+        <li
+          class="event-list__item"
+          data-fixture-date={event.rawDate}
+          data-fixture-end-date={event.rawEndDate}
+          data-fixture-date-status={event.dateStatus}
+        >
+          <span class="event-list__date">{event.text}</span>
+          <span class="event-list__title">{event.title}</span>
+          <span class="event-list__meta">{event.locationName}</span>
+        </li>
+      ))}
+    </ul>
+    <p class="empty" data-fixtures-past-empty hidden={pastFixtures.length > 0}>
+      No past fixtures logged yet for this discipline.
+    </p>
   </section>
 </BaseLayout>
 
+<script>
+  import { eventEndMs } from '../../lib/eventDate';
+
+  // The fixture lists were split into In Progress / Upcoming / Past at build
+  // time; move anything that has finished since into Past using the
+  // visitor's clock, so the page stays right between deploys.
+  const past = document.querySelector<HTMLElement>('[data-fixtures-past]');
+  if (past) {
+    const now = Date.now();
+    document
+      .querySelectorAll<HTMLElement>('[data-fixtures-live] [data-fixture-date], [data-fixtures-upcoming] [data-fixture-date]')
+      .forEach((item) => {
+        if (item.dataset.fixtureDateStatus === 'tbc') return;
+        const end = eventEndMs({ date: item.dataset.fixtureDate!, endDate: item.dataset.fixtureEndDate || undefined });
+        if (end < now) past.prepend(item);
+      });
+    const live = document.querySelector<HTMLElement>('[data-fixtures-live]');
+    if (live && !live.querySelector('[data-fixture-date]')) live.hidden = true;
+    const upcoming = document.querySelector<HTMLElement>('[data-fixtures-upcoming]');
+    if (upcoming && !upcoming.querySelector('[data-fixture-date]')) {
+      upcoming.hidden = true;
+      document.querySelector<HTMLElement>('[data-fixtures-upcoming-empty]')!.hidden = false;
+    }
+    const hasPast = past.querySelector('[data-fixture-date]') !== null;
+    past.hidden = !hasPast;
+    document.querySelector<HTMLElement>('[data-fixtures-past-empty]')!.hidden = hasPast;
+  }
+</script>
+
 <style>
+  [data-fixtures-live][hidden],
+  .event-list[hidden],
+  .empty[hidden] {
+    display: none;
+  }
+
   .section {
     padding-top: clamp(2.5rem, 6vw, 4rem);
     padding-bottom: clamp(3rem, 8vw, 5rem);

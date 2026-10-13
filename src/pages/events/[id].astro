@@ -110,8 +110,11 @@ const eventJsonLd =
 
     {
       registrationDeadlineText && (
-        <p class:list={['registration', { 'registration--closed': registrationClosed }]}>
-          {registrationClosed ? 'Registration closed ' : 'Register by '}
+        <p
+          class:list={['registration', { 'registration--closed': registrationClosed }]}
+          data-registration-deadline={registrationDeadline!.toISOString()}
+        >
+          <span data-registration-label>{registrationClosed ? 'Registration closed ' : 'Register by '}</span>
           <strong>{registrationDeadlineText}</strong>
         </p>
       )
@@ -166,6 +169,16 @@ const eventJsonLd =
     }
   </section>
 </BaseLayout>
+
+<script>
+  // Closed-or-open was decided at build; re-check against the visitor's
+  // clock so the deadline passing doesn't need a redeploy to show.
+  const registration = document.querySelector<HTMLElement>('[data-registration-deadline]');
+  if (registration && Date.parse(registration.dataset.registrationDeadline!) < Date.now()) {
+    registration.classList.add('registration--closed');
+    registration.querySelector('[data-registration-label]')!.textContent = 'Registration closed ';
+  }
+</script>
 
 <style>
   .section {

@@ -1,95 +1,135 @@
 ---
 import { getCollection } from 'astro:content';
-import { getLiveStatus } from '../lib/eventDate';
+import { eventEndMs, getLiveStatus } from '../lib/eventDate';
 
 const now = Date.now();
 const events = await getCollection('events');
 
-// Only the short-span, genuinely-happening-right-now events get the
-// sticky homepage banner — a multi-week qualifier season sitting in the
-// "Live Now" banner for two months straight would be noisy and, on any
-// given day it's checked, quite possibly wrong (nothing's actually
-// streaming that hour). Those still get a calmer badge on their own
-// event card instead; see getLiveStatus's isOngoingBroadcast.
-const liveEvent = events.find((event) => getLiveStatus(event.data, now).isLive);
+// Whether the banner shows is decided in the visitor's browser, not here:
+// a static build only knows the moment it was built, so a banner decided at
+// build time stays up after the event ends (or never appears for one that
+// starts later) until the next deploy. The build just hands over every
+// fixture that hasn't finished yet; the script below picks whichever is
+// live right now, re-checking every minute.
+//
+// Only short-span, confirmed, non-outreach fixtures count as "live" here
+// (getLiveStatus's rule) — a multi-week season sitting in the banner for two
+// months would be noise; those get a calmer badge on their own card.
+const liveCandidates = events
+  .filter((e) => (e.data.dateStatus ?? 'confirmed') === 'confirmed' && eventEndMs(e.data) > now)
+  .map((e) => {
+    const external = e.data.streamUrl ?? e.data.externalLink;
+    return {
+      title: e.data.location ? `${e.data.title} — ${e.data.location.name}` : e.data.title,
+      link: external ?? `/events/${e.id}`,
+      external: Boolean(external),
+      date: e.data.date.toISOString(),
+      endDate: e.data.endDate?.toISOString(),
+      dateStatus: e.data.dateStatus,
+      presenceType: e.data.presenceType,
+    };
+  });
 
-// Tags of events whose streams come from the production calendar. If no
-// event is live at build, the browser checks the calendar and shows this bar
-// while a tagged stream is actually on (see script below).
+// Shown in the built HTML too, so the common case doesn't flash in late.
+const liveAtBuild = liveCandidates.find((c) => getLiveStatus(c, now).isLive);
+
+// Tags of events whose streams come from the production calendar. With no
+// fixture live, the browser checks the calendar and shows this bar while a
+// tagged stream is actually on.
 const streamTags = [...new Set(events.map((e) => e.data.streamTag).filter(Boolean))];
 ---
 
 {
-  liveEvent ? (
-    <div class="ticker">
+  (liveCandidates.length > 0 || streamTags.length > 0) && (
+    <div
+      class="ticker"
+      data-ticker
+      data-events={JSON.stringify(liveCandidates)}
+      data-stream-tags={JSON.stringify(streamTags)}
+      hidden={!liveAtBuild}
+    >
       <div class="ticker__inner container">
         <span class="ticker__pill">
           <span class="pulse-dot" />
           Live Now
         </span>
-        <span class="ticker__info">
-          {liveEvent.data.title}
-          {liveEvent.data.location && <> — {liveEvent.data.location.name}</>}
+        <span class="ticker__info" data-ticker-title>
+          {liveAtBuild?.title}
         </span>
         <a
-          href={liveEvent.data.streamUrl ?? liveEvent.data.externalLink ?? '#'}
+          href={liveAtBuild?.link ?? 'https://www.twitch.tv/britisharmyesports'}
           class="ticker__watch"
-          target="_blank"
-          rel="noopener noreferrer"
+          target={liveAtBuild && !liveAtBuild.external ? undefined : '_blank'}
+          rel={liveAtBuild && !liveAtBuild.external ? undefined : 'noopener noreferrer'}
+          data-ticker-link
         >
           Watch Live →
         </a>
       </div>
     </div>
-  ) : (
-    streamTags.length > 0 && (
-      <div class="ticker" data-stream-ticker={JSON.stringify(streamTags)} hidden>
-        <div class="ticker__inner container">
-          <span class="ticker__pill">
-            <span class="pulse-dot" />
-            Live Now
-          </span>
-          <span class="ticker__info" data-stream-ticker-title />
-          <a
-            href="https://www.twitch.tv/britisharmyesports"
-            class="ticker__watch"
-            target="_blank"
-            rel="noopener noreferrer"
-            data-stream-ticker-link
-          >
-            Watch Live →
-          </a>
-        </div>
-      </div>
-    )
   )
 }
 
 <script>
-  import { getStreams, matchesTag } from '../lib/streams';
+  import { getStreams, matchesTag, type StreamEntry } from '../lib/streams';
+  import { getLiveStatus } from '../lib/eventDate';
 
-  const bar = document.querySelector<HTMLElement>('[data-stream-ticker]');
+  type Candidate = {
+    title: string;
+    link: string;
+    external: boolean;
+    date: string;
+    endDate?: string;
+    dateStatus?: 'confirmed' | 'provisional' | 'tbc';
+    presenceType: string;
+  };
+
+  const bar = document.querySelector<HTMLElement>('[data-ticker]');
   if (bar) {
-    const tags: string[] = JSON.parse(bar.dataset.streamTicker!);
-    const title = bar.querySelector<HTMLElement>('[data-stream-ticker-title]')!;
-    const link = bar.querySelector<HTMLAnchorElement>('[data-stream-ticker-link]')!;
-    getStreams().then((streams) => {
-      const refresh = () => {
-        const now = Date.now();
-        const live = streams?.find((e) => e.start <= now && now < e.end && tags.some((t) => matchesTag(e.title, t)));
-        bar.hidden = !live;
-        if (live) {
-          title.textContent = live.title;
-          if (live.link) link.href = live.link;
-        }
-      };
-      refresh();
-      setInterval(refresh, 60_000);
-    });
+    const candidates: Candidate[] = JSON.parse(bar.dataset.events!);
+    const tags: string[] = JSON.parse(bar.dataset.streamTags!);
+    const title = bar.querySelector<HTMLElement>('[data-ticker-title]')!;
+    const link = bar.querySelector<HTMLAnchorElement>('[data-ticker-link]')!;
+    let streams: StreamEntry[] | null = null;
+
+    const show = (text: string, href: string, external: boolean) => {
+      title.textContent = text;
+      link.href = href;
+      if (external) {
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+      } else {
+        link.removeAttribute('target');
+        link.removeAttribute('rel');
+      }
+      bar.hidden = false;
+    };
+
+    const refresh = () => {
+      const now = Date.now();
+      const event = candidates.find((c) => getLiveStatus(c, now).isLive);
+      if (event) return show(event.title, event.link, event.external);
+      const stream = streams?.find((e) => e.start <= now && now < e.end && tags.some((t) => matchesTag(e.title, t)));
+      if (stream) return show(stream.title, stream.link ?? 'https://www.twitch.tv/britisharmyesports', true);
+      bar.hidden = true;
+    };
+
+    refresh();
+    if (tags.length > 0) {
+      getStreams().then((s) => {
+        streams = s;
+        refresh();
+      });
+    }
+    setInterval(refresh, 60_000);
   }
 </script>
 
 <style>
+  .ticker[hidden] {
+    display: none;
+  }
+
   .ticker {
     background: var(--surface);
     border-bottom: 1px solid var(--border);
