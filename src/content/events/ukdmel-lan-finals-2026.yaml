@@ -9,5 +9,7 @@ endDate: 2026-11-21
 dateStatus: "confirmed"
 format: "in-person"
 location:
-  name: "London (venue TBC)"
+  name: "University Campus of Esports, Lee Valley VeloPark, London"
+  lat: 51.550397
+  long: -0.015228
 description: "League of Legends LAN finals of the UKDMEL defence esports league, following the autumn split."
