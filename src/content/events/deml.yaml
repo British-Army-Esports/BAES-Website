@@ -1,11 +1,14 @@
-title: "UKDMEL League of Legends"
+title: "UKDMEL Autumn Split: League of Legends"
 disciplines:
   - "league-of-legends"
 scale: "military"
 presenceType: "competitive"
 tier: "minor"
-date: 2026-10-13
+date: 2026-10-01
+endDate: 2026-10-29
 dateStatus: "confirmed"
 format: "online"
-description: "League of Legends match night in the UKDMEL defence league, streamed live by the University Campus of Esports (UCES) studio on Twitch."
+description: "League of Legends autumn split of the UKDMEL defence league, with match nights every Tuesday and Thursday. Streamed live by the University Campus of Esports (UCES) studio on Twitch."
 streamUrl: "https://www.twitch.tv/uces_studio"
+streamTime: "19:00"
+streamDays: ["Tuesday", "Thursday"]
