@@ -1,4 +1,6 @@
-title: "UKDMEL LAN Finals"
+title: "UKDMEL LAN Finals: League of Legends"
+disciplines:
+  - "league-of-legends"
 scale: "military"
 presenceType: "competitive"
 tier: "major"
@@ -6,4 +8,6 @@ date: 2026-11-20
 endDate: 2026-11-21
 dateStatus: "confirmed"
 format: "in-person"
-description: "LAN finals of the UKDMEL defence esports league, following the autumn splits."
+location:
+  name: "London (venue TBC)"
+description: "League of Legends LAN finals of the UKDMEL defence esports league, following the autumn split."
