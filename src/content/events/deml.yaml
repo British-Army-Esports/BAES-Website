@@ -1,9 +1,11 @@
-title: "UKDML"
+title: "UKDMEL League of Legends"
+disciplines:
+  - "league-of-legends"
 scale: "military"
-team: "ukaf"
 presenceType: "competitive"
 tier: "minor"
 date: 2026-10-13
 dateStatus: "confirmed"
-description: "Streamed live by the University Campus of Esports (UCES) studio on Twitch."
+format: "online"
+description: "League of Legends match night in the UKDMEL defence league, streamed live by the University Campus of Esports (UCES) studio on Twitch."
 streamUrl: "https://www.twitch.tv/uces_studio"
